@@ -19,6 +19,12 @@
 
 	let menuOpen = $state(false);
 	function closeMenu() { menuOpen = false; }
+
+	let showCount = $state(false);
+
+	function signSup(n: number): string {
+		return n >= 0 ? '+' : '−';
+	}
 </script>
 
 <!-- Backdrop to close menu on outside click -->
@@ -32,70 +38,79 @@
 {/if}
 
 <div class="flex h-full flex-col">
-	<!-- Top bar -->
+	<!-- Top bar: 3-column grid keeps pill perfectly centered -->
 	<header
-		class="flex items-center justify-between border-b border-green-700 bg-green-950/60 px-4 py-2"
+		class="grid grid-cols-3 items-center border-b border-green-700 bg-green-950/60 px-3 py-2"
 	>
-		<div class="flex flex-col">
-			<span class="text-lg font-bold text-white">${game.bankroll}</span>
-			<span class="text-[10px] text-green-400">Bankroll</span>
-		</div>
+		<!-- Left: reserved for future logo -->
+		<div></div>
 
-		<!-- Ellipsis menu -->
-		<div class="relative">
+		<!-- Center: toggleable bankroll / count pill -->
+		<div class="flex justify-center">
 			<button
-				class="relative flex h-9 w-9 items-center justify-center rounded-lg text-xl font-bold text-white hover:bg-green-700 active:bg-green-800"
-				onclick={() => (menuOpen = !menuOpen)}
-				aria-label="Menu"
+				onclick={() => (showCount = !showCount)}
+				class="rounded-full bg-gray-900/80 px-5 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-gray-800 active:bg-gray-950"
 			>
-				⋯
-				{#if game.reshuffleNeeded}
-					<span class="absolute right-1 top-1 h-2 w-2 rounded-full bg-amber-400"></span>
+				{#if showCount}
+					<span class="text-[9px] font-normal opacity-50">RC</span>
+					{rc}<sup class="text-[9px] opacity-80">{signSup(rc)}</sup>
+					<span class="mx-1 opacity-40">|</span>
+					<span class="text-[9px] font-normal opacity-50">TC</span>
+					{tc}<sup class="text-[9px] opacity-80">{signSup(tc)}</sup>
+				{:else}
+					${game.bankroll}
 				{/if}
 			</button>
+		</div>
 
-			{#if menuOpen}
-				<div
-					class="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl bg-green-900 shadow-2xl ring-1 ring-green-700"
+		<!-- Right: ellipsis menu -->
+		<div class="flex justify-end">
+			<div class="relative">
+				<button
+					class="relative flex h-9 w-9 items-center justify-center rounded-lg text-xl font-bold text-white hover:bg-green-700 active:bg-green-800"
+					onclick={() => (menuOpen = !menuOpen)}
+					aria-label="Menu"
 				>
-					<!-- Reshuffle -->
-					<button
-						class="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold hover:bg-green-800 active:bg-green-950"
-						class:text-amber-400={game.reshuffleNeeded}
-						class:text-white={!game.reshuffleNeeded}
-						onclick={() => { game.reshuffle(); closeMenu(); }}
+					⋯
+					{#if game.reshuffleNeeded}
+						<span class="absolute right-1 top-1 h-2 w-2 rounded-full bg-amber-400"></span>
+					{/if}
+				</button>
+
+				{#if menuOpen}
+					<div
+						class="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl bg-green-900 shadow-2xl ring-1 ring-green-700"
 					>
-						<span class="text-base">⟳</span>
-						{game.reshuffleNeeded ? 'Reshuffle ⚠' : 'Reshuffle'}
-					</button>
+						<button
+							class="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold hover:bg-green-800 active:bg-green-950"
+							class:text-amber-400={game.reshuffleNeeded}
+							class:text-white={!game.reshuffleNeeded}
+							onclick={() => { game.reshuffle(); closeMenu(); }}
+						>
+							<span class="text-base">⟳</span>
+							{game.reshuffleNeeded ? 'Reshuffle ⚠' : 'Reshuffle'}
+						</button>
 
-					<div class="border-t border-green-700"></div>
+						<div class="border-t border-green-700"></div>
 
-					<!-- Settings section -->
-					<div class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-green-500">
-						Settings
+						<div class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-green-500">
+							Settings
+						</div>
+						<label
+							class="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm text-green-200 hover:bg-green-800"
+						>
+							<input
+								type="checkbox"
+								class="h-4 w-4 accent-green-400"
+								bind:checked={game.showFeedback}
+							/>
+							Show feedback
+						</label>
 					</div>
-					<label
-						class="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm text-green-200 hover:bg-green-800"
-					>
-						<input
-							type="checkbox"
-							class="h-4 w-4 accent-green-400"
-							bind:checked={game.showFeedback}
-						/>
-						Show feedback
-					</label>
-				</div>
-			{/if}
+				{/if}
+			</div>
 		</div>
 	</header>
-
-	<!-- Shoe info strip -->
-	<div class="flex justify-center gap-4 bg-green-950/30 py-1 text-[11px] text-green-400">
-		<span>RC: {rc >= 0 ? '+' : ''}{rc}</span>
-		<span>TC: {tc >= 0 ? '+' : ''}{tc}</span>
-		<span>{cardsLeft} cards left</span>
-	</div>
 
 	<!-- Dealer area -->
 	<div class="flex flex-1 flex-col items-center justify-center py-6">
