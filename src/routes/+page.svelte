@@ -40,7 +40,7 @@
 <div class="flex h-full flex-col">
 	<!-- Top bar: 3-column grid keeps pill perfectly centered -->
 	<header
-		class="grid grid-cols-3 items-center border-b border-green-700 bg-green-950/60 px-3 py-2"
+		class="grid grid-cols-3 items-center border-b border-gray-800 bg-black/40 px-3 py-2"
 	>
 		<!-- Left: reserved for future logo -->
 		<div></div>
@@ -49,14 +49,14 @@
 		<div class="flex justify-center">
 			<button
 				onclick={() => (showCount = !showCount)}
-				class="rounded-full bg-gray-900/80 px-5 py-1.5 text-sm font-semibold text-white shadow transition-colors hover:bg-gray-800 active:bg-gray-950"
+				class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow transition-colors hover:bg-gray-100 active:bg-gray-200"
 			>
 				{#if showCount}
-					<span class="text-[9px] font-normal opacity-50">RC</span>
-					{rc}<sup class="text-[9px] opacity-80">{signSup(rc)}</sup>
-					<span class="mx-1 opacity-40">|</span>
-					<span class="text-[9px] font-normal opacity-50">TC</span>
-					{tc}<sup class="text-[9px] opacity-80">{signSup(tc)}</sup>
+					<span class="text-[9px] font-normal opacity-60">RC</span>
+					{rc}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
+					<span class="mx-1 opacity-30">|</span>
+					<span class="text-[9px] font-normal opacity-60">TC</span>
+					{tc}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
 				{:else}
 					${game.bankroll}
 				{/if}
@@ -67,7 +67,7 @@
 		<div class="flex justify-end">
 			<div class="relative">
 				<button
-					class="relative flex h-9 w-9 items-center justify-center rounded-lg text-xl font-bold text-white hover:bg-green-700 active:bg-green-800"
+					class="relative flex h-9 w-9 items-center justify-center rounded-lg bg-white text-xl font-bold text-gray-900 hover:bg-gray-100 active:bg-gray-200"
 					onclick={() => (menuOpen = !menuOpen)}
 					aria-label="Menu"
 				>
@@ -79,29 +79,29 @@
 
 				{#if menuOpen}
 					<div
-						class="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl bg-green-900 shadow-2xl ring-1 ring-green-700"
+						class="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl bg-gray-900 shadow-2xl ring-1 ring-gray-700"
 					>
 						<button
-							class="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold hover:bg-green-800 active:bg-green-950"
+							class="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold hover:bg-gray-800 active:bg-gray-950"
 							class:text-amber-400={game.reshuffleNeeded}
-							class:text-white={!game.reshuffleNeeded}
+							class:text-gray-100={!game.reshuffleNeeded}
 							onclick={() => { game.reshuffle(); closeMenu(); }}
 						>
 							<span class="text-base">⟳</span>
 							{game.reshuffleNeeded ? 'Reshuffle ⚠' : 'Reshuffle'}
 						</button>
 
-						<div class="border-t border-green-700"></div>
+						<div class="border-t border-gray-700"></div>
 
-						<div class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-green-500">
+						<div class="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
 							Settings
 						</div>
 						<label
-							class="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm text-green-200 hover:bg-green-800"
+							class="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-gray-800"
 						>
 							<input
 								type="checkbox"
-								class="h-4 w-4 accent-green-400"
+								class="h-4 w-4 accent-gray-400"
 								bind:checked={game.showFeedback}
 							/>
 							Show feedback
@@ -146,14 +146,14 @@
 	<div class="flex flex-1 flex-col items-center justify-center py-6">
 		{#if playerHand}
 			<Hand cards={playerHand.cards} label="Player" showTotal={true} />
-			<span class="mt-1 text-xs text-green-300">
+			<span class="mt-1 text-xs text-gray-400">
 				{playerHand.isSurrendered ? 'Surrendered' : ''}
 				{playerHand.isDoubled ? 'Doubled' : ''}
 			</span>
 		{:else}
 			<div class="flex flex-col items-center gap-2">
-				<span class="text-sm uppercase tracking-widest text-green-600">Player</span>
-				<div class="h-[90px] w-[60px] rounded-lg border-2 border-dashed border-green-700"></div>
+				<span class="text-sm uppercase tracking-widest text-gray-600">Player</span>
+				<div class="h-[130px] w-[90px] rounded-lg border-2 border-dashed border-gray-700"></div>
 			</div>
 		{/if}
 	</div>

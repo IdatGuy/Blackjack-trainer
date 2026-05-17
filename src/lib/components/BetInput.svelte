@@ -37,7 +37,7 @@
 	</div>
 
 	<!-- Min / max label -->
-	<p class="text-[11px] text-green-400">
+	<p class="text-[11px] text-gray-500">
 		Minimum: ${MIN_BET} | Maximum: ${MAX_BET.toLocaleString()}
 	</p>
 

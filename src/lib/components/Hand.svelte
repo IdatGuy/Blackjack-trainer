@@ -23,7 +23,7 @@
 
 <div class="flex flex-col items-center gap-2">
 	{#if label}
-		<span class="text-sm font-semibold uppercase tracking-widest text-green-200">{label}</span>
+		<span class="text-sm font-semibold uppercase tracking-widest text-gray-300">{label}</span>
 	{/if}
 
 	<div class="flex items-end gap-[-8px] justify-center" style="gap: -8px;">
@@ -34,7 +34,7 @@
 		{/each}
 		{#if cards.length === 0}
 			<!-- empty placeholder to keep height -->
-			<div class="h-[90px] w-[60px]"></div>
+			<div class="h-[130px] w-[90px]"></div>
 		{/if}
 	</div>
 
