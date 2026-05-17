@@ -41,9 +41,12 @@ function rankLabel(rank: string): string {
 	return rank === 'T' ? '10' : rank;
 }
 
+export const MIN_BET = 10;
+export const MAX_BET = 1000;
+
 class GameStore {
 	state = $state(initialState());
-	betAmount = $state(10);
+	betAmount = $state(0);
 	showFeedback = $state(true);
 	actionHistory = $state<ActionRecord[]>([]);
 	lastResults = $state<ResolvedHand[]>([]);
@@ -51,6 +54,7 @@ class GameStore {
 
 	deal() {
 		if (this.state.phase !== 'betting') return;
+		if (this.betAmount < MIN_BET || this.betAmount > this.bankroll) return;
 		this.actionHistory = [];
 		this.lastResults = [];
 		this.state = dealHand(this.state, [this.betAmount]);
@@ -101,6 +105,7 @@ class GameStore {
 		};
 		this.lastResults = [];
 		this.actionHistory = [];
+		// betAmount intentionally preserved — defaults to last bet
 	}
 
 	reshuffle() {
@@ -114,11 +119,15 @@ class GameStore {
 		};
 		this.lastResults = [];
 		this.actionHistory = [];
+		this.betAmount = 0;
 	}
 
-	adjustBet(delta: number) {
-		const next = this.betAmount + delta;
-		if (next >= 5 && next <= this.bankroll) this.betAmount = next;
+	addChip(value: number) {
+		this.betAmount = Math.min(this.betAmount + value, MAX_BET, this.bankroll);
+	}
+
+	clearBet() {
+		this.betAmount = 0;
 	}
 
 	get allowedActions(): Action[] {
