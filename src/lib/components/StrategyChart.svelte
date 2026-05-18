@@ -6,6 +6,7 @@
 
 	type Tab = 'hard' | 'soft' | 'pairs';
 	let activeTab = $state<Tab>('hard');
+	let showAllDeviations = $state(false);
 
 	const UPCARDS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'A'] as const;
 
@@ -107,6 +108,16 @@
 			{/each}
 		</div>
 
+		<!-- Deviation toggle -->
+		<div class="flex items-center justify-end border-b border-gray-800 px-4 py-1.5">
+			<button
+				onclick={() => (showAllDeviations = !showAllDeviations)}
+				class="text-xs font-semibold transition-colors {showAllDeviations ? 'text-amber-400' : 'text-gray-500 hover:text-gray-300'}"
+			>
+				Show deviations
+			</button>
+		</div>
+
 		<!-- Chart body -->
 		<div class="flex-1 overflow-y-auto px-2 py-3">
 			<div class="flex gap-1">
@@ -147,7 +158,10 @@
 											{#if cell}
 												{devFiring ? devFiring.action : cellLabel(cell)}
 												{#if devFiring}
-													<span class="block text-[8px] leading-none opacity-75">{devFiring.above ? '≥' : '≤'}{devFiring.tc}</span>
+													<span class="block text-[8px] leading-none opacity-75">{devFiring.above ? '≥' : '≤'}{devFiring.tc > 0 ? '+' : ''}{devFiring.tc}</span>
+												{:else if hasDev && showAllDeviations}
+													{@const firstDev = cell.deviations![0]}
+													<span class="block text-[8px] leading-none text-black/70">{firstDev.action}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
 												{:else if hasDev}
 													<span class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber-400"></span>
 												{/if}
