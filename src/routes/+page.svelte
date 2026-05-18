@@ -18,6 +18,9 @@
 	const activeIndex = $derived(game.state.activeHandIndex);
 	const tc = $derived(trueCount(game.state.shoe));
 	const rc = $derived(game.state.shoe.runningCount);
+	const shoePenetration = $derived(
+		game.state.shoe.dealtCards.length / (game.state.shoe.decks * 52)
+	);
 
 	const isMultiHand = $derived(playerHands.length > 1);
 
@@ -174,6 +177,15 @@
 			</button>
 		</div>
 	</header>
+
+	<!-- Shoe penetration bar -->
+	<div class="h-[3px] w-full bg-white/10">
+		<div
+			class="h-full transition-all duration-300
+				{shoePenetration < 0.6 ? 'bg-green-500/70' : shoePenetration < 0.75 ? 'bg-amber-400/80' : 'bg-red-500/80'}"
+			style="width: {shoePenetration * 100}%"
+		></div>
+	</div>
 
 	<!-- Dealer area -->
 	<div class="flex flex-1 flex-col items-center justify-center py-6">
