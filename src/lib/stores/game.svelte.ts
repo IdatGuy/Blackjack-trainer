@@ -132,6 +132,10 @@ class GameStore {
 		this.betAmount = 0;
 	}
 
+	addFunds(amount: number) {
+		this.bankroll += amount;
+	}
+
 	get allowedActions(): Action[] {
 		if (this.state.phase !== 'player' || this.state.playerHands.length === 0) return [];
 		const activeHand = this.state.playerHands[this.state.activeHandIndex];
