@@ -28,7 +28,7 @@
 	const activeHand = $derived(playerHands[activeIndex]);
 	const activeBust = $derived(activeHand ? isBust(activeHand.cards) : false);
 
-	let showCount = $state(false);
+	let showBankroll = $state(false);
 	let menuOpen = $state(false);
 	let chartOpen = $state(false);
 	let addFundsOpen = $state(false);
@@ -163,25 +163,35 @@
 			</button>
 		</div>
 
-		<!-- Center: toggleable bankroll / count pill -->
+		<!-- Center: count / bankroll pill (tap to toggle when count is on) -->
 		<div class="flex items-center justify-center gap-1.5">
-			<button
-				onclick={() => (showCount = !showCount)}
-				class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow transition-colors hover:bg-gray-100 active:bg-gray-200"
-			>
-				{#if showCount}
-					<span class="text-[9px] font-normal opacity-60">RC</span>
-					{rc}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
-					<span class="mx-1 opacity-30">|</span>
-					<span class="text-[9px] font-normal opacity-60">TC</span>
-					{tc}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
-				{:else if settings.bettingEnabled}
-					${game.bankroll}
-				{:else}
-					Count
-				{/if}
-			</button>
-			{#if settings.bettingEnabled && !showCount}
+			{#if settings.countDisplay !== 'off'}
+				<button
+					onclick={() => (showBankroll = !showBankroll)}
+					class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow transition-colors hover:bg-gray-100 active:bg-gray-200"
+				>
+					{#if showBankroll}
+						{#if settings.bettingEnabled}${game.bankroll}{:else}—{/if}
+					{:else if settings.countDisplay === 'running'}
+						<span class="text-[9px] font-normal opacity-60">RC</span>
+						{rc}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
+					{:else if settings.countDisplay === 'true'}
+						<span class="text-[9px] font-normal opacity-60">TC</span>
+						{tc}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
+					{:else}
+						<span class="text-[9px] font-normal opacity-60">RC</span>
+						{rc}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
+						<span class="mx-1 opacity-30">|</span>
+						<span class="text-[9px] font-normal opacity-60">TC</span>
+						{tc}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
+					{/if}
+				</button>
+			{:else}
+				<div class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow">
+					{#if settings.bettingEnabled}${game.bankroll}{:else}—{/if}
+				</div>
+			{/if}
+			{#if settings.bettingEnabled && (settings.countDisplay === 'off' || showBankroll)}
 				<button
 					onclick={() => (addFundsOpen = true)}
 					class="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 active:bg-white/40"

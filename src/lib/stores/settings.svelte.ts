@@ -6,6 +6,8 @@ class SettingsStore {
 	animationSpeed = $state(3); // 0=instant, 1–5
 	showFeedback = $state(true);
 	bettingEnabled = $state(true);
+	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('off');
+	showDeviationHints = $state(false);
 
 	constructor() {
 		if (browser) {
@@ -16,6 +18,12 @@ class SettingsStore {
 					if (typeof data.animationSpeed === 'number') this.animationSpeed = data.animationSpeed;
 					if (typeof data.showFeedback === 'boolean') this.showFeedback = data.showFeedback;
 					if (typeof data.bettingEnabled === 'boolean') this.bettingEnabled = data.bettingEnabled;
+					if (['off', 'running', 'true', 'both'].includes(data.countDisplay)) {
+						this.countDisplay = data.countDisplay;
+					}
+					if (typeof data.showDeviationHints === 'boolean') {
+						this.showDeviationHints = data.showDeviationHints;
+					}
 				} catch {
 					/* ignore malformed */
 				}
@@ -42,6 +50,16 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setCountDisplay(v: 'off' | 'running' | 'true' | 'both') {
+		this.countDisplay = v;
+		this.persist();
+	}
+
+	setShowDeviationHints(v: boolean) {
+		this.showDeviationHints = v;
+		this.persist();
+	}
+
 	private persist() {
 		if (browser) {
 			localStorage.setItem(
@@ -49,7 +67,9 @@ class SettingsStore {
 				JSON.stringify({
 					animationSpeed: this.animationSpeed,
 					showFeedback: this.showFeedback,
-					bettingEnabled: this.bettingEnabled
+					bettingEnabled: this.bettingEnabled,
+					countDisplay: this.countDisplay,
+					showDeviationHints: this.showDeviationHints
 				})
 			);
 		}

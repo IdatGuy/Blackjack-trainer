@@ -205,6 +205,37 @@ export function getCorrectAction(
 	return 'H'; // ultimate fallback
 }
 
+export function getBaseAction(
+	hand: Hand,
+	dealerUp: Card,
+	shoe: Shoe,
+	rules: RuleSet,
+	overrides?: Partial<StrategyChart>,
+	splitCount = 0
+): Action {
+	const chart = overrides
+		? mergeChart(DEFAULT_CHART, overrides as StrategyChart)
+		: DEFAULT_CHART;
+
+	const allowed = allowedActions(hand, dealerUp, rules, splitCount);
+	const upKey = upCardKey(dealerUp);
+	const type = handType(hand.cards, hand.cards.length === 2);
+	const key = handKey(hand.cards, type);
+
+	let section: Record<string, Record<string, ChartCell>>;
+	if (type === 'pair') section = chart.pairs;
+	else if (type === 'soft') section = chart.soft;
+	else section = chart.hard;
+
+	const cell = section[key]?.[upKey];
+	if (!cell) return handValue(hand.cards) >= 17 ? 'S' : 'H';
+
+	// No deviation check — basic strategy only
+	if (allowed.includes(cell.base)) return cell.base;
+	if (cell.fallback && allowed.includes(cell.fallback)) return cell.fallback;
+	return 'H';
+}
+
 function mergeChart(base: StrategyChart, overrides: StrategyChart): StrategyChart {
 	return {
 		ruleSetId: base.ruleSetId,

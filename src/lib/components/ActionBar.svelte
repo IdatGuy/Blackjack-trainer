@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Action } from '$lib/engine/rules.js';
 	import { game } from '$lib/stores/game.svelte.js';
+	import { settings } from '$lib/stores/settings.svelte.js';
 
 	const allowed = $derived(game.allowedActions);
 
@@ -25,13 +26,20 @@
 	const visible = $derived(ORDER.filter((a) => allowed.includes(a)));
 	const topRow = $derived(visible.slice(0, 3));
 	const bottomRow = $derived(visible.slice(3));
+
+	const deviationAction = $derived(
+		settings.showDeviationHints && game.correctAction !== game.baseAction
+			? game.correctAction
+			: null
+	);
 </script>
 
 <div class="flex w-full flex-col gap-2">
 	<div class="flex gap-2">
 		{#each topRow as action}
 			<button
-				class="flex-1 rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}"
+				class="flex-1 rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}
+					{deviationAction === action ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
 				onclick={() => game.act(action)}
 			>
 				{LABELS[action]}
@@ -42,7 +50,8 @@
 		<div class="flex justify-center gap-2">
 			{#each bottomRow as action}
 				<button
-					class="w-1/3 rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}"
+					class="w-1/3 rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}
+						{deviationAction === action ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
 					onclick={() => game.act(action)}
 				>
 					{LABELS[action]}

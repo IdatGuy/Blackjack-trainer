@@ -12,7 +12,7 @@ import {
 import { handKey, handType, makeHand } from '$lib/engine/hand.js';
 import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
 import { dealCard, resetShoe, shouldReshuffle } from '$lib/engine/shoe.js';
-import { getCorrectAction } from '$lib/engine/strategy.js';
+import { getBaseAction, getCorrectAction } from '$lib/engine/strategy.js';
 import { settings } from './settings.svelte.js';
 
 export type ActionRecord = {
@@ -142,6 +142,20 @@ class GameStore {
 		if (!activeHand) return [];
 		const splitCount = this.state.playerHands.length - 1;
 		return allowedActions(activeHand, this.state.dealerHand.cards[0], this.state.rules, splitCount);
+	}
+
+	get correctAction(): Action | null {
+		if (this.state.phase !== 'player' || this.state.playerHands.length === 0) return null;
+		const activeHand = this.state.playerHands[this.state.activeHandIndex];
+		if (!activeHand) return null;
+		return getCorrectAction(activeHand, this.state.dealerHand.cards[0], this.state.shoe, this.state.rules);
+	}
+
+	get baseAction(): Action | null {
+		if (this.state.phase !== 'player' || this.state.playerHands.length === 0) return null;
+		const activeHand = this.state.playerHands[this.state.activeHandIndex];
+		if (!activeHand) return null;
+		return getBaseAction(activeHand, this.state.dealerHand.cards[0], this.state.shoe, this.state.rules);
 	}
 
 	get reshuffleNeeded(): boolean {

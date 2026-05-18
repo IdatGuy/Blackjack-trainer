@@ -61,6 +61,39 @@
 						></span>
 					</button>
 				</label>
+				<hr class="border-gray-800" />
+				<div class="flex items-center justify-between px-4 py-3.5">
+					<span class="text-sm font-medium text-gray-100">Count display</span>
+					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+						{#each ([['off', 'Off'], ['running', 'RC'], ['true', 'TC'], ['both', 'Both']] as const) as [val, label]}
+							<button
+								onclick={() => settings.setCountDisplay(val)}
+								class="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors
+									{settings.countDisplay === val
+										? 'bg-white text-gray-900'
+										: 'text-gray-400 hover:text-gray-200'}"
+							>{label}</button>
+						{/each}
+					</div>
+				</div>
+				<hr class="border-gray-800" />
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
+					<span class="text-sm font-medium text-gray-100">Deviation hints</span>
+					<button
+						role="switch"
+						aria-checked={settings.showDeviationHints}
+						onclick={() => settings.setShowDeviationHints(!settings.showDeviationHints)}
+						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showDeviationHints
+							? 'bg-green-500'
+							: 'bg-gray-600'}"
+					>
+						<span
+							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showDeviationHints
+								? 'translate-x-5'
+								: 'translate-x-0'}"
+						></span>
+					</button>
+				</label>
 			</div>
 		</div>
 
