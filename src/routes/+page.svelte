@@ -4,6 +4,7 @@
 	import BetInput from '$lib/components/BetInput.svelte';
 	import Hand from '$lib/components/Hand.svelte';
 	import ResultBanner from '$lib/components/ResultBanner.svelte';
+	import StrategyChart from '$lib/components/StrategyChart.svelte';
 	import { handValue, isBust } from '$lib/engine/hand.js';
 	import { trueCount } from '$lib/engine/shoe.js';
 	import { game } from '$lib/stores/game.svelte.js';
@@ -29,6 +30,7 @@
 
 	let showCount = $state(false);
 	let menuOpen = $state(false);
+	let chartOpen = $state(false);
 
 
 	// Initial deal animation state
@@ -168,8 +170,20 @@
 			</button>
 		</div>
 
-		<!-- Right: menu -->
-		<div class="relative flex justify-end">
+		<!-- Right: chart button + menu -->
+		<div class="relative flex items-center justify-end gap-2">
+			<button
+				onclick={() => (chartOpen = true)}
+				class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-gray-300 hover:bg-white/20 active:bg-white/30"
+				aria-label="Strategy chart"
+			>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<rect x="3" y="3" width="7" height="7" rx="1" stroke-linejoin="round"/>
+					<rect x="14" y="3" width="7" height="7" rx="1" stroke-linejoin="round"/>
+					<rect x="3" y="14" width="7" height="7" rx="1" stroke-linejoin="round"/>
+					<rect x="14" y="14" width="7" height="7" rx="1" stroke-linejoin="round"/>
+				</svg>
+			</button>
 			<button
 				onclick={() => (menuOpen = !menuOpen)}
 				class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-xl font-bold leading-none text-gray-900 hover:bg-gray-100 active:bg-gray-200"
@@ -196,15 +210,6 @@
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
 						</svg>
 						Table Rules
-					</button>
-					<button onclick={() => { menuOpen = false; goto('/charts'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-gray-800 active:bg-gray-700">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-gray-400">
-							<rect x="3" y="3" width="7" height="7" rx="1" stroke-linejoin="round"/>
-							<rect x="14" y="3" width="7" height="7" rx="1" stroke-linejoin="round"/>
-							<rect x="3" y="14" width="7" height="7" rx="1" stroke-linejoin="round"/>
-							<rect x="14" y="14" width="7" height="7" rx="1" stroke-linejoin="round"/>
-						</svg>
-						Charts
 					</button>
 					<button onclick={() => { menuOpen = false; goto('/accuracy'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-gray-800 active:bg-gray-700">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-gray-400">
@@ -299,3 +304,5 @@
 		{/if}
 	</div>
 </div>
+
+<StrategyChart open={chartOpen} onclose={() => (chartOpen = false)} />
