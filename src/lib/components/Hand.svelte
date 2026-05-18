@@ -33,7 +33,7 @@
 
 	<div class="flex items-end justify-center">
 		{#each cards as card, i (i)}
-			<div class="-ml-3 first:ml-0" in:fly={{ y: -20, duration: animDuration }}>
+			<div class="-ml-16 first:ml-0" in:fly={{ y: -20, duration: animDuration }}>
 				<CardComp {card} faceDown={hideSecond && i === 1} />
 			</div>
 		{/each}
