@@ -21,7 +21,7 @@
 	};
 
 	// ordered display sequence
-	const ORDER: Action[] = ['H', 'S', 'D', 'R'];
+	const ORDER: Action[] = ['H', 'S', 'D', 'P', 'R'];
 	const visible = $derived(ORDER.filter((a) => allowed.includes(a)));
 </script>
 
@@ -29,7 +29,7 @@
 	{#each visible as action}
 		<button
 			class="min-w-[76px] rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}"
-			onclick={() => game.act(action as 'H' | 'S' | 'D' | 'R')}
+			onclick={() => game.act(action)}
 		>
 			{LABELS[action]}
 		</button>

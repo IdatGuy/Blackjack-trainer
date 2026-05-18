@@ -1,7 +1,11 @@
 <script lang="ts">
+	import { fly } from 'svelte/transition';
 	import type { Card } from '$lib/engine/card.js';
 	import { handValue, isBlackjack } from '$lib/engine/hand.js';
+	import { settings } from '$lib/stores/settings.svelte.js';
 	import CardComp from './Card.svelte';
+
+	const SPEEDS = [0, 80, 160, 250, 400, 600];
 
 	let {
 		cards,
@@ -15,9 +19,10 @@
 		showTotal?: boolean;
 	} = $props();
 
+	const animDuration = $derived(SPEEDS[settings.animationSpeed] ?? 0);
+
 	const total = $derived(cards.length > 0 ? handValue(cards) : null);
 	const bj = $derived(cards.length === 2 && isBlackjack(cards));
-	// During hideSecond, only count the visible card for the total display
 	const visibleTotal = $derived(hideSecond && cards.length >= 2 ? handValue([cards[0]]) : total);
 </script>
 
@@ -26,15 +31,14 @@
 		<span class="text-sm font-semibold uppercase tracking-widest text-gray-300">{label}</span>
 	{/if}
 
-	<div class="flex items-end gap-[-8px] justify-center" style="gap: -8px;">
-		{#each cards as card, i}
-			<div class="-ml-3 first:ml-0">
+	<div class="flex items-end justify-center">
+		{#each cards as card, i (i)}
+			<div class="-ml-3 first:ml-0" in:fly={{ y: -20, duration: animDuration }}>
 				<CardComp card={hideSecond && i === 1 ? null : card} />
 			</div>
 		{/each}
 		{#if cards.length === 0}
-			<!-- empty placeholder to keep height -->
-			<div class="h-[130px] w-[90px]"></div>
+			<div class="h-[140px] w-[96px]"></div>
 		{/if}
 	</div>
 

@@ -5,6 +5,7 @@ import {
 	initialState,
 	playDealer,
 	resolveHands,
+	split,
 	stand,
 	surrender,
 	type ResolvedHand
@@ -13,6 +14,7 @@ import { handKey, handType, makeHand } from '$lib/engine/hand.js';
 import { allowedActions, type Action } from '$lib/engine/rules.js';
 import { resetShoe, shouldReshuffle } from '$lib/engine/shoe.js';
 import { getCorrectAction } from '$lib/engine/strategy.js';
+import { settings } from './settings.svelte.js';
 
 export type ActionRecord = {
 	expected: Action;
@@ -47,7 +49,7 @@ export const MAX_BET = 1000;
 class GameStore {
 	state = $state(initialState());
 	betAmount = $state(0);
-	showFeedback = $state(true);
+	get showFeedback() { return settings.showFeedback; }
 	actionHistory = $state<ActionRecord[]>([]);
 	lastResults = $state<ResolvedHand[]>([]);
 	bankroll = $state(1000);
@@ -61,7 +63,7 @@ class GameStore {
 		this._maybeAutoFinish();
 	}
 
-	act(action: 'H' | 'S' | 'D' | 'R') {
+	act(action: Action) {
 		if (this.state.phase !== 'player') return;
 		const activeHand = this.state.playerHands[this.state.activeHandIndex];
 		const dealerUp = this.state.dealerHand.cards[0];
@@ -89,6 +91,7 @@ class GameStore {
 		else if (action === 'S') this.state = stand(this.state);
 		else if (action === 'D') this.state = double(this.state);
 		else if (action === 'R') this.state = surrender(this.state);
+		else if (action === 'P') this.state = split(this.state);
 
 		this._maybeAutoFinish();
 	}
@@ -134,9 +137,8 @@ class GameStore {
 		if (this.state.phase !== 'player' || this.state.playerHands.length === 0) return [];
 		const activeHand = this.state.playerHands[this.state.activeHandIndex];
 		if (!activeHand) return [];
-		return allowedActions(activeHand, this.state.dealerHand.cards[0], this.state.rules).filter(
-			(a) => a !== 'P' // split deferred to Phase 3
-		);
+		const splitCount = this.state.playerHands.length - 1;
+		return allowedActions(activeHand, this.state.dealerHand.cards[0], this.state.rules, splitCount);
 	}
 
 	get reshuffleNeeded(): boolean {
@@ -149,6 +151,16 @@ class GameStore {
 	}
 
 	_maybeAutoFinish() {
+		// Auto-stand split aces: one card only, no further action allowed
+		if (this.state.phase === 'player') {
+			const activeHand = this.state.playerHands[this.state.activeHandIndex];
+			if (activeHand && activeHand.isSplit && activeHand.cards[0].rank === 'A' && activeHand.cards.length === 2) {
+				this.state = stand(this.state);
+				this._maybeAutoFinish();
+				return;
+			}
+		}
+
 		if (this.state.phase === 'dealer') {
 			this.state = playDealer(this.state);
 		}
