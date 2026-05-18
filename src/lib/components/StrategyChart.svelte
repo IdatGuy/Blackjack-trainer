@@ -2,7 +2,7 @@
 	import { DEFAULT_CHART } from '$lib/engine/strategy.js';
 	import type { ChartCell } from '$lib/engine/strategy.js';
 
-	let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+	let { open, onclose, trueCount = undefined }: { open: boolean; onclose: () => void; trueCount?: number } = $props();
 
 	type Tab = 'hard' | 'soft' | 'pairs';
 	let activeTab = $state<Tab>('hard');
@@ -41,6 +41,18 @@
 			case 'R': return 'bg-violet-300 text-violet-950';
 			default:  return 'bg-gray-300 text-gray-900';
 		}
+	}
+
+	function hasDeviation(cell: ChartCell): boolean {
+		return (cell.deviations?.length ?? 0) > 0;
+	}
+
+	function activeDeviation(cell: ChartCell, tc: number | undefined): { tc: number; action: import('$lib/engine/rules.js').Action; above: boolean } | null {
+		if (tc === undefined || !cell.deviations?.length) return null;
+		for (const dev of cell.deviations) {
+			if (dev.above ? tc >= dev.tc : tc <= dev.tc) return dev;
+		}
+		return null;
 	}
 
 	const rows = $derived(
@@ -126,8 +138,20 @@
 									<td class="pr-1.5 text-right text-[11px] font-semibold text-white/70">{rowLabel(activeTab, key)}</td>
 									{#each UPCARDS as up}
 										{@const cell = section[key]?.[up]}
-										<td class="h-7 text-center text-[11px] font-semibold {cell ? cellClass(cell) : 'bg-gray-800 text-gray-600'}">
-											{cell ? cellLabel(cell) : ''}
+										{@const devFiring = cell ? activeDeviation(cell, trueCount) : null}
+										{@const hasDev = cell ? hasDeviation(cell) : false}
+										<td class="relative h-7 text-center text-[11px] font-semibold
+											{devFiring
+												? 'bg-amber-400 text-amber-950 ring-2 ring-amber-500 ring-inset'
+												: cell ? cellClass(cell) : 'bg-gray-800 text-gray-600'}">
+											{#if cell}
+												{devFiring ? devFiring.action : cellLabel(cell)}
+												{#if devFiring}
+													<span class="block text-[8px] leading-none opacity-75">{devFiring.above ? '≥' : '≤'}{devFiring.tc}</span>
+												{:else if hasDev}
+													<span class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+												{/if}
+											{/if}
 										</td>
 									{/each}
 								</tr>
@@ -162,6 +186,16 @@
 				<div class="flex items-center gap-1.5">
 					<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-violet-300 text-[10px] font-bold text-violet-950">Xh</span>
 					<span class="text-xs text-gray-400">Surrender or hit</span>
+				</div>
+				<div class="flex items-center gap-1.5">
+					<span class="relative flex h-5 w-7 items-center justify-center rounded-sm bg-rose-300 text-[10px] font-bold text-rose-950">
+						S<span class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+					</span>
+					<span class="text-xs text-gray-400">Has TC deviation</span>
+				</div>
+				<div class="flex items-center gap-1.5">
+					<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-amber-400 text-[10px] font-bold text-amber-950 ring-2 ring-amber-500 ring-inset">S</span>
+					<span class="text-xs text-gray-400">Deviation active</span>
 				</div>
 			</div>
 		</div>

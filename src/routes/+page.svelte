@@ -372,4 +372,4 @@
 	</div>
 {/if}
 
-<StrategyChart open={chartOpen} onclose={() => (chartOpen = false)} />
+<StrategyChart open={chartOpen} onclose={() => (chartOpen = false)} trueCount={tc} />
