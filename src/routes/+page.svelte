@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fly } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import ActionBar from '$lib/components/ActionBar.svelte';
 	import BetInput from '$lib/components/BetInput.svelte';
@@ -8,9 +9,12 @@
 	import { handValue, isBust } from '$lib/engine/hand.js';
 	import { trueCount } from '$lib/engine/shoe.js';
 	import { MIN_BET, game } from '$lib/stores/game.svelte.js';
+	import type { Action } from '$lib/engine/rules.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
 
 	const SPEEDS = [0, 80, 160, 250, 400, 600];
+
+	const animDuration = $derived(SPEEDS[settings.animationSpeed] ?? 0);
 
 	const phase = $derived(game.state.phase);
 	const playerHands = $derived(game.state.playerHands);
@@ -49,6 +53,12 @@
 	// Dealer reveal animation state
 	let isDealerAnimating = $state(false);
 	let dealerTimers: ReturnType<typeof setTimeout>[] = [];
+
+	// Split animation state
+	let isSplitting = $state(false);
+	let splitVisibleCounts = $state<number[]>([]);
+	let splitHandStartIdx = $state(0);
+	let splitTimers: ReturnType<typeof setTimeout>[] = [];
 
 	// During the deal sequence, show slices; otherwise show full arrays
 	const visiblePlayerCards = $derived(
@@ -130,6 +140,33 @@
 		dealerTimers.forEach(clearTimeout);
 		dealerTimers = [];
 		isDealerAnimating = false;
+	}
+
+	function handleAction(action: Action) {
+		if (action !== 'P') { game.act(action); return; }
+
+		const dur = SPEEDS[settings.animationSpeed] ?? 0;
+		splitHandStartIdx = game.state.activeHandIndex;
+		game.act('P');
+
+		if (dur === 0) return;
+
+		const n = game.state.playerHands.length;
+		const idx = splitHandStartIdx;
+		splitVisibleCounts = Array.from({ length: n }, (_, i) =>
+			i === idx || i === idx + 1 ? 1 : 99
+		);
+		isSplitting = true;
+
+		splitTimers = [
+			setTimeout(() => {
+				splitVisibleCounts = splitVisibleCounts.map((c, i) => i === idx ? 2 : c);
+			}, dur),
+			setTimeout(() => {
+				splitVisibleCounts = splitVisibleCounts.map((c, i) => i === idx + 1 ? 2 : c);
+			}, 2 * dur),
+			setTimeout(() => { isSplitting = false; splitVisibleCounts = []; }, 2 * dur + 50),
+		];
 	}
 
 	function signSup(n: number): string {
@@ -297,7 +334,7 @@
 				</button>
 			{/if}
 		{:else if phase === 'player' && !isDealing}
-			<ActionBar />
+			<ActionBar onaction={handleAction} />
 			{#if activeBust}
 				<span class="text-sm font-bold text-red-400">Bust!</span>
 			{/if}
@@ -316,7 +353,7 @@
 	<div class="flex flex-1 flex-col items-center justify-center py-6">
 		{#if isMultiHand}
 			<!-- Multi-hand split layout -->
-			<div class="flex items-start justify-center gap-3">
+			<div in:fly={{ y: -12, duration: animDuration }} class="flex items-start justify-center gap-3">
 				{#each playerHands as hand, i}
 					<div
 						class="flex flex-col items-center gap-1 rounded-xl p-1 transition-all
@@ -326,7 +363,12 @@
 								? 'opacity-50'
 								: ''}"
 					>
-						<Hand cards={hand.cards} showTotal={true} />
+						<Hand
+							cards={isSplitting && i < splitVisibleCounts.length
+								? hand.cards.slice(0, splitVisibleCounts[i])
+								: hand.cards}
+							showTotal={true}
+						/>
 						<span class="text-[10px] text-gray-400">
 							{hand.isSurrendered ? 'Surrendered' : hand.isDoubled ? 'Doubled' : ''}
 						</span>

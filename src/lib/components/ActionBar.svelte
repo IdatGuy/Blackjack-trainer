@@ -3,6 +3,8 @@
 	import { game } from '$lib/stores/game.svelte.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
 
+	let { onaction }: { onaction?: (a: Action) => void } = $props();
+
 	const allowed = $derived(game.allowedActions);
 
 	const LABELS: Record<Action, string> = {
@@ -40,7 +42,7 @@
 			<button
 				class="flex-1 rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}
 					{deviationAction === action ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
-				onclick={() => game.act(action)}
+				onclick={() => onaction ? onaction(action) : game.act(action)}
 			>
 				{LABELS[action]}
 			</button>
@@ -52,7 +54,7 @@
 				<button
 					class="w-1/3 rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}
 						{deviationAction === action ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
-					onclick={() => game.act(action)}
+					onclick={() => onaction ? onaction(action) : game.act(action)}
 				>
 					{LABELS[action]}
 				</button>
