@@ -7,6 +7,9 @@
 	import { handValue, isBust } from '$lib/engine/hand.js';
 	import { trueCount } from '$lib/engine/shoe.js';
 	import { game } from '$lib/stores/game.svelte.js';
+	import { settings } from '$lib/stores/settings.svelte.js';
+
+	const SPEEDS = [0, 80, 160, 250, 400, 600];
 
 	const phase = $derived(game.state.phase);
 	const playerHands = $derived(game.state.playerHands);
@@ -23,18 +26,114 @@
 
 	let showCount = $state(false);
 
+	// Initial deal animation state
+	let isDealing = $state(false);
+	let playerVisible = $state(0);
+	let dealerVisible = $state(0);
+	let dealTimers: ReturnType<typeof setTimeout>[] = [];
+
+	// Dealer reveal animation state
+	let isDealerAnimating = $state(false);
+	let dealerTimers: ReturnType<typeof setTimeout>[] = [];
+
+	// During the deal sequence, show slices; otherwise show full arrays
+	const visiblePlayerCards = $derived(
+		isDealing ? (playerHand?.cards.slice(0, playerVisible) ?? []) : (playerHand?.cards ?? [])
+	);
+	const visibleDealerCards = $derived(
+		isDealing ? dealerHand.cards.slice(0, dealerVisible) : dealerHand.cards
+	);
+
+	function handleDeal() {
+		const dur = SPEEDS[settings.animationSpeed] ?? 0;
+
+		if (dur > 0) {
+			// Set BEFORE game.deal() so Svelte batches them into one DOM update
+			isDealing = true;
+			playerVisible = 0;
+			dealerVisible = 0;
+		}
+
+		game.deal();
+
+		if (dur > 0) {
+			// Reveal cards in deal order: player[0], dealer[0], player[1], dealer[1]
+			dealTimers = [
+				setTimeout(() => { playerVisible = 1; }, 0),
+				setTimeout(() => { dealerVisible = 1; }, dur),
+				setTimeout(() => { playerVisible = 2; }, 2 * dur),
+				setTimeout(() => { dealerVisible = 2; }, 3 * dur),
+				setTimeout(() => { isDealing = false; }, 4 * dur + 50)
+			];
+		}
+	}
+
+	function skipDeal() {
+		dealTimers.forEach(clearTimeout);
+		dealTimers = [];
+		playerVisible = 99;
+		dealerVisible = 99;
+		isDealing = false;
+	}
+
+	// Dealer reveal sequence: flip hole card, then draw cards one at a time
+	$effect(() => {
+		if (phase === 'dealer' && !isDealerAnimating && !isDealing) {
+			startDealerSequence();
+		}
+	});
+
+	function startDealerSequence() {
+		const dur = SPEEDS[settings.animationSpeed] ?? 0;
+
+		if (dur === 0) {
+			while (game.dealerShouldDraw) game.dealerDraw();
+			game.resolveDealer();
+			return;
+		}
+
+		isDealerAnimating = true;
+
+		function drawOrResolve() {
+			if (game.dealerShouldDraw) {
+				game.dealerDraw();
+				dealerTimers.push(setTimeout(drawOrResolve, dur));
+			} else {
+				game.resolveDealer();
+				isDealerAnimating = false;
+			}
+		}
+
+		// Wait one dur for the hole card flip to complete, then start drawing
+		dealerTimers.push(setTimeout(drawOrResolve, dur));
+	}
+
+	function cancelDealerAnimation() {
+		dealerTimers.forEach(clearTimeout);
+		dealerTimers = [];
+		isDealerAnimating = false;
+	}
+
 	function signSup(n: number): string {
 		return n >= 0 ? '+' : '−';
 	}
 </script>
 
-<div class="flex h-full flex-col">
+<div class="relative flex h-full flex-col">
+	{#if isDealing}
+		<button
+			onclick={skipDeal}
+			class="absolute inset-0 z-50 cursor-pointer"
+			aria-label="Skip deal animation"
+		></button>
+	{/if}
+
 	<!-- Top bar: 3-column grid keeps pill perfectly centered -->
 	<header class="grid grid-cols-3 items-center border-b border-gray-800 bg-black/40 px-3 py-2">
 		<!-- Left: reshuffle button -->
 		<div class="flex items-center">
 			<button
-				onclick={() => game.reshuffle()}
+				onclick={() => { cancelDealerAnimation(); game.reshuffle(); }}
 				class="flex h-9 w-9 items-center justify-center rounded-lg text-xl transition-colors
 					{game.reshuffleNeeded
 					? 'bg-amber-400 text-gray-900 hover:bg-amber-300 active:bg-amber-500'
@@ -79,7 +178,7 @@
 	<!-- Dealer area -->
 	<div class="flex flex-1 flex-col items-center justify-center py-6">
 		<Hand
-			cards={dealerHand.cards}
+			cards={visibleDealerCards}
 			hideSecond={phase === 'player'}
 			label="Dealer"
 			showTotal={phase !== 'player'}
@@ -89,8 +188,8 @@
 	<!-- Center action zone (fixed height) -->
 	<div class="flex min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4">
 		{#if phase === 'betting'}
-			<BetInput />
-		{:else if phase === 'player'}
+			<BetInput ondeal={handleDeal} />
+		{:else if phase === 'player' && !isDealing}
 			<ActionBar />
 			{#if activeBust}
 				<span class="text-sm font-bold text-red-400">Bust!</span>
@@ -99,7 +198,7 @@
 			<ResultBanner />
 			<button
 				class="rounded-xl bg-yellow-500 px-8 py-3 text-base font-bold text-gray-900 shadow-lg hover:bg-yellow-400 active:bg-yellow-600"
-				onclick={() => game.nextHand()}
+				onclick={() => { cancelDealerAnimation(); game.nextHand(); }}
 			>
 				Next Hand
 			</button>
@@ -128,7 +227,7 @@
 				{/each}
 			</div>
 		{:else if playerHand}
-			<Hand cards={playerHand.cards} label="Player" showTotal={true} />
+			<Hand cards={visiblePlayerCards} label="Player" showTotal={true} />
 			<span class="mt-1 text-xs text-gray-400">
 				{playerHand.isSurrendered ? 'Surrendered' : ''}
 				{playerHand.isDoubled ? 'Doubled' : ''}

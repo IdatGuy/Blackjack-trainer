@@ -3,7 +3,6 @@ import {
 	double,
 	hit,
 	initialState,
-	playDealer,
 	resolveHands,
 	split,
 	stand,
@@ -11,8 +10,8 @@ import {
 	type ResolvedHand
 } from '$lib/engine/game.js';
 import { handKey, handType, makeHand } from '$lib/engine/hand.js';
-import { allowedActions, type Action } from '$lib/engine/rules.js';
-import { resetShoe, shouldReshuffle } from '$lib/engine/shoe.js';
+import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
+import { dealCard, resetShoe, shouldReshuffle } from '$lib/engine/shoe.js';
 import { getCorrectAction } from '$lib/engine/strategy.js';
 import { settings } from './settings.svelte.js';
 
@@ -150,6 +149,32 @@ class GameStore {
 		return `You ${ACTION_PAST[record.actual]} — should have ${ACTION_INF[record.expected]} (${record.handDesc})`;
 	}
 
+	get dealerShouldDraw(): boolean {
+		return this.state.phase === 'dealer' &&
+			dealerShouldHit(this.state.dealerHand.cards, this.state.rules);
+	}
+
+	dealerDraw() {
+		if (this.state.phase !== 'dealer') return;
+		const { card, shoe } = dealCard(this.state.shoe);
+		this.state = {
+			...this.state,
+			shoe,
+			dealerHand: { ...this.state.dealerHand, cards: [...this.state.dealerHand.cards, card] }
+		};
+	}
+
+	resolveDealer() {
+		if (this.state.phase !== 'dealer') return;
+		this.state = { ...this.state, phase: 'resolution' };
+		const { state, results } = resolveHands(this.state);
+		this.state = state;
+		this.lastResults = results;
+		this.bankroll = Math.round(
+			(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
+		) / 100;
+	}
+
 	_maybeAutoFinish() {
 		// Auto-stand split aces: one card only, no further action allowed
 		if (this.state.phase === 'player') {
@@ -160,10 +185,9 @@ class GameStore {
 				return;
 			}
 		}
+		// Dealer phase is driven by the UI animation sequence (startDealerSequence in +page.svelte)
 
-		if (this.state.phase === 'dealer') {
-			this.state = playDealer(this.state);
-		}
+		// Direct resolution (e.g. dealer BJ with peek, all-player BJ)
 		if (this.state.phase === 'resolution') {
 			const { state, results } = resolveHands(this.state);
 			this.state = state;
