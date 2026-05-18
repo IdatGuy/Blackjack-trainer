@@ -7,7 +7,7 @@
 	import StrategyChart from '$lib/components/StrategyChart.svelte';
 	import { handValue, isBust } from '$lib/engine/hand.js';
 	import { trueCount } from '$lib/engine/shoe.js';
-	import { game } from '$lib/stores/game.svelte.js';
+	import { MIN_BET, game } from '$lib/stores/game.svelte.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
 
 	const SPEEDS = [0, 80, 160, 250, 400, 600];
@@ -52,6 +52,10 @@
 	);
 
 	function handleDeal() {
+		if (!settings.bettingEnabled && game.betAmount < MIN_BET) {
+			game.addChip(MIN_BET);
+		}
+
 		const dur = SPEEDS[settings.animationSpeed] ?? 0;
 
 		if (dur > 0) {
@@ -164,8 +168,10 @@
 					<span class="mx-1 opacity-30">|</span>
 					<span class="text-[9px] font-normal opacity-60">TC</span>
 					{tc}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
-				{:else}
+				{:else if settings.bettingEnabled}
 					${game.bankroll}
+				{:else}
+					Count
 				{/if}
 			</button>
 		</div>
@@ -252,7 +258,16 @@
 	<!-- Center action zone (fixed height) -->
 	<div class="flex min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4">
 		{#if phase === 'betting'}
-			<BetInput ondeal={handleDeal} />
+			{#if settings.bettingEnabled}
+				<BetInput ondeal={handleDeal} />
+			{:else}
+				<button
+					class="rounded-xl bg-yellow-500 px-10 py-3 text-base font-bold text-gray-900 shadow-lg hover:bg-yellow-400 active:bg-yellow-600"
+					onclick={handleDeal}
+				>
+					Deal
+				</button>
+			{/if}
 		{:else if phase === 'player' && !isDealing}
 			<ActionBar />
 			{#if activeBust}

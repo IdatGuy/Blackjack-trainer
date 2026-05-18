@@ -170,9 +170,11 @@ class GameStore {
 		const { state, results } = resolveHands(this.state);
 		this.state = state;
 		this.lastResults = results;
-		this.bankroll = Math.round(
-			(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
-		) / 100;
+		if (settings.bettingEnabled) {
+			this.bankroll = Math.round(
+				(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
+			) / 100;
+		}
 	}
 
 	_maybeAutoFinish() {
@@ -192,9 +194,11 @@ class GameStore {
 			const { state, results } = resolveHands(this.state);
 			this.state = state;
 			this.lastResults = results;
-			this.bankroll = Math.round(
-				(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
-			) / 100;
+			if (settings.bettingEnabled) {
+				this.bankroll = Math.round(
+					(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
+				) / 100;
+			}
 		}
 	}
 }

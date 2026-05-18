@@ -5,6 +5,7 @@ const SPEEDS = [0, 80, 160, 250, 400, 600];
 class SettingsStore {
 	animationSpeed = $state(3); // 0=instant, 1–5
 	showFeedback = $state(true);
+	bettingEnabled = $state(true);
 
 	constructor() {
 		if (browser) {
@@ -14,6 +15,7 @@ class SettingsStore {
 					const data = JSON.parse(raw);
 					if (typeof data.animationSpeed === 'number') this.animationSpeed = data.animationSpeed;
 					if (typeof data.showFeedback === 'boolean') this.showFeedback = data.showFeedback;
+					if (typeof data.bettingEnabled === 'boolean') this.bettingEnabled = data.bettingEnabled;
 				} catch {
 					/* ignore malformed */
 				}
@@ -35,11 +37,20 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setBettingEnabled(v: boolean) {
+		this.bettingEnabled = v;
+		this.persist();
+	}
+
 	private persist() {
 		if (browser) {
 			localStorage.setItem(
 				'bj-settings',
-				JSON.stringify({ animationSpeed: this.animationSpeed, showFeedback: this.showFeedback })
+				JSON.stringify({
+					animationSpeed: this.animationSpeed,
+					showFeedback: this.showFeedback,
+					bettingEnabled: this.bettingEnabled
+				})
 			);
 		}
 	}

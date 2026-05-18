@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { HandResult } from '$lib/engine/game.js';
 	import { game } from '$lib/stores/game.svelte.js';
+	import { settings } from '$lib/stores/settings.svelte.js';
 
 	const OUTCOME_STYLES: Record<HandResult, string> = {
 		win: 'bg-green-500 text-white',
@@ -33,7 +34,7 @@
 			<div
 				class="rounded-xl px-6 py-2 text-center text-xl font-bold shadow-lg {OUTCOME_STYLES[result.result]}"
 			>
-				{OUTCOME_LABEL[result.result]}{chipLabel(result.netChips)}
+				{OUTCOME_LABEL[result.result]}{settings.bettingEnabled ? chipLabel(result.netChips) : ''}
 			</div>
 		{/each}
 
