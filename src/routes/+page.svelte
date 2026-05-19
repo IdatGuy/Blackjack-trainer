@@ -312,6 +312,12 @@
 						</svg>
 						Statistics
 					</button>
+					<button onclick={() => { menuOpen = false; goto('/simulation'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-gray-800 active:bg-gray-700">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-gray-400">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"/>
+						</svg>
+						Simulation
+					</button>
 				</div>
 			{/if}
 		</div>
