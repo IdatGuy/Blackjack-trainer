@@ -87,6 +87,9 @@
 		inset: 0;
 		backface-visibility: hidden;
 	}
+	.card-front {
+		transform: rotateY(0deg);
+	}
 	.card-back {
 		transform: rotateY(180deg);
 	}
