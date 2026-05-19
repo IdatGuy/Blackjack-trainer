@@ -228,16 +228,16 @@
 						{:else}—{/if}
 					{:else if settings.countDisplay === 'running'}
 						<span class="text-[9px] font-normal opacity-60">RC</span>
-						{rc}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
+						{Math.abs(rc)}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
 					{:else if settings.countDisplay === 'true'}
 						<span class="text-[9px] font-normal opacity-60">TC</span>
-						{tc}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
+						{Math.abs(tc)}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
 					{:else}
 						<span class="text-[9px] font-normal opacity-60">RC</span>
-						{rc}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
+						{Math.abs(rc)}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
 						<span class="mx-1 opacity-30">|</span>
 						<span class="text-[9px] font-normal opacity-60">TC</span>
-						{tc}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
+						{Math.abs(tc)}<sup class="text-[9px] opacity-70">{signSup(tc)}</sup>
 					{/if}
 				</button>
 			{:else}
