@@ -193,51 +193,46 @@
 					</div>
 
 					<div class="flex-1 overflow-x-auto">
-						<table class="w-full border-collapse">
-							<thead>
-								<tr>
-									<!-- row label spacer -->
-									<th class="w-10"></th>
-									<th colspan="10" class="pb-1 text-center text-[10px] font-semibold uppercase tracking-widest text-green-400">
-										Dealer's Hand
-									</th>
-								</tr>
-								<tr>
-									<th class="w-10"></th>
-									{#each UPCARDS as up}
-										<th class="w-8 pb-1 text-center text-xs font-bold text-green-400">{up}</th>
-									{/each}
-								</tr>
-							</thead>
-							<tbody>
-								{#each rows as key}
-									<tr>
-										<td class="pr-1.5 text-right text-[11px] font-semibold text-white/70">{rowLabel(activeTab, key)}</td>
-										{#each UPCARDS as up}
-											{@const cell = section[key]?.[up]}
-											{@const devFiring = cell ? activeDeviation(cell, trueCount) : null}
-											{@const hasDev = cell ? hasDeviation(cell) : false}
-											<td class="relative h-7 text-center text-[11px] font-semibold
-												{devFiring
-													? 'bg-amber-400 text-amber-950 ring-2 ring-amber-500 ring-inset'
-													: cell ? cellClass(cell) : 'bg-gray-800 text-gray-600'}">
-												{#if cell}
-													{devFiring ? actionLabel(devFiring.action) : cellLabel(cell)}
-													{#if devFiring}
-														<span class="block text-[8px] leading-none opacity-75">{devFiring.above ? '≥' : '≤'}{devFiring.tc > 0 ? '+' : ''}{devFiring.tc}</span>
-													{:else if hasDev && showAllDeviations}
-														{@const firstDev = cell.deviations![0]}
-														<span class="block text-[8px] leading-none text-black/70">{actionLabel(firstDev.action)}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
-													{:else if hasDev}
-														<span class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-													{/if}
-												{/if}
-											</td>
-										{/each}
-									</tr>
+						<!-- Dealer's Hand label -->
+						<div class="mb-0.5 ml-9 text-center text-[10px] font-semibold uppercase tracking-widest text-green-400">
+							Dealer's Hand
+						</div>
+						<!-- Column headers -->
+						<div class="mb-0.5 flex items-center">
+							<div class="w-9 shrink-0"></div>
+							{#each UPCARDS as up}
+								<div class="w-8 shrink-0 text-center text-xs font-bold text-green-400">{up}</div>
+							{/each}
+						</div>
+						<!-- Grid rows -->
+						{#each rows as key}
+							<div class="mb-0.5 flex items-center">
+								<div class="w-9 shrink-0 pr-1 text-right text-[11px] font-semibold text-white/70">
+									{rowLabel(activeTab, key)}
+								</div>
+								{#each UPCARDS as up}
+									{@const cell = section[key]?.[up]}
+									{@const devFiring = cell ? activeDeviation(cell, trueCount) : null}
+									{@const hasDev = cell ? hasDeviation(cell) : false}
+									<div class="relative m-0.5 flex h-7 w-7 shrink-0 flex-col items-center justify-center overflow-visible rounded text-[10px] font-bold leading-none
+										{devFiring
+											? 'bg-amber-400 text-amber-950 ring-2 ring-amber-500 ring-inset'
+											: cell ? cellClass(cell) : 'bg-gray-800 text-gray-600'}">
+										{#if cell}
+											{devFiring ? actionLabel(devFiring.action) : cellLabel(cell)}
+											{#if devFiring}
+												<span class="text-[8px] leading-none opacity-75">{devFiring.above ? '≥' : '≤'}{devFiring.tc > 0 ? '+' : ''}{devFiring.tc}</span>
+											{:else if hasDev && showAllDeviations}
+												{@const firstDev = cell.deviations![0]}
+												<span class="text-[8px] leading-none text-black/70">{actionLabel(firstDev.action)}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
+											{:else if hasDev}
+												<span class="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-amber-400 shadow-sm"></span>
+											{/if}
+										{/if}
+									</div>
 								{/each}
-							</tbody>
-						</table>
+							</div>
+						{/each}
 					</div>
 				</div>
 
@@ -268,8 +263,8 @@
 						<span class="text-xs text-gray-400">Surrender or hit</span>
 					</div>
 					<div class="flex items-center gap-1.5">
-						<span class="relative flex h-5 w-7 items-center justify-center rounded-sm bg-rose-300 text-[10px] font-bold text-rose-950">
-							S<span class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+						<span class="relative flex h-5 w-7 items-center justify-center overflow-visible rounded-sm bg-rose-300 text-[10px] font-bold text-rose-950">
+							S<span class="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-amber-400 shadow-sm"></span>
 						</span>
 						<span class="text-xs text-gray-400">Has TC deviation</span>
 					</div>
