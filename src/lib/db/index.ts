@@ -1,0 +1,21 @@
+import { openDB } from 'idb';
+import type { BjDB } from './schema.js';
+
+let dbPromise: ReturnType<typeof openDB<BjDB>> | null = null;
+
+export function getDb() {
+	if (!dbPromise) {
+		dbPromise = openDB<BjDB>('bj-trainer', 1, {
+			upgrade(db) {
+				const store = db.createObjectStore('decisions', {
+					keyPath: 'id',
+					autoIncrement: true
+				});
+				store.createIndex('by-timestamp', 'timestamp');
+				store.createIndex('by-session', 'sessionId');
+				store.createIndex('by-ruleset', 'ruleSetId');
+			}
+		});
+	}
+	return dbPromise;
+}

@@ -7,12 +7,16 @@ import {
 	split,
 	stand,
 	surrender,
+	type HandResult,
 	type ResolvedHand
 } from '$lib/engine/game.js';
-import { handKey, handType, makeHand } from '$lib/engine/hand.js';
+import { handKey, handType, handValue, makeHand } from '$lib/engine/hand.js';
 import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
-import { dealCard, resetShoe, shouldReshuffle } from '$lib/engine/shoe.js';
+import { dealCard, resetShoe, shouldReshuffle, trueCount } from '$lib/engine/shoe.js';
 import { getBaseAction, getCorrectAction } from '$lib/engine/strategy.js';
+import { browser } from '$app/environment';
+import { saveDecisions } from '$lib/db/persist.js';
+import type { DecisionRecord } from '$lib/db/schema.js';
 import { settings } from './settings.svelte.js';
 
 export type ActionRecord = {
@@ -21,6 +25,8 @@ export type ActionRecord = {
 	correct: boolean;
 	handDesc: string; // e.g. "hard 16 vs 10"
 };
+
+type PendingDecision = Omit<DecisionRecord, 'id' | 'outcomeChips' | 'bankrollTracked' | 'handResult'>;
 
 const ACTION_PAST: Record<Action, string> = {
 	H: 'hit',
@@ -45,19 +51,63 @@ function rankLabel(rank: string): string {
 export const MIN_BET = 10;
 export const MAX_BET = 1000;
 
+function generateId(): string {
+	if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+		return crypto.randomUUID();
+	}
+	return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+function loadBankroll(): number {
+	if (!browser) return 1000;
+	const saved = localStorage.getItem('bj-bankroll');
+	if (saved) {
+		const n = parseFloat(saved);
+		if (Number.isFinite(n) && n >= 0) return n;
+	}
+	return 1000;
+}
+
 class GameStore {
 	state = $state(initialState());
 	betAmount = $state(0);
 	get showFeedback() { return settings.showFeedback; }
 	actionHistory = $state<ActionRecord[]>([]);
 	lastResults = $state<ResolvedHand[]>([]);
-	bankroll = $state(1000);
+	bankroll = $state(loadBankroll());
+	sessionId = $state(browser ? generateId() : 'ssr');
+	handId = $state('');
+	_pending: PendingDecision[] = [];
+
+	_persistBankroll() {
+		if (browser) localStorage.setItem('bj-bankroll', String(this.bankroll));
+	}
+
+	_flushDecisions(results: ResolvedHand[]) {
+		if (this._pending.length === 0) return;
+		const bankrollTracked = settings.bettingEnabled;
+		const completed: DecisionRecord[] = this._pending.map((pd) => ({
+			...pd,
+			outcomeChips: bankrollTracked ? (results[pd.handIndex]?.netChips ?? 0) : 0,
+			bankrollTracked,
+			handResult: (results[pd.handIndex]?.result ?? 'loss') as HandResult
+		}));
+		this._pending = [];
+		if (browser) saveDecisions(completed);
+	}
 
 	deal() {
 		if (this.state.phase !== 'betting') return;
 		if (this.betAmount < MIN_BET || this.betAmount > this.bankroll) return;
 		this.actionHistory = [];
 		this.lastResults = [];
+		this._pending = [];
+		const now = Date.now();
+		this.handId = `${this.sessionId}-${now}`;
+		if (browser) {
+			const prev = parseInt(localStorage.getItem('bj-hands-dealt') ?? '0', 10);
+			localStorage.setItem('bj-hands-dealt', String(prev + 1));
+		}
 		this.state = dealHand(this.state, [this.betAmount]);
 		this._maybeAutoFinish();
 	}
@@ -73,6 +123,7 @@ class GameStore {
 			this.state.shoe,
 			this.state.rules
 		);
+		const base = getBaseAction(activeHand, dealerUp, this.state.shoe, this.state.rules);
 
 		const type = handType(activeHand.cards, activeHand.cards.length === 2);
 		const key = handKey(activeHand.cards, type);
@@ -85,6 +136,36 @@ class GameStore {
 			handDesc
 		};
 		this.actionHistory = [...this.actionHistory, record];
+
+		const isDeviation = expected !== base;
+		const category: DecisionRecord['category'] =
+			action === 'P' ? 'split' :
+			action === 'D' ? 'double' :
+			action === 'R' ? 'surrender' :
+			isDeviation ? 'deviation' : 'hit-stand';
+
+		const playerTotal: number | string =
+			type === 'pair' ? key : handValue(activeHand.cards);
+
+		this._pending.push({
+			timestamp: Date.now(),
+			sessionId: this.sessionId,
+			handId: this.handId,
+			handIndex: this.state.activeHandIndex,
+			ruleSetId: this.state.rules.id,
+			mode: 'standard',
+			playMode: 'shoe',
+			handType: type,
+			playerTotal,
+			dealerUp: dealerUp.rank,
+			trueCount: trueCount(this.state.shoe),
+			expected,
+			actual: action,
+			correct: expected === action,
+			hintShown: settings.showDeviationHints && isDeviation,
+			category,
+			betAmount: activeHand.bet
+		});
 
 		if (action === 'H') this.state = hit(this.state);
 		else if (action === 'S') this.state = stand(this.state);
@@ -107,6 +188,7 @@ class GameStore {
 		};
 		this.lastResults = [];
 		this.actionHistory = [];
+		this._pending = [];
 		// betAmount intentionally preserved — defaults to last bet
 	}
 
@@ -121,7 +203,9 @@ class GameStore {
 		};
 		this.lastResults = [];
 		this.actionHistory = [];
+		this._pending = [];
 		this.betAmount = 0;
+		this.sessionId = browser ? crypto.randomUUID() : 'ssr';
 	}
 
 	addChip(value: number) {
@@ -134,6 +218,7 @@ class GameStore {
 
 	addFunds(amount: number) {
 		this.bankroll += amount;
+		this._persistBankroll();
 	}
 
 	get allowedActions(): Action[] {
@@ -192,7 +277,9 @@ class GameStore {
 			this.bankroll = Math.round(
 				(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
 			) / 100;
+			this._persistBankroll();
 		}
+		this._flushDecisions(results);
 	}
 
 	_maybeAutoFinish() {
@@ -216,7 +303,9 @@ class GameStore {
 				this.bankroll = Math.round(
 					(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
 				) / 100;
+				this._persistBankroll();
 			}
+			this._flushDecisions(results);
 		}
 	}
 }
