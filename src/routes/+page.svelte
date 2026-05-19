@@ -32,6 +32,15 @@
 	const activeHand = $derived(playerHands[activeIndex]);
 	const activeBust = $derived(activeHand ? isBust(activeHand.cards) : false);
 
+	let handEls: (HTMLElement | null)[] = $state([]);
+
+	$effect(() => {
+		const el = handEls[activeIndex];
+		if (el && playerHands.length > 1) {
+			el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+		}
+	});
+
 	let showBankroll = $state(true);
 	let menuOpen = $state(false);
 	let chartOpen = $state(false);
@@ -393,36 +402,38 @@
 
 	<!-- Player area -->
 	<div class="flex flex-1 flex-col items-center justify-center py-6">
-		{#if isMultiHand}
-			<!-- Multi-hand split layout -->
-			<div in:fly={{ y: -12, duration: animDuration }} class="flex items-start justify-center gap-3">
-				{#each playerHands as hand, i}
-					<div
-						class="flex flex-col items-center gap-1 rounded-xl p-1 transition-all
-							{i === activeIndex && phase === 'player'
-							? 'ring-2 ring-white'
-							: hand.isResolved
-								? 'opacity-50'
-								: ''}"
-					>
-						<Hand
-							cards={isSplitting && i < splitVisibleCounts.length
-								? hand.cards.slice(0, splitVisibleCounts[i])
-								: hand.cards}
-							showTotal={settings.showHandTotal}
-						/>
-						<span class="text-[10px] text-gray-400">
-							{hand.isSurrendered ? 'Surrendered' : hand.isDoubled ? 'Doubled' : ''}
-						</span>
-					</div>
-				{/each}
+		{#if playerHands.length > 0}
+			<div
+				class="hand-scroll w-full overflow-x-auto"
+				in:fly={{ y: -12, duration: animDuration }}
+			>
+				<div class="flex items-start gap-4" style="padding-inline: calc(50% - 6rem)">
+					{#each playerHands as hand, i}
+						<div
+							bind:this={handEls[i]}
+							class="flex w-48 flex-shrink-0 flex-col items-center gap-1 transition-all
+								{hand.isResolved ? 'opacity-50' : ''}"
+						>
+							<div class="rounded-xl p-1 transition-all
+								{i === activeIndex && phase === 'player'
+									? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950'
+									: ''}">
+								<Hand
+									cards={isSplitting && i < splitVisibleCounts.length
+										? hand.cards.slice(0, splitVisibleCounts[i])
+										: !isMultiHand && i === 0
+											? visiblePlayerCards
+											: hand.cards}
+									showTotal={settings.showHandTotal}
+								/>
+							</div>
+							<span class="text-[10px] text-gray-400">
+								{hand.isSurrendered ? 'Surrendered' : hand.isDoubled ? 'Doubled' : ''}
+							</span>
+						</div>
+					{/each}
+				</div>
 			</div>
-		{:else if playerHand}
-			<Hand cards={visiblePlayerCards} label="Player" showTotal={settings.showHandTotal} />
-			<span class="mt-1 text-xs text-gray-400">
-				{playerHand.isSurrendered ? 'Surrendered' : ''}
-				{playerHand.isDoubled ? 'Doubled' : ''}
-			</span>
 		{:else}
 			<div class="flex flex-col items-center gap-2">
 				<span class="text-sm uppercase tracking-widest text-gray-600">Player</span>
@@ -457,3 +468,12 @@
 {/if}
 
 <StrategyChart open={chartOpen} onclose={() => (chartOpen = false)} trueCount={tc} />
+
+<style>
+	.hand-scroll {
+		scrollbar-width: none;
+	}
+	.hand-scroll::-webkit-scrollbar {
+		display: none;
+	}
+</style>
