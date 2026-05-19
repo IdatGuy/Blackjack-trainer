@@ -14,6 +14,7 @@ class SettingsStore {
 	bettingEnabled = $state(true);
 	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('both');
 	showDeviationHints = $state(false);
+	highlightActiveDeviations = $state(true);
 	showHandTotal = $state(false);
 	deckCount = $state<1 | 2 | 4 | 6 | 8>(6);
 	minBet = $state<MinBetOption>(10);
@@ -33,6 +34,9 @@ class SettingsStore {
 					}
 					if (typeof data.showDeviationHints === 'boolean') {
 						this.showDeviationHints = data.showDeviationHints;
+					}
+					if (typeof data.highlightActiveDeviations === 'boolean') {
+						this.highlightActiveDeviations = data.highlightActiveDeviations;
 					}
 					if (typeof data.showHandTotal === 'boolean') {
 						this.showHandTotal = data.showHandTotal;
@@ -82,6 +86,11 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setHighlightActiveDeviations(v: boolean) {
+		this.highlightActiveDeviations = v;
+		this.persist();
+	}
+
 	setShowHandTotal(v: boolean) {
 		this.showHandTotal = v;
 		this.persist();
@@ -114,6 +123,7 @@ class SettingsStore {
 					bettingEnabled: this.bettingEnabled,
 					countDisplay: this.countDisplay,
 					showDeviationHints: this.showDeviationHints,
+					highlightActiveDeviations: this.highlightActiveDeviations,
 					showHandTotal: this.showHandTotal,
 					deckCount: this.deckCount,
 					minBet: this.minBet,

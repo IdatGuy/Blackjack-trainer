@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { DEFAULT_CHART } from '$lib/engine/strategy.js';
 	import type { ChartCell } from '$lib/engine/strategy.js';
+	import { settings } from '$lib/stores/settings.svelte.js';
 
 	let { open, onclose, trueCount = undefined }: { open: boolean; onclose: () => void; trueCount?: number } = $props();
 
 	type Tab = 'hard' | 'soft' | 'pairs' | 'insurance';
 	let activeTab = $state<Tab>('hard');
-	let showAllDeviations = $state(false);
 
 	const UPCARDS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'A'] as const;
 
@@ -114,16 +114,6 @@
 			{/each}
 		</div>
 
-		<!-- Deviation toggle -->
-		<div class="flex items-center justify-end border-b border-gray-800 px-4 py-1.5">
-			<button
-				onclick={() => (showAllDeviations = !showAllDeviations)}
-				class="text-xs font-semibold transition-colors {showAllDeviations ? 'text-amber-400' : 'text-gray-500 hover:text-gray-300'}"
-			>
-				Show deviations
-			</button>
-		</div>
-
 		<!-- Chart body -->
 		<div class="flex-1 overflow-y-auto px-2 py-3">
 			{#if activeTab === 'insurance'}
@@ -214,19 +204,18 @@
 									{@const cell = section[key]?.[up]}
 									{@const devFiring = cell ? activeDeviation(cell, trueCount) : null}
 									{@const hasDev = cell ? hasDeviation(cell) : false}
+									{@const highlighted = devFiring !== null && settings.highlightActiveDeviations}
 									<div class="relative m-0.5 flex h-7 w-7 shrink-0 flex-col items-center justify-center overflow-visible rounded text-[10px] font-bold leading-none
-										{devFiring
+										{highlighted
 											? 'bg-amber-400 text-amber-950 ring-2 ring-amber-500 ring-inset'
 											: cell ? cellClass(cell) : 'bg-gray-800 text-gray-600'}">
 										{#if cell}
 											{devFiring ? actionLabel(devFiring.action) : cellLabel(cell)}
 											{#if devFiring}
 												<span class="text-[8px] leading-none opacity-75">{devFiring.above ? '≥' : '≤'}{devFiring.tc > 0 ? '+' : ''}{devFiring.tc}</span>
-											{:else if hasDev && showAllDeviations}
+											{:else if hasDev}
 												{@const firstDev = cell.deviations![0]}
 												<span class="text-[8px] leading-none text-black/70">{actionLabel(firstDev.action)}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
-											{:else if hasDev}
-												<span class="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-amber-400 shadow-sm"></span>
 											{/if}
 										{/if}
 									</div>
@@ -261,12 +250,6 @@
 					<div class="flex items-center gap-1.5">
 						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-violet-300 text-[10px] font-bold text-violet-950">Xh</span>
 						<span class="text-xs text-gray-400">Surrender or hit</span>
-					</div>
-					<div class="flex items-center gap-1.5">
-						<span class="relative flex h-5 w-7 items-center justify-center overflow-visible rounded-sm bg-rose-300 text-[10px] font-bold text-rose-950">
-							S<span class="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-amber-400 shadow-sm"></span>
-						</span>
-						<span class="text-xs text-gray-400">Has TC deviation</span>
 					</div>
 					<div class="flex items-center gap-1.5">
 						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-amber-400 text-[10px] font-bold text-amber-950 ring-2 ring-amber-500 ring-inset">S</span>
