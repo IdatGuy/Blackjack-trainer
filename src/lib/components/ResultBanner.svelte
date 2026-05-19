@@ -34,7 +34,7 @@
 			{/each}
 		</div>
 
-		{#if game.showFeedback}
+		{#if game.showFeedback && game.actionHistory.length > 0}
 			<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">
 				{#if allCorrect}
 					<span class="font-semibold text-green-300">Perfect play ✓</span>
