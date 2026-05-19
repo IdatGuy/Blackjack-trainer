@@ -13,7 +13,7 @@ class SettingsStore {
 	showFeedback = $state(true);
 	bettingEnabled = $state(true);
 	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('both');
-	showDeviationHints = $state(false);
+	showHintButton = $state(false);
 	highlightActiveDeviations = $state(true);
 	showHandTotal = $state(false);
 	deckCount = $state<1 | 2 | 4 | 6 | 8>(6);
@@ -32,9 +32,8 @@ class SettingsStore {
 					if (['off', 'running', 'true', 'both'].includes(data.countDisplay)) {
 						this.countDisplay = data.countDisplay;
 					}
-					if (typeof data.showDeviationHints === 'boolean') {
-						this.showDeviationHints = data.showDeviationHints;
-					}
+					const hintBtn = data.showHintButton ?? data.showDeviationHints;
+					if (typeof hintBtn === 'boolean') this.showHintButton = hintBtn;
 					if (typeof data.highlightActiveDeviations === 'boolean') {
 						this.highlightActiveDeviations = data.highlightActiveDeviations;
 					}
@@ -81,8 +80,8 @@ class SettingsStore {
 		this.persist();
 	}
 
-	setShowDeviationHints(v: boolean) {
-		this.showDeviationHints = v;
+	setShowHintButton(v: boolean) {
+		this.showHintButton = v;
 		this.persist();
 	}
 
@@ -122,7 +121,7 @@ class SettingsStore {
 					showFeedback: this.showFeedback,
 					bettingEnabled: this.bettingEnabled,
 					countDisplay: this.countDisplay,
-					showDeviationHints: this.showDeviationHints,
+					showHintButton: this.showHintButton,
 					highlightActiveDeviations: this.highlightActiveDeviations,
 					showHandTotal: this.showHandTotal,
 					deckCount: this.deckCount,

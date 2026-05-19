@@ -96,17 +96,17 @@
 				</label>
 				<hr class="border-gray-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
-					<span class="text-sm font-medium text-gray-100">Deviation hints</span>
+					<span class="text-sm font-medium text-gray-100">Show hint button</span>
 					<button
 						role="switch"
-						aria-checked={settings.showDeviationHints}
-						onclick={() => settings.setShowDeviationHints(!settings.showDeviationHints)}
-						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showDeviationHints
+						aria-checked={settings.showHintButton}
+						onclick={() => settings.setShowHintButton(!settings.showHintButton)}
+						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showHintButton
 							? 'bg-green-500'
 							: 'bg-gray-600'}"
 					>
 						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showDeviationHints
+							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showHintButton
 								? 'translate-x-5'
 								: 'translate-x-0'}"
 						></span>

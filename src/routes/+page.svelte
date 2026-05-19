@@ -41,6 +41,8 @@
 		}
 	});
 
+	let insuranceHintUsed = $state(false);
+
 	let showBankroll = $state(true);
 	let menuOpen = $state(false);
 	let chartOpen = $state(false);
@@ -151,12 +153,12 @@
 		isDealerAnimating = false;
 	}
 
-	function handleAction(action: Action) {
-		if (action !== 'P') { game.act(action); return; }
+	function handleAction(action: Action, hintUsed: boolean) {
+		if (action !== 'P') { game.act(action, hintUsed); return; }
 
 		const dur = SPEEDS[settings.animationSpeed] ?? 0;
 		splitHandStartIdx = game.state.activeHandIndex;
-		game.act('P');
+		game.act('P', hintUsed);
 
 		if (dur === 0) return;
 
@@ -374,15 +376,21 @@
 				<div class="flex w-full gap-3">
 					<button
 						class="flex-1 rounded-lg py-3 text-sm font-bold text-white shadow transition-colors bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700
-							{settings.showDeviationHints && insureIsCorrect ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
-						onclick={() => game.takeInsurance()}
+							{insuranceHintUsed && insureIsCorrect ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
+						onclick={() => { game.takeInsurance(insuranceHintUsed); insuranceHintUsed = false; }}
 					>Take Insurance</button>
 					<button
 						class="flex-1 rounded-lg py-3 text-sm font-bold text-white shadow transition-colors bg-gray-600 hover:bg-gray-500 active:bg-gray-700
-							{settings.showDeviationHints && !insureIsCorrect ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
-						onclick={() => game.declineInsurance()}
+							{insuranceHintUsed && !insureIsCorrect ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
+						onclick={() => { game.declineInsurance(insuranceHintUsed); insuranceHintUsed = false; }}
 					>Decline</button>
 				</div>
+				{#if settings.showHintButton && !insuranceHintUsed}
+					<button
+						onclick={() => (insuranceHintUsed = true)}
+						class="rounded-lg border border-gray-600 px-6 py-2 text-xs font-semibold text-gray-400 transition-colors hover:border-gray-500 hover:text-gray-300 active:bg-gray-800"
+					>Hint</button>
+				{/if}
 			</div>
 		{:else if phase === 'player' && !isDealing}
 			<ActionBar onaction={handleAction} />

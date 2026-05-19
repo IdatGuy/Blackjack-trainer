@@ -185,7 +185,7 @@ class GameStore {
 		this._maybeAutoFinish();
 	}
 
-	_logInsuranceDecision(actual: 'I' | 'N') {
+	_logInsuranceDecision(actual: 'I' | 'N', hintUsed = false) {
 		const expected = getInsuranceAction(this.state.shoe);
 		const activeHand = this.state.playerHands[0];
 		const type = handType(activeHand.cards, true);
@@ -211,13 +211,13 @@ class GameStore {
 			expected,
 			actual,
 			correct: expected === actual,
-			hintShown: settings.showDeviationHints && expected === 'I',
+			hintShown: hintUsed,
 			category: 'insurance',
 			betAmount: activeHand.bet
 		});
 	}
 
-	takeInsurance() {
+	takeInsurance(hintUsed = false) {
 		if (this.state.phase !== 'insurance') return;
 		const insAmt = Math.floor(this.state.playerHands[0].bet / 2);
 		this.insuranceBet = insAmt;
@@ -225,15 +225,15 @@ class GameStore {
 			this.bankroll = Math.round((this.bankroll - insAmt) * 100) / 100;
 			this._persistBankroll();
 		}
-		this._logInsuranceDecision('I');
+		this._logInsuranceDecision('I', hintUsed);
 		this.state = resolveInsurance(this.state);
 		this._maybeAutoFinish();
 	}
 
-	declineInsurance() {
+	declineInsurance(hintUsed = false) {
 		if (this.state.phase !== 'insurance') return;
 		this.insuranceBet = 0;
-		this._logInsuranceDecision('N');
+		this._logInsuranceDecision('N', hintUsed);
 		this.state = resolveInsurance(this.state);
 		this._maybeAutoFinish();
 	}
@@ -242,7 +242,7 @@ class GameStore {
 		return getInsuranceAction(this.state.shoe);
 	}
 
-	act(action: Action) {
+	act(action: Action, hintUsed = false) {
 		if (this.state.phase !== 'player') return;
 		const activeHand = this.state.playerHands[this.state.activeHandIndex];
 		const dealerUp = this.state.dealerHand.cards[0];
@@ -292,7 +292,7 @@ class GameStore {
 			expected,
 			actual: action,
 			correct: expected === action,
-			hintShown: settings.showDeviationHints && isDeviation,
+			hintShown: hintUsed,
 			category,
 			betAmount: activeHand.bet
 		});

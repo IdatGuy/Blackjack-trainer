@@ -3,7 +3,7 @@
 	import { game } from '$lib/stores/game.svelte.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
 
-	let { onaction }: { onaction?: (a: Action) => void } = $props();
+	let { onaction }: { onaction?: (a: Action, hintUsed: boolean) => void } = $props();
 
 	const allowed = $derived(game.allowedActions);
 
@@ -33,11 +33,25 @@
 	const topRow = $derived(visible.slice(0, 3));
 	const bottomRow = $derived(visible.slice(3));
 
-	const deviationAction = $derived(
-		settings.showDeviationHints && game.correctAction !== game.baseAction
-			? game.correctAction
-			: null
-	);
+	let hintUsed = $state(false);
+
+	// reset hint when moving to a new split hand
+	$effect(() => {
+		game.state.activeHandIndex;
+		hintUsed = false;
+	});
+
+	const hintAction = $derived(hintUsed ? game.correctAction : null);
+
+	function handleAction(action: Action) {
+		const wasHinted = hintUsed;
+		hintUsed = false;
+		if (onaction) {
+			onaction(action, wasHinted);
+		} else {
+			game.act(action, wasHinted);
+		}
+	}
 </script>
 
 <div class="mx-auto flex w-full max-w-sm flex-col gap-2">
@@ -45,8 +59,8 @@
 		{#each topRow as action}
 			<button
 				class="flex-1 rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}
-					{deviationAction === action ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
-				onclick={() => onaction ? onaction(action) : game.act(action)}
+					{hintAction === action ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
+				onclick={() => handleAction(action)}
 			>
 				{LABELS[action]}
 			</button>
@@ -57,12 +71,22 @@
 			{#each bottomRow as action}
 				<button
 					class="w-1/3 rounded-lg px-4 py-3 text-sm font-bold text-white shadow transition-colors {STYLES[action]}
-						{deviationAction === action ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
-					onclick={() => onaction ? onaction(action) : game.act(action)}
+						{hintAction === action ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
+					onclick={() => handleAction(action)}
 				>
 					{LABELS[action]}
 				</button>
 			{/each}
+		</div>
+	{/if}
+	{#if settings.showHintButton && !hintUsed}
+		<div class="flex justify-center">
+			<button
+				onclick={() => (hintUsed = true)}
+				class="rounded-lg border border-gray-600 px-6 py-2 text-xs font-semibold text-gray-400 transition-colors hover:border-gray-500 hover:text-gray-300 active:bg-gray-800"
+			>
+				Hint
+			</button>
 		</div>
 	{/if}
 </div>
