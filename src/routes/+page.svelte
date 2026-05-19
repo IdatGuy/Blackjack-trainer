@@ -4,13 +4,29 @@
 	import ActionBar from '$lib/components/ActionBar.svelte';
 	import BetInput from '$lib/components/BetInput.svelte';
 	import Hand from '$lib/components/Hand.svelte';
-	import ResultBanner from '$lib/components/ResultBanner.svelte';
 	import StrategyChart from '$lib/components/StrategyChart.svelte';
+	import type { HandResult } from '$lib/engine/game.js';
 	import { handValue, isBust } from '$lib/engine/hand.js';
 	import { trueCount } from '$lib/engine/shoe.js';
 	import { game } from '$lib/stores/game.svelte.js';
 	import type { Action } from '$lib/engine/rules.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
+
+	const OUTCOME_TEXT: Record<HandResult, string> = {
+		win: 'You Win',
+		blackjack: 'Blackjack!',
+		push: 'Push',
+		loss: 'You Lose',
+		surrender: 'Surrendered'
+	};
+
+	const OUTCOME_COLOR: Record<HandResult, string> = {
+		win: 'text-white',
+		blackjack: 'text-white',
+		push: 'text-white',
+		loss: 'text-white',
+		surrender: 'text-white'
+	};
 
 	const SPEEDS = [0, 80, 160, 250, 400, 600];
 
@@ -30,15 +46,12 @@
 	const isMultiHand = $derived(playerHands.length > 1);
 
 	const activeHand = $derived(playerHands[activeIndex]);
-	const activeBust = $derived(activeHand ? isBust(activeHand.cards) : false);
 
 	let handEls: (HTMLElement | null)[] = $state([]);
 
 	$effect(() => {
 		const el = handEls[activeIndex];
-		if (el && playerHands.length > 1) {
-			el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-		}
+		if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 	});
 
 	let insuranceHintUsed = $state(false);
@@ -394,11 +407,7 @@
 			</div>
 		{:else if phase === 'player' && !isDealing}
 			<ActionBar onaction={handleAction} />
-			{#if activeBust}
-				<span class="text-sm font-bold text-red-400">Bust!</span>
-			{/if}
 		{:else if phase === 'resolution'}
-			<ResultBanner />
 			<button
 				class="rounded-xl bg-yellow-500 px-8 py-3 text-base font-bold text-gray-900 shadow-lg hover:bg-yellow-400 active:bg-yellow-600"
 				onclick={() => { cancelDealerAnimation(); game.nextHand(); }}
@@ -411,17 +420,63 @@
 	<!-- Player area -->
 	<div class="flex flex-1 flex-col items-center justify-center py-6">
 		{#if playerHands.length > 0}
+			{#if playerHands.length > 1}
+				<div class="flex justify-center gap-1.5 pb-2">
+					{#each playerHands as _, i}
+						<button
+							onclick={() => handEls[i]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })}
+							class="h-2 w-2 rounded-full transition-colors {i === activeIndex ? 'bg-white' : 'bg-gray-600'}"
+							aria-label="Hand {i + 1}"
+						></button>
+					{/each}
+				</div>
+			{/if}
 			<div
 				class="hand-scroll w-full overflow-x-auto"
 				in:fly={{ y: -12, duration: animDuration }}
 			>
-				<div class="flex items-start gap-4" style="padding-inline: calc(50% - 6rem)">
+				<div class="flex items-start gap-4" style="padding-left: calc(50% - 6rem)">
 					{#each playerHands as hand, i}
+						{@const lastAct = game.lastActionFor(i)}
+						{@const resolved = game.lastResults[i]}
 						<div
 							bind:this={handEls[i]}
 							class="flex w-48 flex-shrink-0 flex-col items-center gap-1 transition-all
-								{hand.isResolved ? 'opacity-50' : ''}"
+								{hand.isResolved && phase === 'player' ? 'opacity-50' : ''}"
+							style="scroll-snap-align: center"
 						>
+							<!-- per-hand badge -->
+							<div class="flex w-full flex-col items-center gap-1 pb-1">
+								{#if phase === 'resolution' && resolved}
+									<span class="text-2xl font-bold {OUTCOME_COLOR[resolved.result]}">{OUTCOME_TEXT[resolved.result]}</span>
+									{#if game.showFeedback}
+										{@const actionsForHand = game.actionHistory.filter(r => r.handIndex === i)}
+										{@const allOk = actionsForHand.length > 0 && actionsForHand.every(r => r.correct)}
+										{@const wrong = actionsForHand.filter(r => !r.correct)}
+										{#if actionsForHand.length > 0}
+											<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">
+												{#if allOk}
+													<span class="font-semibold text-green-300">Perfect play ✓</span>
+												{:else}
+													<div class="flex flex-col gap-1">
+														{#each wrong as record}
+															<span class="text-red-300">{game.feedbackFor(record)}</span>
+														{/each}
+													</div>
+												{/if}
+											</div>
+										{/if}
+									{/if}
+								{:else if hand.isSurrendered}
+									<span class="text-xs text-gray-400">Surrendered</span>
+								{:else if isBust(hand.cards)}
+									<span class="text-sm font-bold text-red-400">Bust!</span>
+								{:else if lastAct && !lastAct.correct && phase === 'player'}
+									<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">
+										<span class="text-red-300">{game.shortFeedbackFor(lastAct)}</span>
+									</div>
+								{/if}
+							</div>
 							<div class="rounded-xl p-1 transition-all
 								{i === activeIndex && phase === 'player'
 									? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950'
@@ -435,11 +490,10 @@
 									showTotal={settings.showHandTotal}
 								/>
 							</div>
-							<span class="text-[10px] text-gray-400">
-								{hand.isSurrendered ? 'Surrendered' : hand.isDoubled ? 'Doubled' : ''}
-							</span>
 						</div>
 					{/each}
+					<!-- spacer forces trailing scroll room so last hand can reach center -->
+					<div style="flex-shrink: 0; width: calc(50% - 6rem)"></div>
 				</div>
 			</div>
 		{:else}
@@ -480,6 +534,8 @@
 <style>
 	.hand-scroll {
 		scrollbar-width: none;
+		scroll-snap-type: x mandatory;
+		-webkit-overflow-scrolling: touch;
 	}
 	.hand-scroll::-webkit-scrollbar {
 		display: none;

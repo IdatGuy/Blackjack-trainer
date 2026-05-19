@@ -25,6 +25,7 @@ export type ActionRecord = {
 	actual: Action;
 	correct: boolean;
 	handDesc: string; // e.g. "hard 16 vs 10"
+	handIndex: number;
 };
 
 type PendingDecision = Omit<DecisionRecord, 'id' | 'outcomeChips' | 'bankrollTracked' | 'handResult'>;
@@ -193,7 +194,8 @@ class GameStore {
 			expected,
 			actual,
 			correct: expected === actual,
-			handDesc: 'insurance vs A'
+			handDesc: 'insurance vs A',
+			handIndex: 0
 		};
 		this.actionHistory = [...this.actionHistory, record];
 		this._pending.push({
@@ -263,7 +265,8 @@ class GameStore {
 			expected,
 			actual: action,
 			correct: expected === action,
-			handDesc
+			handDesc,
+			handIndex: this.state.activeHandIndex
 		};
 		this.actionHistory = [...this.actionHistory, record];
 
@@ -383,6 +386,16 @@ class GameStore {
 	feedbackFor(record: ActionRecord): string {
 		if (record.correct) return '';
 		return `You ${ACTION_PAST[record.actual]} — should have ${ACTION_INF[record.expected]} (${record.handDesc})`;
+	}
+
+	lastActionFor(handIndex: number): ActionRecord | null {
+		const actions = this.actionHistory.filter(r => r.handIndex === handIndex);
+		return actions.at(-1) ?? null;
+	}
+
+	shortFeedbackFor(record: ActionRecord): string {
+		if (record.correct) return '';
+		return `Should ${ACTION_INF[record.expected]}`;
 	}
 
 	get dealerShouldDraw(): boolean {
