@@ -13,6 +13,7 @@
 		type CellDetail
 	} from '$lib/db/accuracy.js';
 	import { filterSince } from '$lib/db/queries.js';
+	import { clearDecisions } from '$lib/db/index.js';
 	import HeatmapGrid from '$lib/components/accuracy/HeatmapGrid.svelte';
 	import DeviationList from '$lib/components/accuracy/DeviationList.svelte';
 	import type { DeviationEntry } from '$lib/components/accuracy/DeviationList.svelte';
@@ -116,6 +117,30 @@
 	let categoryStats = $state<CategoryStat[]>([]);
 	let deviationAccuracy = $state(new Map<string, CellAccuracy>());
 
+	let showResetWarning = $state(false);
+
+	async function handleReset() {
+		await clearDecisions();
+		showResetWarning = false;
+		const since = filterSince(timeFilter);
+		if (activeTab === 'hard') {
+			heatmapData = {};
+			getHeatmapData('hard', since).then((d) => (heatmapData = d));
+		} else if (activeTab === 'soft') {
+			heatmapData = {};
+			getHeatmapData('soft', since).then((d) => (heatmapData = d));
+		} else if (activeTab === 'pairs') {
+			heatmapData = {};
+			getHeatmapData('pair', since).then((d) => (heatmapData = d));
+		} else if (activeTab === 'deviations') {
+			deviationAccuracy = new Map();
+			getDeviationAccuracy(since).then((m) => (deviationAccuracy = m));
+		} else {
+			categoryStats = [];
+			getCategoryStats(since).then((s) => (categoryStats = s));
+		}
+	}
+
 	// Cell detail sheet
 	let detailCell = $state<{ handType: 'hard' | 'soft' | 'pair'; playerKey: string; dealerUp: string } | null>(null);
 	let detailData = $state<CellDetail | null>(null);
@@ -197,7 +222,13 @@
 		>
 			←
 		</button>
-		<span class="text-base font-semibold text-white">Accuracy</span>
+		<span class="flex-1 text-base font-semibold text-white">Accuracy</span>
+		<button
+			onclick={() => (showResetWarning = true)}
+			class="rounded-md px-2.5 py-1 text-xs font-semibold text-red-400 hover:bg-red-400/10 active:bg-red-400/20"
+		>
+			Reset
+		</button>
 	</header>
 
 	<!-- Tab bar -->
@@ -274,6 +305,30 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Reset warning bottom sheet -->
+{#if showResetWarning}
+	<button class="fixed inset-0 z-40 bg-black/50" onclick={() => (showResetWarning = false)} aria-label="Cancel"></button>
+	<div class="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-gray-900 px-4 pb-8 pt-4 shadow-xl">
+		<div class="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20"></div>
+		<h3 class="mb-2 text-base font-semibold text-white">Reset Accuracy Data</h3>
+		<p class="mb-6 text-sm text-white/60">This will permanently delete all accuracy history. This cannot be undone.</p>
+		<div class="flex gap-3">
+			<button
+				onclick={() => (showResetWarning = false)}
+				class="flex-1 rounded-lg bg-white/10 py-3 text-sm font-semibold text-white hover:bg-white/15"
+			>
+				Cancel
+			</button>
+			<button
+				onclick={handleReset}
+				class="flex-1 rounded-lg bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-500"
+			>
+				Reset
+			</button>
+		</div>
+	</div>
+{/if}
 
 <!-- Cell detail bottom sheet -->
 {#if detailCell}

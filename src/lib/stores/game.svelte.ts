@@ -94,6 +94,11 @@ class GameStore {
 		if (browser) localStorage.setItem('bj-bankroll', String(this.bankroll));
 	}
 
+	resetBankroll() {
+		this.bankroll = 1000;
+		this._persistBankroll();
+	}
+
 	_setFlash(delta: number) {
 		if (!browser) return;
 		if (this._flashTimer) clearTimeout(this._flashTimer);

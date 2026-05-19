@@ -19,3 +19,8 @@ export function getDb() {
 	}
 	return dbPromise;
 }
+
+export async function clearDecisions(): Promise<void> {
+	const db = await getDb();
+	await db.clear('decisions');
+}
