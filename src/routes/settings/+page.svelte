@@ -78,6 +78,24 @@
 				</div>
 				<hr class="border-gray-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
+					<span class="text-sm font-medium text-gray-100">Show hand total</span>
+					<button
+						role="switch"
+						aria-checked={settings.showHandTotal}
+						onclick={() => settings.setShowHandTotal(!settings.showHandTotal)}
+						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showHandTotal
+							? 'bg-green-500'
+							: 'bg-gray-600'}"
+					>
+						<span
+							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showHandTotal
+								? 'translate-x-5'
+								: 'translate-x-0'}"
+						></span>
+					</button>
+				</label>
+				<hr class="border-gray-800" />
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Deviation hints</span>
 					<button
 						role="switch"

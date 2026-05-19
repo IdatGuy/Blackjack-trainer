@@ -8,6 +8,8 @@ class SettingsStore {
 	bettingEnabled = $state(true);
 	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('off');
 	showDeviationHints = $state(false);
+	showHandTotal = $state(false);
+	deckCount = $state<1 | 2 | 4 | 6 | 8>(6);
 
 	constructor() {
 		if (browser) {
@@ -23,6 +25,12 @@ class SettingsStore {
 					}
 					if (typeof data.showDeviationHints === 'boolean') {
 						this.showDeviationHints = data.showDeviationHints;
+					}
+					if (typeof data.showHandTotal === 'boolean') {
+						this.showHandTotal = data.showHandTotal;
+					}
+					if ([1, 2, 4, 6, 8].includes(data.deckCount)) {
+						this.deckCount = data.deckCount;
 					}
 				} catch {
 					/* ignore malformed */
@@ -60,6 +68,16 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setShowHandTotal(v: boolean) {
+		this.showHandTotal = v;
+		this.persist();
+	}
+
+	setDeckCount(v: 1 | 2 | 4 | 6 | 8) {
+		this.deckCount = v;
+		this.persist();
+	}
+
 	private persist() {
 		if (browser) {
 			localStorage.setItem(
@@ -69,7 +87,9 @@ class SettingsStore {
 					showFeedback: this.showFeedback,
 					bettingEnabled: this.bettingEnabled,
 					countDisplay: this.countDisplay,
-					showDeviationHints: this.showDeviationHints
+					showDeviationHints: this.showDeviationHints,
+					showHandTotal: this.showHandTotal,
+					deckCount: this.deckCount
 				})
 			);
 		}

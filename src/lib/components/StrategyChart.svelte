@@ -78,7 +78,7 @@
 	></button>
 
 	<!-- Panel -->
-	<div class="fixed inset-x-2 bottom-0 top-14 z-50 flex flex-col overflow-hidden rounded-t-2xl bg-gray-950 shadow-2xl">
+	<div class="fixed bottom-0 top-14 left-1/2 z-50 flex w-[calc(100%-1rem)] max-w-[420px] -translate-x-1/2 flex-col overflow-hidden rounded-t-2xl bg-gray-950 shadow-2xl">
 		<!-- Header -->
 		<div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
 			<span class="text-base font-bold text-green-400">Strategy Chart</span>

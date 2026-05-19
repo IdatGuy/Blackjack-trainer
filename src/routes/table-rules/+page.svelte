@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { game } from '$lib/stores/game.svelte.js';
+	import { settings } from '$lib/stores/settings.svelte.js';
+
+	const DECK_OPTIONS = [1, 2, 4, 6, 8] as const;
+
+	function selectDecks(n: 1 | 2 | 4 | 6 | 8) {
+		settings.setDeckCount(n);
+		game.reshuffle();
+	}
 </script>
 
 <div class="flex h-full flex-col">
@@ -14,7 +23,27 @@
 		<span class="text-base font-semibold text-white">Table Rules</span>
 	</header>
 
-	<div class="flex flex-1 items-center justify-center">
-		<p class="text-sm text-gray-500">Coming soon</p>
+	<div class="flex-1 overflow-y-auto px-4 py-4">
+		<div class="mb-6">
+			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Shoe</p>
+			<div class="overflow-hidden rounded-xl bg-gray-900 px-4 py-3.5">
+				<div class="mb-3 flex items-center justify-between">
+					<span class="text-sm font-medium text-gray-100">Decks</span>
+					<span class="text-xs text-gray-500">{settings.deckCount * 52} cards</span>
+				</div>
+				<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+					{#each DECK_OPTIONS as n}
+						<button
+							onclick={() => selectDecks(n)}
+							class="flex-1 rounded-md py-1.5 text-sm font-semibold transition-colors
+								{settings.deckCount === n
+									? 'bg-white text-gray-900'
+									: 'text-gray-400 hover:text-gray-200'}"
+						>{n}</button>
+					{/each}
+				</div>
+				<p class="mt-2 text-[11px] text-gray-600">Changing decks reshuffles the shoe</p>
+			</div>
+		</div>
 	</div>
 </div>

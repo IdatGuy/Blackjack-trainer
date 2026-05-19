@@ -32,7 +32,7 @@
 	const activeHand = $derived(playerHands[activeIndex]);
 	const activeBust = $derived(activeHand ? isBust(activeHand.cards) : false);
 
-	let showBankroll = $state(false);
+	let showBankroll = $state(true);
 	let menuOpen = $state(false);
 	let chartOpen = $state(false);
 	let addFundsOpen = $state(false);
@@ -367,7 +367,7 @@
 							cards={isSplitting && i < splitVisibleCounts.length
 								? hand.cards.slice(0, splitVisibleCounts[i])
 								: hand.cards}
-							showTotal={true}
+							showTotal={settings.showHandTotal}
 						/>
 						<span class="text-[10px] text-gray-400">
 							{hand.isSurrendered ? 'Surrendered' : hand.isDoubled ? 'Doubled' : ''}
@@ -376,7 +376,7 @@
 				{/each}
 			</div>
 		{:else if playerHand}
-			<Hand cards={visiblePlayerCards} label="Player" showTotal={true} />
+			<Hand cards={visiblePlayerCards} label="Player" showTotal={settings.showHandTotal} />
 			<span class="mt-1 text-xs text-gray-400">
 				{playerHand.isSurrendered ? 'Surrendered' : ''}
 				{playerHand.isDoubled ? 'Doubled' : ''}

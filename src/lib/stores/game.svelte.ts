@@ -12,7 +12,7 @@ import {
 } from '$lib/engine/game.js';
 import { handKey, handType, handValue, makeHand } from '$lib/engine/hand.js';
 import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
-import { dealCard, resetShoe, shouldReshuffle, trueCount } from '$lib/engine/shoe.js';
+import { buildShoe, dealCard, resetShoe, shouldReshuffle, trueCount } from '$lib/engine/shoe.js';
 import { getBaseAction, getCorrectAction } from '$lib/engine/strategy.js';
 import { browser } from '$app/environment';
 import { saveDecisions } from '$lib/db/persist.js';
@@ -195,7 +195,8 @@ class GameStore {
 	reshuffle() {
 		this.state = {
 			...this.state,
-			shoe: resetShoe(this.state.shoe),
+			shoe: buildShoe(settings.deckCount),
+			rules: { ...this.state.rules, decks: settings.deckCount },
 			phase: 'betting',
 			playerHands: [],
 			dealerHand: makeHand([], 0),
