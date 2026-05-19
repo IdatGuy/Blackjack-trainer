@@ -12,7 +12,9 @@
 		S: 'Stand',
 		D: 'Double',
 		P: 'Split',
-		R: 'Surrender'
+		R: 'Surrender',
+		I: 'Take Insurance',
+		N: 'Decline'
 	};
 
 	const STYLES: Record<Action, string> = {
@@ -20,7 +22,9 @@
 		S: 'bg-red-700 hover:bg-red-600 active:bg-red-800',
 		D: 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700',
 		P: 'bg-purple-600 hover:bg-purple-500 active:bg-purple-700',
-		R: 'bg-gray-600 hover:bg-gray-500 active:bg-gray-700'
+		R: 'bg-gray-600 hover:bg-gray-500 active:bg-gray-700',
+		I: 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700',
+		N: 'bg-gray-600 hover:bg-gray-500 active:bg-gray-700'
 	};
 
 	// ordered display sequence

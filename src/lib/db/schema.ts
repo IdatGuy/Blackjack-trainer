@@ -20,7 +20,7 @@ export type DecisionRecord = {
 	actual: Action;
 	correct: boolean;
 	hintShown: boolean;
-	category: 'hit-stand' | 'double' | 'split' | 'surrender' | 'deviation';
+	category: 'hit-stand' | 'double' | 'split' | 'surrender' | 'deviation' | 'insurance';
 	handResult: HandResult;
 	betAmount: number;
 	outcomeChips: number;

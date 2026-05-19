@@ -2,7 +2,7 @@ import type { Card } from './card.js';
 import type { Hand } from './hand.js';
 import { handValue, isPair, isSoft } from './hand.js';
 
-export type Action = 'H' | 'S' | 'D' | 'P' | 'R'; // hit/stand/double/split/surrender
+export type Action = 'H' | 'S' | 'D' | 'P' | 'R' | 'I' | 'N'; // hit/stand/double/split/surrender/insurance/no-insurance
 
 export type RuleSet = {
 	id: string;

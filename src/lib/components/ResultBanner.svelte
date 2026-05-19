@@ -33,6 +33,11 @@
 				</span>
 			{/each}
 		</div>
+		{#if game.insuranceBet > 0}
+			<span class="text-xs font-semibold {game.insuranceResult === 'win' ? 'text-green-400' : 'text-red-400'}">
+				Insurance {game.insuranceResult === 'win' ? `+$${game.insuranceBet * 2}` : `-$${game.insuranceBet}`}
+			</span>
+		{/if}
 
 		{#if game.showFeedback && game.actionHistory.length > 0}
 			<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">

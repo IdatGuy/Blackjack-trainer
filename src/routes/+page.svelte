@@ -330,14 +330,14 @@
 	<div class="flex flex-1 flex-col items-center justify-center py-6">
 		<Hand
 			cards={visibleDealerCards}
-			hideSecond={phase === 'player'}
+			hideSecond={phase === 'player' || phase === 'insurance'}
 			label="Dealer"
-			showTotal={phase !== 'player'}
+			showTotal={phase !== 'player' && phase !== 'insurance'}
 		/>
 	</div>
 
 	<!-- Center action zone (fixed height) -->
-	<div class="flex w-full min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4 {phase === 'betting' || (phase === 'player' && !isDealing) || phase === 'resolution' ? 'bg-black/20 border-t border-b border-white/10' : ''}">
+	<div class="flex w-full min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4 {phase === 'betting' || (phase === 'player' && !isDealing) || phase === 'insurance' || phase === 'resolution' ? 'bg-black/20 border-t border-b border-white/10' : ''}">
 		{#if phase === 'betting'}
 			{#if settings.bettingEnabled}
 				<BetInput ondeal={handleDeal} />
@@ -349,6 +349,26 @@
 					Deal
 				</button>
 			{/if}
+		{:else if phase === 'insurance'}
+			{@const insureIsCorrect = game.correctInsuranceAction === 'I'}
+			<div class="flex flex-col items-center gap-3 text-center">
+				<div>
+					<p class="text-sm font-semibold text-white">Dealer shows Ace</p>
+					<p class="text-xs text-gray-400">Insurance costs half your bet (${Math.floor(game.state.playerHands[0]?.bet / 2)})</p>
+				</div>
+				<div class="flex w-full gap-3">
+					<button
+						class="flex-1 rounded-lg py-3 text-sm font-bold text-white shadow transition-colors bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700
+							{settings.showDeviationHints && insureIsCorrect ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
+						onclick={() => game.takeInsurance()}
+					>Take Insurance</button>
+					<button
+						class="flex-1 rounded-lg py-3 text-sm font-bold text-white shadow transition-colors bg-gray-600 hover:bg-gray-500 active:bg-gray-700
+							{settings.showDeviationHints && !insureIsCorrect ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
+						onclick={() => game.declineInsurance()}
+					>Decline</button>
+				</div>
+			</div>
 		{:else if phase === 'player' && !isDealing}
 			<ActionBar onaction={handleAction} />
 			{#if activeBust}

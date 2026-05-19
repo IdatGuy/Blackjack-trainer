@@ -3,7 +3,7 @@ import { type Hand, handValue, isBlackjack, isBust, makeHand } from './hand.js';
 import { type RuleSet, dealerShouldHit, DEFAULT_RULESET } from './rules.js';
 import { buildShoe, dealCard, type Shoe } from './shoe.js';
 
-export type GamePhase = 'betting' | 'dealing' | 'player' | 'dealer' | 'resolution';
+export type GamePhase = 'betting' | 'dealing' | 'player' | 'dealer' | 'resolution' | 'insurance';
 
 export type HandResult = 'win' | 'loss' | 'push' | 'blackjack' | 'surrender';
 
@@ -70,17 +70,19 @@ export function dealHand(state: GameState, bets: number[]): GameState {
 	const playerHands = bets.map((bet, i) => makeHand(playerCards[i], bet));
 	const dealerHand = makeHand(dealerCards, 0);
 
-	// Check for dealer blackjack (if peek rule, game skips to resolution)
+	const dealerUpIsAce = dealerCards[0].rank === 'A';
 	const dealerBJ = isBlackjack(dealerCards);
 	const allPlayerBJ = playerHands.every((h) => isBlackjack(h.cards));
 
-	let phase: GamePhase = 'player';
-	if (dealerBJ) {
-		// Peek: if dealer has BJ, skip to resolution immediately
+	let phase: GamePhase;
+	if (dealerUpIsAce && state.rules.peek) {
+		phase = 'insurance'; // offer insurance before peeking at hole card
+	} else if (dealerBJ) {
 		phase = state.rules.peek ? 'resolution' : 'dealer';
-	}
-	if (allPlayerBJ && !dealerBJ) {
-		phase = 'resolution'; // all players have BJ, dealer doesn't
+	} else if (allPlayerBJ) {
+		phase = 'resolution';
+	} else {
+		phase = 'player';
 	}
 
 	return {
@@ -110,6 +112,14 @@ function advanceActive(state: GameState): GameState {
 		return { ...state, phase: 'dealer' };
 	}
 	return { ...state, activeHandIndex: next };
+}
+
+export function resolveInsurance(state: GameState): GameState {
+	if (state.phase !== 'insurance') throw new Error('Not in insurance phase');
+	const dealerBJ = isBlackjack(state.dealerHand.cards);
+	const allPlayerBJ = state.playerHands.every((h) => isBlackjack(h.cards));
+	const phase: GamePhase = (dealerBJ || allPlayerBJ) ? 'resolution' : 'player';
+	return { ...state, phase };
 }
 
 export function hit(state: GameState): GameState {

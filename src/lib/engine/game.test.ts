@@ -8,6 +8,7 @@ import {
 	initialState,
 	playDealer,
 	resolveHands,
+	resolveInsurance,
 	stand,
 	double,
 	surrender,
@@ -51,7 +52,10 @@ describe('dealHand', () => {
 		]);
 		const state = { ...initialState(), shoe };
 		const next = dealHand(state, [10]);
-		expect(next.phase).toBe('resolution');
+		// Insurance is offered first when dealer shows Ace; resolveInsurance transitions to resolution
+		expect(next.phase).toBe('insurance');
+		const afterInsurance = resolveInsurance(next);
+		expect(afterInsurance.phase).toBe('resolution');
 	});
 
 	it('enters resolution on player BJ (dealer no BJ)', () => {

@@ -257,6 +257,10 @@ function mergeSection(
 	return result;
 }
 
+export function getInsuranceAction(shoe: Shoe): 'I' | 'N' {
+	return trueCount(shoe) >= 3 ? 'I' : 'N';
+}
+
 // Re-export for convenience
 import { handValue } from './hand.js';
 export { DEFAULT_CHART };

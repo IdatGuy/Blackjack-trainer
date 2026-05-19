@@ -4,16 +4,17 @@ import {
 	hit,
 	initialState,
 	resolveHands,
+	resolveInsurance,
 	split,
 	stand,
 	surrender,
 	type HandResult,
 	type ResolvedHand
 } from '$lib/engine/game.js';
-import { handKey, handType, handValue, makeHand } from '$lib/engine/hand.js';
+import { handKey, handType, handValue, isBlackjack, makeHand } from '$lib/engine/hand.js';
 import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
 import { buildShoe, dealCard, resetShoe, shouldReshuffle, trueCount } from '$lib/engine/shoe.js';
-import { getBaseAction, getCorrectAction } from '$lib/engine/strategy.js';
+import { getBaseAction, getCorrectAction, getInsuranceAction } from '$lib/engine/strategy.js';
 import { browser } from '$app/environment';
 import { saveDecisions } from '$lib/db/persist.js';
 import type { DecisionRecord } from '$lib/db/schema.js';
@@ -33,7 +34,9 @@ const ACTION_PAST: Record<Action, string> = {
 	S: 'stood',
 	D: 'doubled',
 	P: 'split',
-	R: 'surrendered'
+	R: 'surrendered',
+	I: 'took insurance',
+	N: 'declined insurance'
 };
 
 const ACTION_INF: Record<Action, string> = {
@@ -41,7 +44,9 @@ const ACTION_INF: Record<Action, string> = {
 	S: 'stand',
 	D: 'double',
 	P: 'split',
-	R: 'surrender'
+	R: 'surrender',
+	I: 'take insurance',
+	N: 'decline insurance'
 };
 
 function rankLabel(rank: string): string {
@@ -81,6 +86,8 @@ class GameStore {
 	_flashTimer: ReturnType<typeof setTimeout> | null = null;
 	sessionId = $state(browser ? generateId() : 'ssr');
 	handId = $state('');
+	insuranceBet = $state(0);
+	insuranceResult = $state<'win' | 'loss' | null>(null);
 	_pending: PendingDecision[] = [];
 
 	_persistBankroll() {
@@ -100,6 +107,15 @@ class GameStore {
 
 	_applyResolution(results: ResolvedHand[]) {
 		this.lastResults = results;
+		const dealerHadBJ = isBlackjack(this.state.dealerHand.cards);
+		if (this.insuranceBet > 0) {
+			this.insuranceResult = dealerHadBJ ? 'win' : 'loss';
+			if (settings.bettingEnabled && dealerHadBJ) {
+				// 2:1 payout; insuranceBet was already deducted, so return bet + profit
+				this.bankroll = Math.round((this.bankroll + this.insuranceBet * 3) * 100) / 100;
+				this._persistBankroll();
+			}
+		}
 		if (settings.bettingEnabled) {
 			let totalReturn = 0;
 			let displayFlash = 0;
@@ -119,12 +135,24 @@ class GameStore {
 	_flushDecisions(results: ResolvedHand[]) {
 		if (this._pending.length === 0) return;
 		const bankrollTracked = settings.bettingEnabled;
-		const completed: DecisionRecord[] = this._pending.map((pd) => ({
-			...pd,
-			outcomeChips: bankrollTracked ? (results[pd.handIndex]?.netChips ?? 0) : 0,
-			bankrollTracked,
-			handResult: (results[pd.handIndex]?.result ?? 'loss') as HandResult
-		}));
+		const completed: DecisionRecord[] = this._pending.map((pd) => {
+			if (pd.category === 'insurance') {
+				return {
+					...pd,
+					outcomeChips: bankrollTracked
+						? (this.insuranceResult === 'win' ? this.insuranceBet * 2 : -this.insuranceBet)
+						: 0,
+					bankrollTracked,
+					handResult: (this.insuranceResult === 'win' ? 'win' : 'loss') as HandResult
+				};
+			}
+			return {
+				...pd,
+				outcomeChips: bankrollTracked ? (results[pd.handIndex]?.netChips ?? 0) : 0,
+				bankrollTracked,
+				handResult: (results[pd.handIndex]?.result ?? 'loss') as HandResult
+			};
+		});
 		this._pending = [];
 		if (browser) saveDecisions(completed);
 	}
@@ -135,6 +163,8 @@ class GameStore {
 		this.actionHistory = [];
 		this.lastResults = [];
 		this._pending = [];
+		this.insuranceBet = 0;
+		this.insuranceResult = null;
 		const now = Date.now();
 		this.handId = `${this.sessionId}-${now}`;
 		if (browser) {
@@ -148,6 +178,63 @@ class GameStore {
 		}
 		this.state = dealHand(this.state, [this.betAmount]);
 		this._maybeAutoFinish();
+	}
+
+	_logInsuranceDecision(actual: 'I' | 'N') {
+		const expected = getInsuranceAction(this.state.shoe);
+		const activeHand = this.state.playerHands[0];
+		const type = handType(activeHand.cards, true);
+		const record: ActionRecord = {
+			expected,
+			actual,
+			correct: expected === actual,
+			handDesc: 'insurance vs A'
+		};
+		this.actionHistory = [...this.actionHistory, record];
+		this._pending.push({
+			timestamp: Date.now(),
+			sessionId: this.sessionId,
+			handId: this.handId,
+			handIndex: 0,
+			ruleSetId: this.state.rules.id,
+			mode: 'standard',
+			playMode: 'shoe',
+			handType: type,
+			playerTotal: handValue(activeHand.cards),
+			dealerUp: 'A',
+			trueCount: trueCount(this.state.shoe),
+			expected,
+			actual,
+			correct: expected === actual,
+			hintShown: settings.showDeviationHints && expected === 'I',
+			category: 'insurance',
+			betAmount: activeHand.bet
+		});
+	}
+
+	takeInsurance() {
+		if (this.state.phase !== 'insurance') return;
+		const insAmt = Math.floor(this.state.playerHands[0].bet / 2);
+		this.insuranceBet = insAmt;
+		if (settings.bettingEnabled && insAmt > 0) {
+			this.bankroll = Math.round((this.bankroll - insAmt) * 100) / 100;
+			this._persistBankroll();
+		}
+		this._logInsuranceDecision('I');
+		this.state = resolveInsurance(this.state);
+		this._maybeAutoFinish();
+	}
+
+	declineInsurance() {
+		if (this.state.phase !== 'insurance') return;
+		this.insuranceBet = 0;
+		this._logInsuranceDecision('N');
+		this.state = resolveInsurance(this.state);
+		this._maybeAutoFinish();
+	}
+
+	get correctInsuranceAction(): 'I' | 'N' {
+		return getInsuranceAction(this.state.shoe);
 	}
 
 	act(action: Action) {
@@ -227,6 +314,8 @@ class GameStore {
 		this.lastResults = [];
 		this.actionHistory = [];
 		this._pending = [];
+		this.insuranceBet = 0;
+		this.insuranceResult = null;
 		// betAmount intentionally preserved — defaults to last bet
 	}
 
