@@ -73,8 +73,8 @@
 <style>
 	.card-flipper {
 		position: relative;
-		width: 96px;
-		height: 140px;
+		width: var(--card-w, 96px);
+		height: var(--card-h, 140px);
 		flex-shrink: 0;
 		transform-style: preserve-3d;
 		transition: transform var(--flip-ms, 250ms) ease;

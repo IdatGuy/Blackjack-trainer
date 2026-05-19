@@ -36,7 +36,7 @@
 	);
 </script>
 
-<div class="flex w-full flex-col gap-2">
+<div class="mx-auto flex w-full max-w-sm flex-col gap-2">
 	<div class="flex gap-2">
 		{#each topRow as action}
 			<button

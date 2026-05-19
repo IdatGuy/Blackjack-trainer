@@ -414,7 +414,7 @@
 		aria-label="Close"
 	></button>
 	<!-- Panel -->
-	<div class="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-gray-900 px-6 pb-8 pt-5 shadow-2xl">
+	<div class="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-2xl bg-gray-900 px-6 pb-8 pt-5 shadow-2xl">
 		<p class="mb-4 text-center text-sm font-semibold tracking-widest text-white">Add Funds</p>
 		<div class="flex items-center justify-center gap-4">
 			{#each ADD_FUND_CHIPS as chip}

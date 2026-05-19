@@ -33,12 +33,12 @@
 
 	<div class="flex items-end justify-center">
 		{#each cards as card, i (i)}
-			<div class="-ml-16 first:ml-0" in:fly={{ y: -20, duration: animDuration }}>
+			<div class="card-offset" in:fly={{ y: -20, duration: animDuration }}>
 				<CardComp {card} faceDown={hideSecond && i === 1} />
 			</div>
 		{/each}
 		{#if cards.length === 0}
-			<div class="h-[140px] w-[96px]"></div>
+			<div style="height: var(--card-h, 140px); width: var(--card-w, 96px)"></div>
 		{/if}
 	</div>
 
@@ -54,3 +54,12 @@
 		</span>
 	{/if}
 </div>
+
+<style>
+	.card-offset {
+		margin-left: calc(-1 * var(--card-overlap, 64px));
+	}
+	.card-offset:first-child {
+		margin-left: 0;
+	}
+</style>
