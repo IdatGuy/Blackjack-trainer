@@ -210,12 +210,10 @@
 											? 'bg-amber-400 text-amber-950 ring-2 ring-amber-500 ring-inset'
 											: cell ? cellClass(cell) : 'bg-gray-800 text-gray-600'}">
 										{#if cell}
-											{devFiring ? actionLabel(devFiring.action) : cellLabel(cell)}
-											{#if devFiring}
-												<span class="text-[8px] leading-none opacity-75">{devFiring.above ? '≥' : '≤'}{devFiring.tc > 0 ? '+' : ''}{devFiring.tc}</span>
-											{:else if hasDev}
+											{cellLabel(cell)}
+											{#if hasDev}
 												{@const firstDev = cell.deviations![0]}
-												<span class="text-[8px] leading-none text-black/70">{actionLabel(firstDev.action)}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
+												<span class="text-[8px] leading-none opacity-70">{actionLabel(firstDev.action)}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
 											{/if}
 										{/if}
 									</div>
