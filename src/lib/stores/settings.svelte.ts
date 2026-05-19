@@ -12,7 +12,7 @@ class SettingsStore {
 	animationSpeed = $state(3); // 0=instant, 1–5
 	showFeedback = $state(true);
 	bettingEnabled = $state(true);
-	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('off');
+	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('both');
 	showDeviationHints = $state(false);
 	showHandTotal = $state(false);
 	deckCount = $state<1 | 2 | 4 | 6 | 8>(6);
