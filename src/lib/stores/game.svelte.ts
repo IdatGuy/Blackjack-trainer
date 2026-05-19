@@ -48,7 +48,9 @@ function rankLabel(rank: string): string {
 	return rank === 'T' ? '10' : rank;
 }
 
+/** @deprecated import settings.minBet / settings.maxBet directly */
 export const MIN_BET = 10;
+/** @deprecated import settings.minBet / settings.maxBet directly */
 export const MAX_BET = 1000;
 
 function generateId(): string {
@@ -129,7 +131,7 @@ class GameStore {
 
 	deal() {
 		if (this.state.phase !== 'betting') return;
-		if (this.betAmount < MIN_BET || this.betAmount > this.bankroll) return;
+		if (this.betAmount < settings.minBet || this.betAmount > this.bankroll) return;
 		this.actionHistory = [];
 		this.lastResults = [];
 		this._pending = [];
@@ -246,7 +248,7 @@ class GameStore {
 	}
 
 	addChip(value: number) {
-		this.betAmount = Math.min(this.betAmount + value, MAX_BET, this.bankroll);
+		this.betAmount = Math.min(this.betAmount + value, settings.maxBet, this.bankroll);
 	}
 
 	clearBet() {

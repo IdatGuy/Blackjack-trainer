@@ -2,6 +2,12 @@ import { browser } from '$app/environment';
 
 const SPEEDS = [0, 80, 160, 250, 400, 600];
 
+export const MIN_BET_OPTIONS = [5, 10, 25, 50] as const;
+export const MAX_BET_OPTIONS = [100, 250, 500, 1000, 2000] as const;
+
+export type MinBetOption = (typeof MIN_BET_OPTIONS)[number];
+export type MaxBetOption = (typeof MAX_BET_OPTIONS)[number];
+
 class SettingsStore {
 	animationSpeed = $state(3); // 0=instant, 1–5
 	showFeedback = $state(true);
@@ -10,6 +16,8 @@ class SettingsStore {
 	showDeviationHints = $state(false);
 	showHandTotal = $state(false);
 	deckCount = $state<1 | 2 | 4 | 6 | 8>(6);
+	minBet = $state<MinBetOption>(10);
+	maxBet = $state<MaxBetOption>(1000);
 
 	constructor() {
 		if (browser) {
@@ -31,6 +39,12 @@ class SettingsStore {
 					}
 					if ([1, 2, 4, 6, 8].includes(data.deckCount)) {
 						this.deckCount = data.deckCount;
+					}
+					if ((MIN_BET_OPTIONS as readonly number[]).includes(data.minBet)) {
+						this.minBet = data.minBet;
+					}
+					if ((MAX_BET_OPTIONS as readonly number[]).includes(data.maxBet)) {
+						this.maxBet = data.maxBet;
 					}
 				} catch {
 					/* ignore malformed */
@@ -78,6 +92,18 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setMinBet(v: MinBetOption) {
+		this.minBet = v;
+		if (this.maxBet <= v) this.maxBet = MAX_BET_OPTIONS.find((o) => o > v) ?? MAX_BET_OPTIONS[MAX_BET_OPTIONS.length - 1];
+		this.persist();
+	}
+
+	setMaxBet(v: MaxBetOption) {
+		this.maxBet = v;
+		if (this.minBet >= v) this.minBet = MIN_BET_OPTIONS.slice().reverse().find((o) => o < v) ?? MIN_BET_OPTIONS[0];
+		this.persist();
+	}
+
 	private persist() {
 		if (browser) {
 			localStorage.setItem(
@@ -89,7 +115,9 @@ class SettingsStore {
 					countDisplay: this.countDisplay,
 					showDeviationHints: this.showDeviationHints,
 					showHandTotal: this.showHandTotal,
-					deckCount: this.deckCount
+					deckCount: this.deckCount,
+					minBet: this.minBet,
+					maxBet: this.maxBet
 				})
 			);
 		}

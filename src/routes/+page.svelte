@@ -8,7 +8,7 @@
 	import StrategyChart from '$lib/components/StrategyChart.svelte';
 	import { handValue, isBust } from '$lib/engine/hand.js';
 	import { trueCount } from '$lib/engine/shoe.js';
-	import { MIN_BET, game } from '$lib/stores/game.svelte.js';
+	import { game } from '$lib/stores/game.svelte.js';
 	import type { Action } from '$lib/engine/rules.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
 
@@ -69,8 +69,8 @@
 	);
 
 	function handleDeal() {
-		if (!settings.bettingEnabled && game.betAmount < MIN_BET) {
-			game.addChip(MIN_BET);
+		if (!settings.bettingEnabled && game.betAmount < settings.minBet) {
+			game.addChip(settings.minBet);
 		}
 
 		const dur = SPEEDS[settings.animationSpeed] ?? 0;

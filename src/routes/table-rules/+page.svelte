@@ -1,13 +1,23 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { game } from '$lib/stores/game.svelte.js';
-	import { settings } from '$lib/stores/settings.svelte.js';
+	import {
+		settings,
+		MIN_BET_OPTIONS,
+		MAX_BET_OPTIONS,
+		type MinBetOption,
+		type MaxBetOption
+	} from '$lib/stores/settings.svelte.js';
 
 	const DECK_OPTIONS = [1, 2, 4, 6, 8] as const;
 
 	function selectDecks(n: 1 | 2 | 4 | 6 | 8) {
 		settings.setDeckCount(n);
 		game.reshuffle();
+	}
+
+	function fmtBet(n: number) {
+		return n >= 1000 ? `$${n / 1000}K` : `$${n}`;
 	}
 </script>
 
@@ -43,6 +53,47 @@
 					{/each}
 				</div>
 				<p class="mt-2 text-[11px] text-gray-600">Changing decks reshuffles the shoe</p>
+			</div>
+		</div>
+
+		<div class="mb-6">
+			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Betting Limits</p>
+			<div class="overflow-hidden rounded-xl bg-gray-900 px-4 py-3.5 space-y-4">
+				<!-- Min bet -->
+				<div>
+					<div class="mb-2 flex items-center justify-between">
+						<span class="text-sm font-medium text-gray-100">Minimum Bet</span>
+					</div>
+					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+						{#each MIN_BET_OPTIONS as n}
+							<button
+								onclick={() => settings.setMinBet(n as MinBetOption)}
+								class="flex-1 rounded-md py-1.5 text-sm font-semibold transition-colors
+									{settings.minBet === n
+										? 'bg-white text-gray-900'
+										: 'text-gray-400 hover:text-gray-200'}"
+							>{fmtBet(n)}</button>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Max bet -->
+				<div>
+					<div class="mb-2 flex items-center justify-between">
+						<span class="text-sm font-medium text-gray-100">Maximum Bet</span>
+					</div>
+					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+						{#each MAX_BET_OPTIONS as n}
+							<button
+								onclick={() => settings.setMaxBet(n as MaxBetOption)}
+								class="flex-1 rounded-md py-1.5 text-sm font-semibold transition-colors
+									{settings.maxBet === n
+										? 'bg-white text-gray-900'
+										: 'text-gray-400 hover:text-gray-200'}"
+							>{fmtBet(n)}</button>
+						{/each}
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

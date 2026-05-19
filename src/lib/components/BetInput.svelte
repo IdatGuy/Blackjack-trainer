@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { MAX_BET, MIN_BET, game } from '$lib/stores/game.svelte.js';
+	import { game } from '$lib/stores/game.svelte.js';
+	import { settings } from '$lib/stores/settings.svelte.js';
 
 	let { ondeal }: { ondeal: () => void } = $props();
 
@@ -11,17 +12,22 @@
 		{ value: 500, color: 'bg-purple-700 ring-purple-500', label: '$500' }
 	];
 
-	const cap = $derived(Math.min(MAX_BET, game.bankroll));
+	const cap = $derived(Math.min(settings.maxBet, game.bankroll));
+
+	function fmt(n: number) {
+		return n >= 1000 ? `$${(n / 1000).toLocaleString()}K` : `$${n}`;
+	}
 </script>
 
 <div class="flex flex-col items-center gap-3">
 	<!-- Chip row -->
 	<div class="flex items-center gap-2">
 		{#each CHIPS as chip}
+			{@const tooSmall = chip.value < settings.minBet && game.betAmount === 0}
 			{@const wouldExceed = game.betAmount + chip.value > cap}
 			<button
 				class="relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ring-2 ring-inset transition-opacity {chip.color}"
-				disabled={wouldExceed}
+				disabled={wouldExceed || tooSmall}
 				onclick={() => game.addChip(chip.value)}
 			>
 				<!-- Inner ring detail -->
@@ -34,6 +40,9 @@
 	<!-- Current bet display -->
 	<span class="text-2xl font-bold text-white">${game.betAmount}</span>
 
+	<!-- Table limits -->
+	<p class="text-[11px] text-gray-500">Table min {fmt(settings.minBet)} · max {fmt(settings.maxBet)}</p>
+
 	<!-- Action buttons -->
 	<div class="flex w-full gap-3">
 		<button
@@ -45,7 +54,7 @@
 		</button>
 		<button
 			class="flex-1 rounded-xl bg-yellow-500 py-3 text-sm font-bold text-gray-900 shadow-lg hover:bg-yellow-400 active:bg-yellow-600 disabled:opacity-40"
-			disabled={game.betAmount < MIN_BET}
+			disabled={game.betAmount < settings.minBet}
 			onclick={() => ondeal()}
 		>
 			Deal
