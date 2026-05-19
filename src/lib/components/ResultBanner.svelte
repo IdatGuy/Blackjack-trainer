@@ -12,11 +12,11 @@
 	};
 
 	const OUTCOME_COLOR: Record<HandResult, string> = {
-		win: 'text-green-400',
-		blackjack: 'text-green-400',
-		push: 'text-gray-300',
-		loss: 'text-red-400',
-		surrender: 'text-gray-300'
+		win: 'text-white',
+		blackjack: 'text-white',
+		push: 'text-white',
+		loss: 'text-white',
+		surrender: 'text-white'
 	};
 
 	const wrongActions = $derived(game.actionHistory.filter((r) => !r.correct));

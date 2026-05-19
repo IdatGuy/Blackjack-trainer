@@ -337,7 +337,7 @@
 	</div>
 
 	<!-- Center action zone (fixed height) -->
-	<div class="flex min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4">
+	<div class="flex w-full min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4 {phase === 'betting' || (phase === 'player' && !isDealing) || phase === 'resolution' ? 'bg-black/20 border-t border-b border-white/10' : ''}">
 		{#if phase === 'betting'}
 			{#if settings.bettingEnabled}
 				<BetInput ondeal={handleDeal} />
