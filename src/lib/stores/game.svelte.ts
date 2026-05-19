@@ -75,12 +75,43 @@ class GameStore {
 	actionHistory = $state<ActionRecord[]>([]);
 	lastResults = $state<ResolvedHand[]>([]);
 	bankroll = $state(loadBankroll());
+	bankrollFlash = $state<number | null>(null);
+	_flashTimer: ReturnType<typeof setTimeout> | null = null;
 	sessionId = $state(browser ? generateId() : 'ssr');
 	handId = $state('');
 	_pending: PendingDecision[] = [];
 
 	_persistBankroll() {
 		if (browser) localStorage.setItem('bj-bankroll', String(this.bankroll));
+	}
+
+	_setFlash(delta: number) {
+		if (!browser) return;
+		if (this._flashTimer) clearTimeout(this._flashTimer);
+		if (delta === 0) { this.bankrollFlash = null; return; }
+		this.bankrollFlash = delta;
+		this._flashTimer = setTimeout(() => {
+			this.bankrollFlash = null;
+			this._flashTimer = null;
+		}, 1400);
+	}
+
+	_applyResolution(results: ResolvedHand[]) {
+		this.lastResults = results;
+		if (settings.bettingEnabled) {
+			let totalReturn = 0;
+			let displayFlash = 0;
+			for (const r of results) {
+				const returnAmount = r.netChips + r.bet;
+				totalReturn += returnAmount;
+				if (r.netChips > 0) displayFlash += r.netChips;
+				else if (returnAmount > 0) displayFlash += returnAmount;
+			}
+			this.bankroll = Math.round((this.bankroll + totalReturn) * 100) / 100;
+			this._persistBankroll();
+			this._setFlash(displayFlash);
+		}
+		this._flushDecisions(results);
 	}
 
 	_flushDecisions(results: ResolvedHand[]) {
@@ -107,6 +138,11 @@ class GameStore {
 		if (browser) {
 			const prev = parseInt(localStorage.getItem('bj-hands-dealt') ?? '0', 10);
 			localStorage.setItem('bj-hands-dealt', String(prev + 1));
+		}
+		if (settings.bettingEnabled) {
+			this.bankroll = Math.round((this.bankroll - this.betAmount) * 100) / 100;
+			this._persistBankroll();
+			this._setFlash(-this.betAmount);
 		}
 		this.state = dealHand(this.state, [this.betAmount]);
 		this._maybeAutoFinish();
@@ -273,14 +309,7 @@ class GameStore {
 		this.state = { ...this.state, phase: 'resolution' };
 		const { state, results } = resolveHands(this.state);
 		this.state = state;
-		this.lastResults = results;
-		if (settings.bettingEnabled) {
-			this.bankroll = Math.round(
-				(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
-			) / 100;
-			this._persistBankroll();
-		}
-		this._flushDecisions(results);
+		this._applyResolution(results);
 	}
 
 	_maybeAutoFinish() {
@@ -299,14 +328,7 @@ class GameStore {
 		if (this.state.phase === 'resolution') {
 			const { state, results } = resolveHands(this.state);
 			this.state = state;
-			this.lastResults = results;
-			if (settings.bettingEnabled) {
-				this.bankroll = Math.round(
-					(this.bankroll + results.reduce((sum, r) => sum + r.netChips, 0)) * 100
-				) / 100;
-				this._persistBankroll();
-			}
-			this._flushDecisions(results);
+			this._applyResolution(results);
 		}
 	}
 }

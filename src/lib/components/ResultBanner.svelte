@@ -3,26 +3,21 @@
 	import { game } from '$lib/stores/game.svelte.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
 
-	const OUTCOME_STYLES: Record<HandResult, string> = {
-		win: 'bg-green-500 text-white',
-		blackjack: 'bg-yellow-400 text-gray-900',
-		push: 'bg-gray-400 text-gray-900',
-		loss: 'bg-red-600 text-white',
-		surrender: 'bg-gray-500 text-white'
+	const OUTCOME_TEXT: Record<HandResult, string> = {
+		win: 'You Win',
+		blackjack: 'Blackjack!',
+		push: 'Push',
+		loss: 'You Lose',
+		surrender: 'Surrendered'
 	};
 
-	const OUTCOME_LABEL: Record<HandResult, string> = {
-		win: 'WIN',
-		blackjack: 'BLACKJACK',
-		push: 'PUSH',
-		loss: 'LOSS',
-		surrender: 'SURRENDER'
+	const OUTCOME_COLOR: Record<HandResult, string> = {
+		win: 'text-green-400',
+		blackjack: 'text-green-400',
+		push: 'text-gray-300',
+		loss: 'text-red-400',
+		surrender: 'text-gray-300'
 	};
-
-	function chipLabel(chips: number): string {
-		if (chips === 0) return '';
-		return chips > 0 ? ` +$${chips}` : ` -$${Math.abs(chips)}`;
-	}
 
 	const wrongActions = $derived(game.actionHistory.filter((r) => !r.correct));
 	const allCorrect = $derived(game.actionHistory.length > 0 && wrongActions.length === 0);
@@ -30,13 +25,14 @@
 
 {#if game.state.phase === 'resolution' && game.lastResults.length > 0}
 	<div class="flex flex-col items-center gap-3">
-		{#each game.lastResults as result}
-			<div
-				class="rounded-xl px-6 py-2 text-center text-xl font-bold shadow-lg {OUTCOME_STYLES[result.result]}"
-			>
-				{OUTCOME_LABEL[result.result]}{settings.bettingEnabled ? chipLabel(result.netChips) : ''}
-			</div>
-		{/each}
+		<div class="flex items-center gap-3">
+			{#each game.lastResults as result, i}
+				{#if i > 0}<span class="text-gray-600">·</span>{/if}
+				<span class="text-2xl font-bold {OUTCOME_COLOR[result.result]}">
+					{OUTCOME_TEXT[result.result]}
+				</span>
+			{/each}
+		</div>
 
 		{#if game.showFeedback}
 			<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">

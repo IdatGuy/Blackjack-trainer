@@ -15,8 +15,6 @@
 </script>
 
 <div class="flex flex-col items-center gap-3">
-	<span class="text-sm font-semibold tracking-widest text-white">Place Your Bet</span>
-
 	<!-- Chip row -->
 	<div class="flex items-center gap-2">
 		{#each CHIPS as chip}
@@ -34,14 +32,7 @@
 	</div>
 
 	<!-- Current bet display -->
-	<div class="rounded-full bg-gray-900/80 px-10 py-2 text-2xl font-bold text-white shadow">
-		${game.betAmount}
-	</div>
-
-	<!-- Min / max label -->
-	<p class="text-[11px] text-gray-500">
-		Minimum: ${MIN_BET} | Maximum: ${MAX_BET.toLocaleString()}
-	</p>
+	<span class="text-2xl font-bold text-white">${game.betAmount}</span>
 
 	<!-- Action buttons -->
 	<div class="flex w-full gap-3">

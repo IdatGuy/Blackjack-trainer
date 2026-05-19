@@ -208,7 +208,15 @@
 					class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow transition-colors hover:bg-gray-100 active:bg-gray-200"
 				>
 					{#if showBankroll}
-						{#if settings.bettingEnabled}${game.bankroll}{:else}—{/if}
+						{#if settings.bettingEnabled}
+							{#if game.bankrollFlash !== null}
+								<span class={game.bankrollFlash > 0 ? 'text-green-600' : 'text-red-500'}>
+									{game.bankrollFlash > 0 ? `+$${game.bankrollFlash}` : `-$${Math.abs(game.bankrollFlash)}`}
+								</span>
+							{:else}
+								${game.bankroll}
+							{/if}
+						{:else}—{/if}
 					{:else if settings.countDisplay === 'running'}
 						<span class="text-[9px] font-normal opacity-60">RC</span>
 						{rc}<sup class="text-[9px] opacity-70">{signSup(rc)}</sup>
@@ -225,7 +233,15 @@
 				</button>
 			{:else}
 				<div class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow">
-					{#if settings.bettingEnabled}${game.bankroll}{:else}—{/if}
+					{#if settings.bettingEnabled}
+						{#if game.bankrollFlash !== null}
+							<span class={game.bankrollFlash > 0 ? 'text-green-600' : 'text-red-500'}>
+								{game.bankrollFlash > 0 ? `+$${game.bankrollFlash}` : `-$${Math.abs(game.bankrollFlash)}`}
+							</span>
+						{:else}
+							${game.bankroll}
+						{/if}
+					{:else}—{/if}
 				</div>
 			{/if}
 			{#if settings.bettingEnabled && (settings.countDisplay === 'off' || showBankroll)}
