@@ -27,10 +27,14 @@
 		return key;
 	}
 
+	function actionLabel(action: import('$lib/engine/rules.js').Action): string {
+		if (action === 'R') return 'Xh';
+		return action;
+	}
+
 	function cellLabel(cell: ChartCell): string {
 		if (cell.base === 'D') return cell.fallback === 'S' ? 'Ds' : 'Dh';
-		if (cell.base === 'R') return 'Xh';
-		return cell.base;
+		return actionLabel(cell.base);
 	}
 
 	function cellClass(cell: ChartCell): string {
@@ -156,12 +160,12 @@
 												? 'bg-amber-400 text-amber-950 ring-2 ring-amber-500 ring-inset'
 												: cell ? cellClass(cell) : 'bg-gray-800 text-gray-600'}">
 											{#if cell}
-												{devFiring ? devFiring.action : cellLabel(cell)}
+												{devFiring ? actionLabel(devFiring.action) : cellLabel(cell)}
 												{#if devFiring}
 													<span class="block text-[8px] leading-none opacity-75">{devFiring.above ? '≥' : '≤'}{devFiring.tc > 0 ? '+' : ''}{devFiring.tc}</span>
 												{:else if hasDev && showAllDeviations}
 													{@const firstDev = cell.deviations![0]}
-													<span class="block text-[8px] leading-none text-black/70">{firstDev.action}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
+													<span class="block text-[8px] leading-none text-black/70">{actionLabel(firstDev.action)}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
 												{:else if hasDev}
 													<span class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber-400"></span>
 												{/if}
