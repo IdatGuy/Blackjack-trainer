@@ -80,6 +80,7 @@ class GameStore {
 	state = $state(initialState());
 	betAmount = $state(0);
 	get showFeedback() { return settings.showFeedback; }
+	get rules() { return this.state.rules; }
 	actionHistory = $state<ActionRecord[]>([]);
 	lastResults = $state<ResolvedHand[]>([]);
 	bankroll = $state(loadBankroll());

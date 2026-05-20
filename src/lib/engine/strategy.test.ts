@@ -270,10 +270,115 @@ describe('Fab 4 surrender deviations', () => {
 
 describe('fallback when action not allowed', () => {
 	it('Ds (soft 18 vs 3) falls back to stand when double not allowed after split', () => {
-		// Simulate a split hand where DAS is off
 		const nodasRules = { ...rules, doubleAfterSplit: false };
 		const splitHand = makeHand([card('A'), card('7')], 10, true);
 		const action = getCorrectAction(splitHand, card('3'), shoe(), nodasRules, undefined, 1);
 		expect(action).toBe('S');
+	});
+});
+
+// ─── Rule variant charts ──────────────────────────────────────────────────
+
+describe('H17 chart differences', () => {
+	const h17 = { ...rules, dealerHitsSoft17: true };
+
+	it('hard 11 vs A: double (H17 basic strategy)', () => {
+		const action = getCorrectAction(hand([card('7'), card('4')]), card('A'), shoe(), h17);
+		expect(action).toBe('D');
+	});
+	it('hard 15 vs A: surrender (H17 basic strategy)', () => {
+		const action = getCorrectAction(hand([card('T'), card('5')]), card('A'), shoe(), h17);
+		expect(action).toBe('R');
+	});
+	it('hard 17 vs A: surrender (H17 basic strategy)', () => {
+		const action = getCorrectAction(hand([card('T'), card('7')]), card('A'), shoe(), h17);
+		expect(action).toBe('R');
+	});
+	it('soft 18 (A7) vs 2: double-else-stand (H17)', () => {
+		const action = getCorrectAction(hand([card('A'), card('7')]), card('2'), shoe(), h17);
+		expect(action).toBe('D');
+	});
+	it('hard 11 vs A: I-18 #9 is not a deviation in H17 (already basic strategy)', () => {
+		// In H17, doubling 11 vs A is basic strategy so should not appear as a deviation
+		// Confirm it still doubles at TC 0 (not just TC≥1)
+		const action = getCorrectAction(hand([card('7'), card('4')]), card('A'), shoe(0), h17);
+		expect(action).toBe('D');
+	});
+});
+
+describe('No-DAS chart differences', () => {
+	const nodas = { ...rules, doubleAfterSplit: false };
+
+	it('2-2 vs 2: hit (no DAS)', () => {
+		const action = getCorrectAction(hand([card('2'), card('2')]), card('2'), shoe(), nodas);
+		expect(action).toBe('H');
+	});
+	it('2-2 vs 3: split (no DAS — still optimal to split)', () => {
+		const action = getCorrectAction(hand([card('2'), card('2')]), card('3'), shoe(), nodas);
+		expect(action).toBe('P');
+	});
+	it('3-3 vs 2: hit (no DAS)', () => {
+		const action = getCorrectAction(hand([card('3'), card('3')]), card('2'), shoe(), nodas);
+		expect(action).toBe('H');
+	});
+	it('3-3 vs 3: hit (no DAS)', () => {
+		const action = getCorrectAction(hand([card('3'), card('3')]), card('3'), shoe(), nodas);
+		expect(action).toBe('H');
+	});
+	it('4-4 vs 5: hit (no DAS)', () => {
+		const action = getCorrectAction(hand([card('4'), card('4')]), card('5'), shoe(), nodas);
+		expect(action).toBe('H');
+	});
+	it('6-6 vs 2: hit (no DAS)', () => {
+		const action = getCorrectAction(hand([card('6'), card('6')]), card('2'), shoe(), nodas);
+		expect(action).toBe('H');
+	});
+});
+
+describe('single deck chart differences', () => {
+	const sd = { ...rules, decks: 1 } as typeof rules;
+
+	it('hard 8 vs 5: double (1D)', () => {
+		const action = getCorrectAction(hand([card('5'), card('3')]), card('5'), shoe(), sd);
+		expect(action).toBe('D');
+	});
+	it('hard 8 vs 6: double (1D)', () => {
+		const action = getCorrectAction(hand([card('5'), card('3')]), card('6'), shoe(), sd);
+		expect(action).toBe('D');
+	});
+	it('hard 8 vs 4: hit (1D — same as multi)', () => {
+		const action = getCorrectAction(hand([card('5'), card('3')]), card('4'), shoe(), sd);
+		expect(action).toBe('H');
+	});
+	it('hard 10 vs A: double (1D)', () => {
+		const action = getCorrectAction(hand([card('6'), card('4')]), card('A'), shoe(), sd);
+		expect(action).toBe('D');
+	});
+	it('hard 11 vs A: double (1D)', () => {
+		const action = getCorrectAction(hand([card('7'), card('4')]), card('A'), shoe(), sd);
+		expect(action).toBe('D');
+	});
+	it('soft A4 vs 3: double (1D)', () => {
+		const action = getCorrectAction(hand([card('A'), card('4')]), card('3'), shoe(), sd);
+		expect(action).toBe('D');
+	});
+});
+
+describe('no-surrender chart', () => {
+	const nos = { ...rules, surrender: 'none' } as typeof rules;
+
+	it('hard 16 vs T: hit at TC -3 (no surrender, I-18 deviation does not fire)', () => {
+		// I-18 #2 fires at TC≥0; at TC -3 it doesn't, so fallback of R is H
+		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(-18), nos);
+		expect(action).toBe('H');
+	});
+	it('hard 16 vs T: stand at TC 0 (I-18 deviation fires even without surrender)', () => {
+		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(0), nos);
+		expect(action).toBe('S');
+	});
+	it('hard 15 vs T: hit at TC -2 (no surrender, Fab 3 does not fire)', () => {
+		// Fab 3 fires at TC≥0; at TC -2 it doesn't, so fallback of R is H
+		const action = getCorrectAction(hand([card('T'), card('5')]), card('T'), shoe(-12), nos);
+		expect(action).toBe('H');
 	});
 });

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { DEFAULT_CHART } from '$lib/engine/strategy.js';
+	import { getChartForRules } from '$lib/engine/strategy.js';
 	import type { ChartCell } from '$lib/engine/strategy.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
+	import { game } from '$lib/stores/game.svelte.js';
 
 	let { open, onclose, trueCount = undefined }: { open: boolean; onclose: () => void; trueCount?: number } = $props();
 
@@ -66,10 +67,12 @@
 		PAIR_ROWS
 	);
 
+	const chart = $derived(getChartForRules(game.rules));
+
 	const section = $derived(
-		activeTab === 'hard' ? DEFAULT_CHART.hard :
-		activeTab === 'soft' ? DEFAULT_CHART.soft :
-		DEFAULT_CHART.pairs
+		activeTab === 'hard' ? chart.hard :
+		activeTab === 'soft' ? chart.soft :
+		chart.pairs
 	);
 
 	const tcActive = $derived(trueCount !== undefined && trueCount >= 3);

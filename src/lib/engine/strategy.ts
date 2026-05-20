@@ -26,6 +26,7 @@ const D = (): ChartCell => ({ base: 'D', fallback: 'H' }); // double else hit
 const Ds = (): ChartCell => ({ base: 'D', fallback: 'S' }); // double else stand
 const P = (): ChartCell => ({ base: 'P' });
 const R = (): ChartCell => ({ base: 'R', fallback: 'H' }); // surrender else hit
+const Rs = (): ChartCell => ({ base: 'R', fallback: 'S' }); // surrender else stand
 
 // Dealer upcards used as column keys
 const UPCARDS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'A'] as const;
@@ -39,84 +40,150 @@ function row(cells: ChartCell[]): Record<string, ChartCell> {
 	return result;
 }
 
-// ─── 6D S17 DAS Late Surrender — Wizard of Odds ───────────────────────────
+// ─── Multi-deck baseline (6D/S17/DAS/LS) — Wizard of Odds ─────────────────
+// These factory functions return fresh objects so patches don't mutate shared state.
 
-// Hard totals: rows indexed by player total (as string)
-const HARD: Record<string, Record<string, ChartCell>> = {
-	'5': row([H(), H(), H(), H(), H(), H(), H(), H(), H(), H()]),
-	'6': row([H(), H(), H(), H(), H(), H(), H(), H(), H(), H()]),
-	'7': row([H(), H(), H(), H(), H(), H(), H(), H(), H(), H()]),
-	'8': row([H(), H(), H(), H(), H(), H(), H(), H(), H(), H()]),
-	'9': row([H(), D(), D(), D(), D(), H(), H(), H(), H(), H()]),
-	'10': row([D(), D(), D(), D(), D(), D(), D(), D(), H(), H()]),
-	'11': row([D(), D(), D(), D(), D(), D(), D(), D(), D(), H()]),
-	'12': row([H(), H(), S(), S(), S(), H(), H(), H(), H(), H()]),
-	'13': row([S(), S(), S(), S(), S(), H(), H(), H(), H(), H()]),
-	'14': row([S(), S(), S(), S(), S(), H(), H(), H(), H(), H()]),
-	'15': row([S(), S(), S(), S(), S(), H(), H(), H(), R(), H()]),
-	'16': row([S(), S(), S(), S(), S(), H(), H(), R(), R(), R()]),
-	'17': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
-	'18': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
-	'19': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
-	'20': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
-	'21': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()])
-};
+function makeHard(): Record<string, Record<string, ChartCell>> {
+	return {
+		'5': row([H(), H(), H(), H(), H(), H(), H(), H(), H(), H()]),
+		'6': row([H(), H(), H(), H(), H(), H(), H(), H(), H(), H()]),
+		'7': row([H(), H(), H(), H(), H(), H(), H(), H(), H(), H()]),
+		'8': row([H(), H(), H(), H(), H(), H(), H(), H(), H(), H()]),
+		'9': row([H(), D(), D(), D(), D(), H(), H(), H(), H(), H()]),
+		'10': row([D(), D(), D(), D(), D(), D(), D(), D(), H(), H()]),
+		'11': row([D(), D(), D(), D(), D(), D(), D(), D(), D(), H()]),
+		'12': row([H(), H(), S(), S(), S(), H(), H(), H(), H(), H()]),
+		'13': row([S(), S(), S(), S(), S(), H(), H(), H(), H(), H()]),
+		'14': row([S(), S(), S(), S(), S(), H(), H(), H(), H(), H()]),
+		'15': row([S(), S(), S(), S(), S(), H(), H(), H(), R(), H()]),
+		'16': row([S(), S(), S(), S(), S(), H(), H(), R(), R(), R()]),
+		'17': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
+		'18': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
+		'19': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
+		'20': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
+		'21': row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()])
+	};
+}
 
-// Soft totals: keyed as "A2"–"A9" (A counted as 11, so A2 = soft 13, A9 = soft 20)
-const SOFT: Record<string, Record<string, ChartCell>> = {
-	A2: row([H(), H(), H(), D(), D(), H(), H(), H(), H(), H()]),
-	A3: row([H(), H(), H(), D(), D(), H(), H(), H(), H(), H()]),
-	A4: row([H(), H(), D(), D(), D(), H(), H(), H(), H(), H()]),
-	A5: row([H(), H(), D(), D(), D(), H(), H(), H(), H(), H()]),
-	A6: row([H(), D(), D(), D(), D(), H(), H(), H(), H(), H()]),
-	A7: row([S(), Ds(), Ds(), D(), D(), S(), S(), H(), H(), H()]),
-	A8: row([S(), S(), S(), S(), Ds(), S(), S(), S(), S(), S()]),
-	A9: row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()])
-};
+function makeSoft(): Record<string, Record<string, ChartCell>> {
+	return {
+		A2: row([H(), H(), H(), D(), D(), H(), H(), H(), H(), H()]),
+		A3: row([H(), H(), H(), D(), D(), H(), H(), H(), H(), H()]),
+		A4: row([H(), H(), D(), D(), D(), H(), H(), H(), H(), H()]),
+		A5: row([H(), H(), D(), D(), D(), H(), H(), H(), H(), H()]),
+		A6: row([H(), D(), D(), D(), D(), H(), H(), H(), H(), H()]),
+		A7: row([S(), Ds(), Ds(), D(), D(), S(), S(), H(), H(), H()]),
+		A8: row([S(), S(), S(), S(), Ds(), S(), S(), S(), S(), S()]),
+		A9: row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()])
+	};
+}
 
-// Pairs: keyed as "AA", "22"…"TT" (T = any ten-value)
-const PAIRS: Record<string, Record<string, ChartCell>> = {
-	AA: row([P(), P(), P(), P(), P(), P(), P(), P(), P(), P()]),
-	'22': row([P(), P(), P(), P(), P(), P(), H(), H(), H(), H()]),
-	'33': row([P(), P(), P(), P(), P(), P(), H(), H(), H(), H()]),
-	'44': row([H(), H(), H(), P(), P(), H(), H(), H(), H(), H()]),
-	'55': row([D(), D(), D(), D(), D(), D(), D(), D(), H(), H()]),
-	'66': row([P(), P(), P(), P(), P(), H(), H(), H(), H(), H()]),
-	'77': row([P(), P(), P(), P(), P(), P(), H(), H(), H(), H()]),
-	'88': row([P(), P(), P(), P(), P(), P(), P(), P(), P(), P()]),
-	'99': row([P(), P(), P(), P(), P(), S(), P(), P(), S(), S()]),
-	TT: row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()])
-};
+function makePairs(): Record<string, Record<string, ChartCell>> {
+	return {
+		AA: row([P(), P(), P(), P(), P(), P(), P(), P(), P(), P()]),
+		'22': row([P(), P(), P(), P(), P(), P(), H(), H(), H(), H()]),
+		'33': row([P(), P(), P(), P(), P(), P(), H(), H(), H(), H()]),
+		'44': row([H(), H(), H(), P(), P(), H(), H(), H(), H(), H()]),
+		'55': row([D(), D(), D(), D(), D(), D(), D(), D(), H(), H()]),
+		'66': row([P(), P(), P(), P(), P(), H(), H(), H(), H(), H()]),
+		'77': row([P(), P(), P(), P(), P(), P(), H(), H(), H(), H()]),
+		'88': row([P(), P(), P(), P(), P(), P(), P(), P(), P(), P()]),
+		'99': row([P(), P(), P(), P(), P(), S(), P(), P(), S(), S()]),
+		TT: row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()])
+	};
+}
 
-// ─── Illustrious 18 + Fab 4 deviations ────────────────────────────────────
-// Applied after chart construction. Each deviation: { tc, action, above }
-// above=true → fire when trueCount >= tc; above=false → fire when trueCount <= tc
+// ─── Patch functions (mutate in place) ───────────────────────────────────────
 
-function applyDeviations(chart: StrategyChart): void {
+function apply2DPatch(
+	hard: Record<string, Record<string, ChartCell>>,
+	soft: Record<string, Record<string, ChartCell>>
+): void {
+	hard['9']['2'] = D();
+	hard['11']['A'] = D();
+	soft['A2']['4'] = D();
+	soft['A3']['4'] = D();
+	soft['A6']['2'] = D();
+	soft['A7']['2'] = Ds();
+}
+
+function apply1DPatch(
+	hard: Record<string, Record<string, ChartCell>>,
+	soft: Record<string, Record<string, ChartCell>>
+): void {
+	hard['8']['5'] = D();
+	hard['8']['6'] = D();
+	hard['9']['2'] = D();
+	hard['10']['A'] = D();
+	hard['11']['A'] = D();
+	soft['A2']['4'] = D();
+	soft['A3']['4'] = D();
+	soft['A4']['3'] = D();
+	soft['A5']['3'] = D();
+	soft['A6']['2'] = D();
+	soft['A7']['2'] = Ds();
+	soft['A8']['4'] = Ds();
+	soft['A8']['5'] = Ds();
+}
+
+function applyH17Patch(
+	hard: Record<string, Record<string, ChartCell>>,
+	soft: Record<string, Record<string, ChartCell>>
+): void {
+	hard['11']['A'] = D();
+	hard['15']['A'] = R(); // basic strategy surrender in H17
+	hard['17']['A'] = Rs(); // basic strategy surrender in H17
+	soft['A7']['2'] = Ds();
+}
+
+function applyNoDASPatch(pairs: Record<string, Record<string, ChartCell>>): void {
+	pairs['22']['2'] = H();
+	pairs['33']['2'] = H();
+	pairs['33']['3'] = H();
+	pairs['44']['5'] = H();
+	pairs['44']['6'] = H();
+	pairs['66']['2'] = H();
+}
+
+function applyNoSurrenderPatch(hard: Record<string, Record<string, ChartCell>>): void {
+	for (const row of Object.values(hard)) {
+		for (const [up, cell] of Object.entries(row)) {
+			if (cell.base === 'R') {
+				row[up] = { base: cell.fallback ?? 'H' };
+			}
+		}
+	}
+}
+
+// ─── Deviations ──────────────────────────────────────────────────────────────
+
+function applyDeviations(chart: StrategyChart, h17 = false): void {
 	// Illustrious 18
-	dev(chart.hard, '16', 'T', { tc: 0, action: 'S', above: true }); // #2 stand at TC≥0
-	dev(chart.hard, '15', 'T', { tc: 4, action: 'S', above: true }); // #3 stand at TC≥4
-	dev(chart.pairs, 'TT', '5', { tc: 5, action: 'P', above: true }); // #4 split TT vs 5 at TC≥5
-	dev(chart.pairs, 'TT', '6', { tc: 4, action: 'P', above: true }); // #5 split TT vs 6 at TC≥4
-	dev(chart.hard, '10', 'T', { tc: 4, action: 'D', above: true }); // #6 double 10 vs T at TC≥4
-	dev(chart.hard, '12', '3', { tc: 2, action: 'S', above: true }); // #7 stand 12 vs 3 at TC≥2
-	dev(chart.hard, '12', '2', { tc: 3, action: 'S', above: true }); // #8 stand 12 vs 2 at TC≥3
-	dev(chart.hard, '11', 'A', { tc: 1, action: 'D', above: true }); // #9 double 11 vs A at TC≥1
-	dev(chart.hard, '9', '2', { tc: 1, action: 'D', above: true }); // #10 double 9 vs 2 at TC≥1
-	dev(chart.hard, '10', 'A', { tc: 4, action: 'D', above: true }); // #11 double 10 vs A at TC≥4
-	dev(chart.hard, '9', '7', { tc: 3, action: 'D', above: true }); // #12 double 9 vs 7 at TC≥3
-	dev(chart.hard, '16', '9', { tc: 5, action: 'S', above: true }); // #13 stand 16 vs 9 at TC≥5
-	dev(chart.hard, '13', '2', { tc: -1, action: 'H', above: false }); // #14 hit 13 vs 2 at TC≤-1
-	dev(chart.hard, '12', '4', { tc: -1, action: 'H', above: false }); // #15 hit 12 vs 4 at TC≤-1
-	dev(chart.hard, '12', '5', { tc: -2, action: 'H', above: false }); // #16 hit 12 vs 5 at TC≤-2
-	dev(chart.hard, '12', '6', { tc: -1, action: 'H', above: false }); // #17 hit 12 vs 6 at TC≤-1
-	dev(chart.hard, '13', '3', { tc: -2, action: 'H', above: false }); // #18 hit 13 vs 3 at TC≤-2
+	dev(chart.hard, '16', 'T', { tc: 0, action: 'S', above: true }); // #2
+	dev(chart.hard, '15', 'T', { tc: 4, action: 'S', above: true }); // #3
+	dev(chart.pairs, 'TT', '5', { tc: 5, action: 'P', above: true }); // #4
+	dev(chart.pairs, 'TT', '6', { tc: 4, action: 'P', above: true }); // #5
+	dev(chart.hard, '10', 'T', { tc: 4, action: 'D', above: true }); // #6
+	dev(chart.hard, '12', '3', { tc: 2, action: 'S', above: true }); // #7
+	dev(chart.hard, '12', '2', { tc: 3, action: 'S', above: true }); // #8
+	// #9 — double 11 vs A: only a deviation in S17 (H17 makes it basic strategy)
+	if (!h17) dev(chart.hard, '11', 'A', { tc: 1, action: 'D', above: true });
+	dev(chart.hard, '9', '2', { tc: 1, action: 'D', above: true }); // #10
+	dev(chart.hard, '10', 'A', { tc: 4, action: 'D', above: true }); // #11
+	dev(chart.hard, '9', '7', { tc: 3, action: 'D', above: true }); // #12
+	dev(chart.hard, '16', '9', { tc: 5, action: 'S', above: true }); // #13
+	dev(chart.hard, '13', '2', { tc: -1, action: 'H', above: false }); // #14
+	dev(chart.hard, '12', '4', { tc: -1, action: 'H', above: false }); // #15
+	dev(chart.hard, '12', '5', { tc: -2, action: 'H', above: false }); // #16
+	dev(chart.hard, '12', '6', { tc: -1, action: 'H', above: false }); // #17
+	dev(chart.hard, '13', '3', { tc: -2, action: 'H', above: false }); // #18
 
 	// Fab 4 (surrender deviations)
 	dev(chart.hard, '14', 'T', { tc: 3, action: 'R', above: true }); // Fab 1
 	dev(chart.hard, '15', '9', { tc: 2, action: 'R', above: true }); // Fab 2
 	dev(chart.hard, '15', 'T', { tc: 0, action: 'R', above: true }); // Fab 3
-	dev(chart.hard, '15', 'A', { tc: 1, action: 'R', above: true }); // Fab 4
+	// Fab 4 — surrender 15 vs A: only a deviation in S17 (H17 makes it basic strategy)
+	if (!h17) dev(chart.hard, '15', 'A', { tc: 1, action: 'R', above: true });
 }
 
 function dev(
@@ -131,22 +198,47 @@ function dev(
 	cell.deviations.push(deviation);
 }
 
-// ─── Build the chart ──────────────────────────────────────────────────────
+// ─── Chart builder ────────────────────────────────────────────────────────────
 
-export function buildChart6dS17(): StrategyChart {
+function buildChartForRules(rules: RuleSet): StrategyChart {
+	const hard = makeHard();
+	const soft = makeSoft();
+	const pairs = makePairs();
+
+	if (rules.decks === 1) apply1DPatch(hard, soft);
+	else if (rules.decks === 2) apply2DPatch(hard, soft);
+
+	if (rules.dealerHitsSoft17) applyH17Patch(hard, soft);
+	if (!rules.doubleAfterSplit) applyNoDASPatch(pairs);
+	if (rules.surrender === 'none') applyNoSurrenderPatch(hard);
+
 	const chart: StrategyChart = {
-		ruleSetId: '6d-s17-das-ls',
-		hard: HARD,
-		soft: SOFT,
-		pairs: PAIRS
+		ruleSetId: chartCacheKey(rules),
+		hard,
+		soft,
+		pairs
 	};
-	applyDeviations(chart);
+
+	applyDeviations(chart, rules.dealerHitsSoft17);
 	return chart;
 }
 
-const DEFAULT_CHART = buildChart6dS17();
+function chartCacheKey(rules: RuleSet): string {
+	const d = rules.decks <= 1 ? '1d' : rules.decks === 2 ? '2d' : 'multi';
+	return `${d}-${rules.dealerHitsSoft17 ? 'h17' : 's17'}-${rules.doubleAfterSplit ? 'das' : 'nodas'}-${rules.surrender}`;
+}
 
-// ─── Lookup ───────────────────────────────────────────────────────────────
+const chartCache = new Map<string, StrategyChart>();
+
+export function getChartForRules(rules: RuleSet): StrategyChart {
+	const key = chartCacheKey(rules);
+	if (chartCache.has(key)) return chartCache.get(key)!;
+	const chart = buildChartForRules(rules);
+	chartCache.set(key, chart);
+	return chart;
+}
+
+// ─── Lookup ───────────────────────────────────────────────────────────────────
 
 function upCardKey(card: Card): UpCard {
 	const r = card.rank;
@@ -163,14 +255,13 @@ export function getCorrectAction(
 	splitCount = 0
 ): Action {
 	const chart = overrides
-		? mergeChart(DEFAULT_CHART, overrides as StrategyChart)
-		: DEFAULT_CHART;
+		? mergeChart(getChartForRules(rules), overrides as StrategyChart)
+		: getChartForRules(rules);
 
 	const tc = trueCount(shoe);
 	const allowed = allowedActions(hand, dealerUp, rules, splitCount);
 	const upKey = upCardKey(dealerUp);
 
-	// Determine which section and key to look up
 	const type = handType(hand.cards, hand.cards.length === 2);
 	const key = handKey(hand.cards, type);
 
@@ -185,11 +276,9 @@ export function getCorrectAction(
 
 	const cell = section[key]?.[upKey];
 	if (!cell) {
-		// Fallback for totals not explicitly charted (e.g., hard 4 not in table)
 		return handValue(hand.cards) >= 17 ? 'S' : 'H';
 	}
 
-	// Check deviations first (sorted in insertion order; each is independent)
 	if (cell.deviations) {
 		for (const dev of cell.deviations) {
 			const fires = dev.above ? tc >= dev.tc : tc <= dev.tc;
@@ -199,10 +288,9 @@ export function getCorrectAction(
 		}
 	}
 
-	// Return base action, falling back if not allowed
 	if (allowed.includes(cell.base)) return cell.base;
 	if (cell.fallback && allowed.includes(cell.fallback)) return cell.fallback;
-	return 'H'; // ultimate fallback
+	return 'H';
 }
 
 export function getBaseAction(
@@ -214,8 +302,8 @@ export function getBaseAction(
 	splitCount = 0
 ): Action {
 	const chart = overrides
-		? mergeChart(DEFAULT_CHART, overrides as StrategyChart)
-		: DEFAULT_CHART;
+		? mergeChart(getChartForRules(rules), overrides as StrategyChart)
+		: getChartForRules(rules);
 
 	const allowed = allowedActions(hand, dealerUp, rules, splitCount);
 	const upKey = upCardKey(dealerUp);
@@ -230,7 +318,6 @@ export function getBaseAction(
 	const cell = section[key]?.[upKey];
 	if (!cell) return handValue(hand.cards) >= 17 ? 'S' : 'H';
 
-	// No deviation check — basic strategy only
 	if (allowed.includes(cell.base)) return cell.base;
 	if (cell.fallback && allowed.includes(cell.fallback)) return cell.fallback;
 	return 'H';
@@ -261,6 +348,18 @@ export function getInsuranceAction(shoe: Shoe): 'I' | 'N' {
 	return trueCount(shoe) >= 3 ? 'I' : 'N';
 }
 
-// Re-export for convenience
 import { handValue } from './hand.js';
-export { DEFAULT_CHART };
+
+// Default chart (6D/S17/DAS/LS) for backwards compatibility
+export const DEFAULT_CHART = getChartForRules({
+	id: '6d-s17-das-ls',
+	name: '6 Deck S17 DAS Late Surrender',
+	decks: 6,
+	dealerHitsSoft17: false,
+	doubleAfterSplit: true,
+	resplitAces: false,
+	surrender: 'late',
+	peek: true,
+	blackjackPays: '3:2',
+	maxSplits: 4
+});
