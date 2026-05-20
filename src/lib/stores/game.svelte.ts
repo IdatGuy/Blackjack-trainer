@@ -165,7 +165,7 @@ class GameStore {
 
 	deal() {
 		if (this.state.phase !== 'betting') return;
-		if (this.betAmount < settings.minBet || this.betAmount > this.bankroll) return;
+		if (this.betAmount < settings.minBet || this.betAmount * settings.spotCount > this.bankroll) return;
 		this.actionHistory = [];
 		this.lastResults = [];
 		this._pending = [];
@@ -178,11 +178,12 @@ class GameStore {
 			localStorage.setItem('bj-hands-dealt', String(prev + 1));
 		}
 		if (settings.bettingEnabled) {
-			this.bankroll = Math.round((this.bankroll - this.betAmount) * 100) / 100;
+			const totalBet = this.betAmount * settings.spotCount;
+			this.bankroll = Math.round((this.bankroll - totalBet) * 100) / 100;
 			this._persistBankroll();
-			this._setFlash(-this.betAmount);
+			this._setFlash(-totalBet);
 		}
-		this.state = dealHand(this.state, [this.betAmount]);
+		this.state = dealHand(this.state, Array.from({ length: settings.spotCount }, () => this.betAmount));
 		this._maybeAutoFinish();
 	}
 
@@ -331,7 +332,16 @@ class GameStore {
 		this.state = {
 			...this.state,
 			shoe: buildShoe(settings.deckCount),
-			rules: { ...this.state.rules, decks: settings.deckCount },
+			rules: {
+				...this.state.rules,
+				decks: settings.deckCount,
+				dealerHitsSoft17: settings.dealerHitsSoft17,
+				doubleAfterSplit: settings.doubleAfterSplit,
+				resplitAces: settings.resplitAces,
+				surrender: settings.surrender,
+				peek: settings.peek,
+				blackjackPays: settings.blackjackPays,
+			},
 			phase: 'betting',
 			playerHands: [],
 			dealerHand: makeHand([], 0),
