@@ -11,7 +11,7 @@
 
 	const UPCARDS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'A'] as const;
 
-	const HARD_ROWS = ['5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21'];
+	const HARD_ROWS = ['7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'];
 	const SOFT_ROWS = ['A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'];
 	const PAIR_ROWS = ['AA', '22', '33', '44', '55', '66', '77', '88', '99', 'TT'];
 
@@ -154,11 +154,6 @@
 			{#if activeTab === 'insurance'}
 				<!-- Insurance reference card -->
 				<div class="flex flex-col gap-4 px-2">
-					<div class="rounded-xl bg-gray-900 px-4 py-3.5">
-						<p class="mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-500">When offered</p>
-						<p class="text-sm text-gray-200">Only when the dealer's up card is an <span class="font-bold text-white">Ace</span>. Insurance costs half your original bet and pays 2:1 if the dealer has a natural blackjack.</p>
-					</div>
-
 					<div class="rounded-xl bg-gray-900 px-4 py-3.5">
 						<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Basic Strategy</p>
 						<div class="flex items-center gap-3">
