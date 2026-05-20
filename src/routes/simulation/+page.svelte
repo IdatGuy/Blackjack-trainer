@@ -130,7 +130,7 @@
 	<header class="flex items-center gap-3 border-b border-gray-800 bg-black/40 px-3 py-2">
 		<button
 			onclick={() => goto('/')}
-			class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-lg font-bold text-gray-900 hover:bg-gray-100 active:bg-gray-200"
+			class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-600"
 			aria-label="Back"
 		>
 			←
@@ -153,7 +153,7 @@
 						max="100000"
 						step="1000"
 						bind:value={numHands}
-						class="w-24 rounded-lg bg-gray-800 px-2 py-1 text-right text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+						class="w-24 rounded-lg bg-gray-800 px-2 py-1 text-right text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
 					/>
 				</div>
 				<!-- Decks -->
@@ -161,7 +161,7 @@
 					<span class="text-sm font-medium text-gray-100">Decks</span>
 					<select
 						bind:value={decks}
-						class="rounded-lg bg-gray-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+						class="rounded-lg bg-gray-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
 					>
 						<option value={1}>1</option>
 						<option value={2}>2</option>
@@ -173,14 +173,14 @@
 				<!-- Dealer hits soft 17 -->
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Dealer hits soft 17</span>
-					<input type="checkbox" bind:checked={dealerHitsSoft17} class="h-4 w-4 accent-blue-500" />
+					<input type="checkbox" bind:checked={dealerHitsSoft17} class="h-4 w-4 accent-gray-400" />
 				</label>
 				<!-- Blackjack pays -->
 				<div class="flex items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Blackjack pays</span>
 					<select
 						bind:value={blackjackPays}
-						class="rounded-lg bg-gray-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+						class="rounded-lg bg-gray-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
 					>
 						<option value="3:2">3:2</option>
 						<option value="6:5">6:5</option>
@@ -193,7 +193,7 @@
 		<button
 			onclick={runSimulation}
 			disabled={running}
-			class="mb-6 w-full rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50"
+			class="mb-6 w-full rounded-xl bg-gray-700 py-3 text-sm font-semibold text-white hover:bg-gray-600 active:bg-gray-800 disabled:opacity-50"
 		>
 			{running ? 'Running…' : 'Run Simulation'}
 		</button>
