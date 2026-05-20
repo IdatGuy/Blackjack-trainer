@@ -27,10 +27,10 @@
 </script>
 
 <div class="flex h-full flex-col">
-	<header class="flex items-center gap-3 border-b border-gray-800 bg-black/40 px-3 py-2">
+	<header class="flex items-center gap-3 border-b border-zinc-800 bg-black/40 px-3 py-2">
 		<button
 			onclick={() => goto('/')}
-			class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-600"
+			class="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 active:bg-zinc-600"
 			aria-label="Back"
 		>
 			←
@@ -44,12 +44,12 @@
 		<!-- Shoe -->
 		<div class="mb-6">
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Shoe</p>
-			<div class="overflow-hidden rounded-xl bg-gray-900 px-4 py-3.5">
+			<div class="overflow-hidden rounded-xl bg-zinc-900 px-4 py-3.5">
 				<div class="mb-3 flex items-center justify-between">
 					<span class="text-sm font-medium text-gray-100">Decks</span>
 					<span class="text-xs text-gray-500">{settings.deckCount * 52} cards</span>
 				</div>
-				<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+				<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
 					{#each DECK_OPTIONS as n}
 						<button
 							onclick={() => selectDecks(n)}
@@ -67,7 +67,7 @@
 		<!-- Dealer Rules -->
 		<div class="mb-6">
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Dealer Rules</p>
-			<div class="overflow-hidden rounded-xl bg-gray-900 divide-y divide-gray-800">
+			<div class="overflow-hidden rounded-xl bg-zinc-900 divide-y divide-zinc-800">
 
 				<!-- Soft 17 -->
 				<div class="px-4 py-3.5">
@@ -75,7 +75,7 @@
 						<span class="text-sm font-medium text-gray-100">Soft 17</span>
 						<span class="text-xs text-gray-500">{settings.dealerHitsSoft17 ? 'Dealer hits' : 'Dealer stands'}</span>
 					</div>
-					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
 						<button
 							onclick={() => applyRule(() => settings.setDealerHitsSoft17(false))}
 							class="flex-1 rounded-md py-1.5 text-sm font-semibold transition-colors
@@ -94,7 +94,7 @@
 					<div class="mb-2.5 flex items-center justify-between">
 						<span class="text-sm font-medium text-gray-100">Blackjack pays</span>
 					</div>
-					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
 						<button
 							onclick={() => applyRule(() => settings.setBlackjackPays('3:2'))}
 							class="flex-1 rounded-md py-1.5 text-sm font-semibold transition-colors
@@ -120,7 +120,7 @@
 						onclick={() => applyRule(() => settings.setPeek(!settings.peek))}
 						class="relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none {settings.peek
 							? 'bg-green-500'
-							: 'bg-gray-600'}"
+							: 'bg-zinc-600'}"
 					>
 						<span
 							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.peek
@@ -135,14 +135,14 @@
 		<!-- Player Rules -->
 		<div class="mb-6">
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Player Rules</p>
-			<div class="overflow-hidden rounded-xl bg-gray-900 divide-y divide-gray-800">
+			<div class="overflow-hidden rounded-xl bg-zinc-900 divide-y divide-zinc-800">
 
 				<!-- Surrender -->
 				<div class="px-4 py-3.5">
 					<div class="mb-2.5 flex items-center justify-between">
 						<span class="text-sm font-medium text-gray-100">Surrender</span>
 					</div>
-					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
 						<button
 							onclick={() => applyRule(() => settings.setSurrender('none'))}
 							class="flex-1 rounded-md py-1.5 text-sm font-semibold transition-colors
@@ -170,7 +170,7 @@
 						onclick={() => applyRule(() => settings.setDoubleAfterSplit(!settings.doubleAfterSplit))}
 						class="relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none {settings.doubleAfterSplit
 							? 'bg-green-500'
-							: 'bg-gray-600'}"
+							: 'bg-zinc-600'}"
 					>
 						<span
 							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.doubleAfterSplit
@@ -189,7 +189,7 @@
 						onclick={() => applyRule(() => settings.setResplitAces(!settings.resplitAces))}
 						class="relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none {settings.resplitAces
 							? 'bg-green-500'
-							: 'bg-gray-600'}"
+							: 'bg-zinc-600'}"
 					>
 						<span
 							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.resplitAces
@@ -204,12 +204,12 @@
 		<!-- Betting Limits -->
 		<div class="mb-6">
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Betting Limits</p>
-			<div class="overflow-hidden rounded-xl bg-gray-900 px-4 py-3.5 space-y-4">
+			<div class="overflow-hidden rounded-xl bg-zinc-900 px-4 py-3.5 space-y-4">
 				<div>
 					<div class="mb-2 flex items-center justify-between">
 						<span class="text-sm font-medium text-gray-100">Minimum Bet</span>
 					</div>
-					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
 						{#each MIN_BET_OPTIONS as n}
 							<button
 								onclick={() => settings.setMinBet(n as MinBetOption)}
@@ -226,7 +226,7 @@
 					<div class="mb-2 flex items-center justify-between">
 						<span class="text-sm font-medium text-gray-100">Maximum Bet</span>
 					</div>
-					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
 						{#each MAX_BET_OPTIONS as n}
 							<button
 								onclick={() => settings.setMaxBet(n as MaxBetOption)}

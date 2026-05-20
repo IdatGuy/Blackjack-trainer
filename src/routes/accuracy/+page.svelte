@@ -218,10 +218,10 @@
 
 <div class="flex h-full flex-col">
 	<!-- Header -->
-	<header class="flex items-center gap-3 border-b border-gray-800 bg-black/40 px-3 py-2">
+	<header class="flex items-center gap-3 border-b border-zinc-800 bg-black/40 px-3 py-2">
 		<button
 			onclick={() => goto('/')}
-			class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-600"
+			class="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 active:bg-gray-600"
 			aria-label="Back"
 		>
 			←
@@ -315,7 +315,7 @@
 <!-- Reset warning bottom sheet -->
 {#if showResetWarning}
 	<button class="fixed inset-0 z-40 bg-black/50" onclick={() => (showResetWarning = false)} aria-label="Cancel"></button>
-	<div class="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-gray-900 px-4 pb-8 pt-4 shadow-xl">
+	<div class="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-zinc-900 px-4 pb-8 pt-4 shadow-xl">
 		<div class="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20"></div>
 		<h3 class="mb-2 text-base font-semibold text-white">Reset Accuracy Data</h3>
 		<p class="mb-6 text-sm text-white/60">This will permanently delete all accuracy history. This cannot be undone.</p>
@@ -346,7 +346,7 @@
 	></button>
 
 	<!-- Sheet -->
-	<div class="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-gray-900 px-4 pb-8 pt-4 shadow-xl">
+	<div class="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-zinc-900 px-4 pb-8 pt-4 shadow-xl">
 		<!-- Handle -->
 		<div class="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20"></div>
 

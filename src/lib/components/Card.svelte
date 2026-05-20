@@ -38,7 +38,7 @@
 >
 	<!-- Back face — visible when faceDown=true (rotated to front) -->
 	<div
-		class="card-face card-back relative flex items-center justify-center overflow-hidden rounded-xl border border-gray-700 shadow-md"
+		class="card-face card-back relative flex items-center justify-center overflow-hidden rounded-xl border border-zinc-700 shadow-md"
 		style="background-color: #166534;"
 	>
 		<div

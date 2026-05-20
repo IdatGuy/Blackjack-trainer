@@ -119,13 +119,13 @@
 	></button>
 
 	<!-- Panel -->
-	<div class="fixed bottom-0 top-14 left-1/2 z-50 flex w-[calc(100%-1rem)] max-w-[420px] -translate-x-1/2 flex-col overflow-hidden rounded-t-2xl bg-gray-900 shadow-2xl">
+	<div class="fixed bottom-0 top-14 left-1/2 z-50 flex w-[calc(100%-1rem)] max-w-[420px] -translate-x-1/2 flex-col overflow-hidden rounded-t-2xl bg-zinc-900 shadow-2xl">
 		<!-- Header -->
-		<div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
+		<div class="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
 			<span class="text-base font-bold text-green-400">Strategy Chart</span>
 			<button
 				onclick={onclose}
-				class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white active:bg-gray-700"
+				class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-zinc-800 hover:text-white active:bg-zinc-700"
 				aria-label="Close"
 			>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -135,7 +135,7 @@
 		</div>
 
 		<!-- Tabs -->
-		<div class="flex border-b border-gray-800">
+		<div class="flex border-b border-zinc-800">
 			{#each (['hard', 'soft', 'pairs', 'insurance'] as const) as tab}
 				<button
 					onclick={() => (activeTab = tab)}
@@ -154,15 +154,15 @@
 			{#if activeTab === 'insurance'}
 				<!-- Insurance reference card -->
 				<div class="flex flex-col gap-4 px-2">
-					<div class="rounded-xl bg-gray-900 px-4 py-3.5">
+					<div class="rounded-xl bg-zinc-900 px-4 py-3.5">
 						<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Basic Strategy</p>
 						<div class="flex items-center gap-3">
-							<span class="flex h-8 min-w-[3rem] items-center justify-center rounded-lg bg-gray-700 text-sm font-bold text-gray-200">N</span>
+							<span class="flex h-8 min-w-[3rem] items-center justify-center rounded-lg bg-zinc-700 text-sm font-bold text-gray-200">N</span>
 							<p class="text-sm text-gray-300"><span class="font-semibold text-white">Always decline.</span> Insurance has a negative expected value at neutral counts.</p>
 						</div>
 					</div>
 
-					<div class="rounded-xl bg-gray-900 px-4 py-3.5">
+					<div class="rounded-xl bg-zinc-900 px-4 py-3.5">
 						<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Counting Deviation — Illustrious 18 #1</p>
 						<div class="flex flex-col gap-2">
 							<div class="flex items-center gap-3">
@@ -181,22 +181,22 @@
 						</div>
 					</div>
 
-					<div class="rounded-xl bg-gray-900 px-4 py-3.5">
+					<div class="rounded-xl bg-zinc-900 px-4 py-3.5">
 						<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Decision Summary</p>
-						<div class="overflow-hidden rounded-lg border border-gray-800">
+						<div class="overflow-hidden rounded-lg border border-zinc-800">
 							<table class="w-full border-collapse text-sm">
 								<thead>
-									<tr class="bg-gray-800/60">
+									<tr class="bg-zinc-800/60">
 										<th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">True Count</th>
 										<th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">Decision</th>
 									</tr>
 								</thead>
 								<tbody>
-									<tr class="border-t border-gray-800 {trueCount !== undefined && trueCount < 3 ? 'bg-gray-800/40' : ''}">
+									<tr class="border-t border-zinc-800 {trueCount !== undefined && trueCount < 3 ? 'bg-zinc-800/40' : ''}">
 										<td class="px-3 py-2 font-mono text-gray-300">TC &lt; +3</td>
 										<td class="px-3 py-2 font-semibold text-gray-300">Decline (N)</td>
 									</tr>
-									<tr class="border-t border-gray-800 {trueCount !== undefined && trueCount >= 3 ? 'bg-amber-900/30' : ''}">
+									<tr class="border-t border-zinc-800 {trueCount !== undefined && trueCount >= 3 ? 'bg-amber-900/30' : ''}">
 										<td class="px-3 py-2 font-mono text-gray-300">TC ≥ +3</td>
 										<td class="px-3 py-2 font-semibold text-indigo-300">Take Insurance (I)</td>
 									</tr>
@@ -238,7 +238,7 @@
 									<div class="relative m-0.5 flex h-7 w-7 shrink-0 flex-col items-center justify-center overflow-visible rounded text-[10px] font-bold leading-none
 										{highlighted
 											? 'bg-amber-400 text-amber-950 ring-2 ring-amber-500 ring-inset'
-											: cell ? cellClass(cell) : 'bg-gray-800 text-gray-600'}">
+											: cell ? cellClass(cell) : 'bg-zinc-800 text-gray-600'}">
 										{#if cell}
 											{cellLabel(cell)}
 											{#if hasDev}

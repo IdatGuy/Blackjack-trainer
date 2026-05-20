@@ -127,10 +127,10 @@
 
 <div class="flex h-full flex-col">
 	<!-- Header -->
-	<header class="flex items-center gap-3 border-b border-gray-800 bg-black/40 px-3 py-2">
+	<header class="flex items-center gap-3 border-b border-zinc-800 bg-black/40 px-3 py-2">
 		<button
 			onclick={() => goto('/')}
-			class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-600"
+			class="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 active:bg-zinc-600"
 			aria-label="Back"
 		>
 			←
@@ -143,7 +143,7 @@
 		<!-- Inputs -->
 		<div class="mb-6">
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Rules</p>
-			<div class="overflow-hidden rounded-xl bg-gray-900 divide-y divide-gray-800">
+			<div class="overflow-hidden rounded-xl bg-zinc-900 divide-y divide-zinc-800">
 				<!-- Hands -->
 				<div class="flex items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Hands</span>
@@ -153,7 +153,7 @@
 						max="100000"
 						step="1000"
 						bind:value={numHands}
-						class="w-24 rounded-lg bg-gray-800 px-2 py-1 text-right text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
+						class="w-24 rounded-lg bg-zinc-800 px-2 py-1 text-right text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
 					/>
 				</div>
 				<!-- Decks -->
@@ -161,7 +161,7 @@
 					<span class="text-sm font-medium text-gray-100">Decks</span>
 					<select
 						bind:value={decks}
-						class="rounded-lg bg-gray-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
+						class="rounded-lg bg-zinc-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
 					>
 						<option value={1}>1</option>
 						<option value={2}>2</option>
@@ -180,7 +180,7 @@
 					<span class="text-sm font-medium text-gray-100">Blackjack pays</span>
 					<select
 						bind:value={blackjackPays}
-						class="rounded-lg bg-gray-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
+						class="rounded-lg bg-zinc-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
 					>
 						<option value="3:2">3:2</option>
 						<option value="6:5">6:5</option>
@@ -193,7 +193,7 @@
 		<button
 			onclick={runSimulation}
 			disabled={running}
-			class="mb-6 w-full rounded-xl bg-gray-700 py-3 text-sm font-semibold text-white hover:bg-gray-600 active:bg-gray-800 disabled:opacity-50"
+			class="mb-6 w-full rounded-xl bg-zinc-700 py-3 text-sm font-semibold text-white hover:bg-zinc-600 active:bg-zinc-800 disabled:opacity-50"
 		>
 			{running ? 'Running…' : 'Run Simulation'}
 		</button>
@@ -204,7 +204,7 @@
 				<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
 					Results · {result.handsPlayed.toLocaleString()} hands · {result.durationMs.toFixed(0)}ms
 				</p>
-				<div class="overflow-hidden rounded-xl bg-gray-900 divide-y divide-gray-800">
+				<div class="overflow-hidden rounded-xl bg-zinc-900 divide-y divide-zinc-800">
 					<div class="flex items-center justify-between px-4 py-3">
 						<span class="text-sm text-gray-400">Wins</span>
 						<span class="text-sm font-medium text-white">{result.wins.toLocaleString()} <span class="text-gray-500">({pct(result.wins, result.handsPlayed)})</span></span>

@@ -53,9 +53,9 @@
 	}
 </script>
 
-<div class="flex h-full flex-col bg-[#111]">
+<div class="flex h-full flex-col">
 	<!-- Header -->
-	<header class="flex items-center gap-3 border-b border-white/8 bg-[#111] px-4 py-3">
+	<header class="flex items-center gap-3 border-b border-zinc-800 bg-black/40 px-4 py-3">
 		<button onclick={() => goto('/')} class="text-lg leading-none text-green-400" aria-label="Back">
 			←
 		</button>

@@ -22,9 +22,9 @@
 		S: 'bg-red-700 hover:bg-red-600 active:bg-red-800',
 		D: 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700',
 		P: 'bg-purple-600 hover:bg-purple-500 active:bg-purple-700',
-		R: 'bg-gray-600 hover:bg-gray-500 active:bg-gray-700',
+		R: 'bg-gray-600 hover:bg-gray-500 active:bg-zinc-700',
 		I: 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700',
-		N: 'bg-gray-600 hover:bg-gray-500 active:bg-gray-700'
+		N: 'bg-gray-600 hover:bg-gray-500 active:bg-zinc-700'
 	};
 
 	// ordered display sequence
@@ -83,7 +83,7 @@
 		<div class="flex justify-center">
 			<button
 				onclick={() => (hintUsed = true)}
-				class="rounded-lg border border-gray-600 px-6 py-2 text-xs font-semibold text-gray-400 transition-colors hover:border-gray-500 hover:text-gray-300 active:bg-gray-800"
+				class="rounded-lg border border-gray-600 px-6 py-2 text-xs font-semibold text-gray-400 transition-colors hover:border-gray-500 hover:text-gray-300 active:bg-zinc-800"
 			>
 				Hint
 			</button>

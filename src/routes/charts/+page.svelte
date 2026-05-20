@@ -3,10 +3,10 @@
 </script>
 
 <div class="flex h-full flex-col">
-	<header class="flex items-center gap-3 border-b border-gray-800 bg-black/40 px-3 py-2">
+	<header class="flex items-center gap-3 border-b border-zinc-800 bg-black/40 px-3 py-2">
 		<button
 			onclick={() => goto('/')}
-			class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-600"
+			class="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 active:bg-gray-600"
 			aria-label="Back"
 		>
 			←

@@ -71,7 +71,7 @@
 	}
 
 	const ADD_FUND_CHIPS: { value: number; color: string; label: string }[] = [
-		{ value: 100,  color: 'bg-gray-800  ring-gray-500',   label: '$100'  },
+		{ value: 100,  color: 'bg-zinc-800  ring-gray-500',   label: '$100'  },
 		{ value: 500,  color: 'bg-purple-700 ring-purple-500', label: '$500'  },
 		{ value: 1000, color: 'bg-yellow-600 ring-yellow-400', label: '$1K'   },
 	];
@@ -217,7 +217,7 @@
 	{/if}
 
 	<!-- Top bar: 3-column grid keeps pill perfectly centered -->
-	<header class="grid grid-cols-3 items-center border-b border-gray-800 bg-black/40 px-3 py-2">
+	<header class="grid grid-cols-3 items-center border-b border-zinc-800 bg-black/40 px-3 py-2">
 		<!-- Left: reshuffle button -->
 		<div class="flex items-center">
 			<button
@@ -317,21 +317,21 @@
 					onclick={() => (menuOpen = false)}
 					aria-label="Close menu"
 				></button>
-				<div class="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl border border-gray-700 bg-gray-900 shadow-xl">
-					<button onclick={() => { menuOpen = false; goto('/settings'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-gray-800 active:bg-gray-700">
+				<div class="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl">
+					<button onclick={() => { menuOpen = false; goto('/settings'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-zinc-800 active:bg-zinc-700">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-gray-600">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z"/>
 							<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
 						Settings
 					</button>
-					<button onclick={() => { menuOpen = false; goto('/table-rules'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-gray-800 active:bg-gray-700">
+					<button onclick={() => { menuOpen = false; goto('/table-rules'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-zinc-800 active:bg-zinc-700">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-gray-600">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
 						</svg>
 						Table Rules
 					</button>
-					<button onclick={() => { menuOpen = false; goto('/accuracy'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-gray-800 active:bg-gray-700">
+					<button onclick={() => { menuOpen = false; goto('/accuracy'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-zinc-800 active:bg-zinc-700">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-gray-600">
 							<circle cx="12" cy="12" r="9" stroke-linecap="round" stroke-linejoin="round"/>
 							<circle cx="12" cy="12" r="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -339,13 +339,13 @@
 						</svg>
 						Accuracy
 					</button>
-					<button onclick={() => { menuOpen = false; goto('/statistics'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-gray-800 active:bg-gray-700">
+					<button onclick={() => { menuOpen = false; goto('/statistics'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-zinc-800 active:bg-zinc-700">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-gray-600">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/>
 						</svg>
 						Statistics
 					</button>
-					<button onclick={() => { menuOpen = false; goto('/simulation'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-gray-800 active:bg-gray-700">
+					<button onclick={() => { menuOpen = false; goto('/simulation'); }} class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-100 hover:bg-zinc-800 active:bg-zinc-700">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-gray-600">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"/>
 						</svg>
@@ -402,7 +402,7 @@
 						onclick={() => { game.takeInsurance(insuranceHintUsed); insuranceHintUsed = false; }}
 					>Take Insurance</button>
 					<button
-						class="flex-1 rounded-lg py-3 text-sm font-bold text-white shadow transition-colors bg-gray-600 hover:bg-gray-500 active:bg-gray-700
+						class="flex-1 rounded-lg py-3 text-sm font-bold text-white shadow transition-colors bg-gray-600 hover:bg-gray-500 active:bg-zinc-700
 							{insuranceHintUsed && !insureIsCorrect ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950' : ''}"
 						onclick={() => { game.declineInsurance(insuranceHintUsed); insuranceHintUsed = false; }}
 					>Decline</button>
@@ -410,7 +410,7 @@
 				{#if settings.showHintButton && !insuranceHintUsed}
 					<button
 						onclick={() => (insuranceHintUsed = true)}
-						class="rounded-lg border border-gray-600 px-6 py-2 text-xs font-semibold text-gray-400 transition-colors hover:border-gray-500 hover:text-gray-300 active:bg-gray-800"
+						class="rounded-lg border border-gray-600 px-6 py-2 text-xs font-semibold text-gray-400 transition-colors hover:border-gray-500 hover:text-gray-300 active:bg-zinc-800"
 					>Hint</button>
 				{/if}
 			</div>
@@ -508,7 +508,7 @@
 		{:else}
 			<div class="flex flex-col items-center gap-2">
 				<span class="text-sm uppercase tracking-widest text-gray-600">Player</span>
-				<div class="h-[140px] w-[96px] rounded-lg border-2 border-dashed border-gray-700"></div>
+				<div class="h-[140px] w-[96px] rounded-lg border-2 border-dashed border-zinc-700"></div>
 			</div>
 		{/if}
 	</div>
@@ -522,7 +522,7 @@
 		aria-label="Close"
 	></button>
 	<!-- Panel -->
-	<div class="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-2xl bg-gray-900 px-6 pb-8 pt-5 shadow-2xl">
+	<div class="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-2xl bg-zinc-900 px-6 pb-8 pt-5 shadow-2xl">
 		<p class="mb-3 text-center text-sm font-semibold tracking-widest text-white">Add Funds</p>
 		<!-- Bankroll total + flash -->
 		<div class="mb-4 flex items-center justify-center gap-2">

@@ -8,7 +8,7 @@
 		{ value: 5,   color: 'bg-red-600   ring-red-400',    label: '$5'   },
 		{ value: 10,  color: 'bg-blue-600  ring-blue-400',   label: '$10'  },
 		{ value: 25,  color: 'bg-green-600 ring-green-400',  label: '$25'  },
-		{ value: 100, color: 'bg-gray-800  ring-gray-500',   label: '$100' },
+		{ value: 100, color: 'bg-zinc-800  ring-gray-500',   label: '$100' },
 		{ value: 500, color: 'bg-purple-700 ring-purple-500', label: '$500' }
 	];
 
@@ -28,7 +28,7 @@
 				class="w-10 rounded-lg py-1.5 text-xs font-bold transition-colors
 					{settings.spotCount === n
 						? 'bg-yellow-500 text-gray-900'
-						: 'bg-gray-700 text-gray-300 hover:bg-gray-600'}"
+						: 'bg-zinc-700 text-gray-300 hover:bg-gray-600'}"
 			>
 				{n}
 			</button>
@@ -67,7 +67,7 @@
 	<!-- Action buttons -->
 	<div class="flex w-full gap-3">
 		<button
-			class="flex-1 rounded-xl bg-gray-600 py-3 text-sm font-bold text-white shadow hover:bg-gray-500 active:bg-gray-700 disabled:opacity-40"
+			class="flex-1 rounded-xl bg-gray-600 py-3 text-sm font-bold text-white shadow hover:bg-gray-500 active:bg-zinc-700 disabled:opacity-40"
 			disabled={game.betAmount === 0}
 			onclick={() => game.clearBet()}
 		>

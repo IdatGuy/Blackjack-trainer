@@ -7,10 +7,10 @@
 
 <div class="flex h-full flex-col">
 	<!-- Header -->
-	<header class="flex items-center gap-3 border-b border-gray-800 bg-black/40 px-3 py-2">
+	<header class="flex items-center gap-3 border-b border-zinc-800 bg-black/40 px-3 py-2">
 		<button
 			onclick={() => goto('/')}
-			class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-600"
+			class="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 active:bg-zinc-600"
 			aria-label="Back"
 		>
 			←
@@ -26,7 +26,7 @@
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
 				Gameplay
 			</p>
-			<div class="overflow-hidden rounded-xl bg-gray-900">
+			<div class="overflow-hidden rounded-xl bg-zinc-900">
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show feedback</span>
 					<button
@@ -35,7 +35,7 @@
 						onclick={() => settings.setShowFeedback(!settings.showFeedback)}
 						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showFeedback
 							? 'bg-green-500'
-							: 'bg-gray-600'}"
+							: 'bg-zinc-600'}"
 					>
 						<span
 							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showFeedback
@@ -44,7 +44,7 @@
 						></span>
 					</button>
 				</label>
-				<hr class="border-gray-800" />
+				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Betting</span>
 					<button
@@ -53,7 +53,7 @@
 						onclick={() => settings.setBettingEnabled(!settings.bettingEnabled)}
 						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.bettingEnabled
 							? 'bg-green-500'
-							: 'bg-gray-600'}"
+							: 'bg-zinc-600'}"
 					>
 						<span
 							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.bettingEnabled
@@ -62,10 +62,10 @@
 						></span>
 					</button>
 				</label>
-				<hr class="border-gray-800" />
+				<hr class="border-zinc-800" />
 				<div class="flex items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Count display</span>
-					<div class="flex gap-1 rounded-lg bg-gray-800 p-0.5">
+					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
 						{#each ([['off', 'Off'], ['running', 'RC'], ['true', 'TC'], ['both', 'Both']] as const) as [val, label]}
 							<button
 								onclick={() => settings.setCountDisplay(val)}
@@ -77,7 +77,7 @@
 						{/each}
 					</div>
 				</div>
-				<hr class="border-gray-800" />
+				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show hand total</span>
 					<button
@@ -86,7 +86,7 @@
 						onclick={() => settings.setShowHandTotal(!settings.showHandTotal)}
 						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showHandTotal
 							? 'bg-green-500'
-							: 'bg-gray-600'}"
+							: 'bg-zinc-600'}"
 					>
 						<span
 							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showHandTotal
@@ -95,7 +95,7 @@
 						></span>
 					</button>
 				</label>
-				<hr class="border-gray-800" />
+				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show hint button</span>
 					<button
@@ -104,7 +104,7 @@
 						onclick={() => settings.setShowHintButton(!settings.showHintButton)}
 						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showHintButton
 							? 'bg-green-500'
-							: 'bg-gray-600'}"
+							: 'bg-zinc-600'}"
 					>
 						<span
 							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showHintButton
@@ -113,7 +113,7 @@
 						></span>
 					</button>
 				</label>
-				<hr class="border-gray-800" />
+				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Highlight active deviations</span>
 					<button
@@ -122,7 +122,7 @@
 						onclick={() => settings.setHighlightActiveDeviations(!settings.highlightActiveDeviations)}
 						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.highlightActiveDeviations
 							? 'bg-green-500'
-							: 'bg-gray-600'}"
+							: 'bg-zinc-600'}"
 					>
 						<span
 							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.highlightActiveDeviations
@@ -139,7 +139,7 @@
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
 				Appearance
 			</p>
-			<div class="overflow-hidden rounded-xl bg-gray-900 px-4 py-3.5">
+			<div class="overflow-hidden rounded-xl bg-zinc-900 px-4 py-3.5">
 				<div class="mb-3 flex items-center justify-between">
 					<span class="text-sm font-medium text-gray-100">Animation speed</span>
 					<span class="text-sm font-semibold text-gray-300">
