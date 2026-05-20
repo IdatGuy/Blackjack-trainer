@@ -20,6 +20,22 @@
 </script>
 
 <div class="flex flex-col items-center gap-3">
+	<!-- Spot selector -->
+	<div class="flex items-center gap-1.5">
+		{#each [1, 2, 3] as n (n)}
+			<button
+				onclick={() => settings.setSpotCount(n as 1 | 2 | 3)}
+				class="w-10 rounded-lg py-1.5 text-xs font-bold transition-colors
+					{settings.spotCount === n
+						? 'bg-yellow-500 text-gray-900'
+						: 'bg-gray-700 text-gray-300 hover:bg-gray-600'}"
+			>
+				{n}
+			</button>
+		{/each}
+		<span class="ml-1 text-xs text-gray-500">{settings.spotCount === 1 ? 'spot' : 'spots'}</span>
+	</div>
+
 	<!-- Chip row -->
 	<div class="flex items-center gap-2">
 		{#each CHIPS as chip}
@@ -38,7 +54,12 @@
 	</div>
 
 	<!-- Current bet display -->
-	<span class="text-2xl font-bold text-white">${game.betAmount}</span>
+	<div class="flex flex-col items-center gap-0.5">
+		<span class="text-2xl font-bold text-white">${game.betAmount}</span>
+		{#if settings.spotCount > 1 && game.betAmount > 0}
+			<span class="text-xs text-gray-400">{settings.spotCount} spots · ${game.betAmount * settings.spotCount} total</span>
+		{/if}
+	</div>
 
 	<!-- Table limits -->
 	<p class="text-[11px] text-gray-500">Table min {fmt(settings.minBet)} · max {fmt(settings.maxBet)}</p>
@@ -54,7 +75,7 @@
 		</button>
 		<button
 			class="flex-1 rounded-xl bg-yellow-500 py-3 text-sm font-bold text-gray-900 shadow-lg hover:bg-yellow-400 active:bg-yellow-600 disabled:opacity-40"
-			disabled={game.betAmount < settings.minBet}
+			disabled={game.betAmount < settings.minBet || game.betAmount * settings.spotCount > game.bankroll}
 			onclick={() => ondeal()}
 		>
 			Deal

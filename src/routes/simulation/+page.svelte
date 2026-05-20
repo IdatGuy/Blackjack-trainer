@@ -139,6 +139,7 @@
 	</header>
 
 	<div class="flex-1 overflow-y-auto px-4 py-4">
+	<div class="mx-auto w-full max-w-lg">
 		<!-- Inputs -->
 		<div class="mb-6">
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Rules</p>
@@ -237,5 +238,6 @@
 				</div>
 			</div>
 		{/if}
+	</div>
 	</div>
 </div>

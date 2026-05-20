@@ -60,6 +60,15 @@
 	let menuOpen = $state(false);
 	let chartOpen = $state(false);
 	let addFundsOpen = $state(false);
+	let lastFundsAdded = $state<number | null>(null);
+	let fundsAddedTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function onAddFunds(amount: number) {
+		game.addFunds(amount);
+		lastFundsAdded = amount;
+		if (fundsAddedTimer) clearTimeout(fundsAddedTimer);
+		fundsAddedTimer = setTimeout(() => { lastFundsAdded = null; }, 1500);
+	}
 
 	const ADD_FUND_CHIPS: { value: number; color: string; label: string }[] = [
 		{ value: 100,  color: 'bg-gray-800  ring-gray-500',   label: '$100'  },
@@ -514,12 +523,19 @@
 	></button>
 	<!-- Panel -->
 	<div class="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-2xl bg-gray-900 px-6 pb-8 pt-5 shadow-2xl">
-		<p class="mb-4 text-center text-sm font-semibold tracking-widest text-white">Add Funds</p>
+		<p class="mb-3 text-center text-sm font-semibold tracking-widest text-white">Add Funds</p>
+		<!-- Bankroll total + flash -->
+		<div class="mb-4 flex items-center justify-center gap-2">
+			<span class="text-3xl font-bold text-yellow-400">${game.bankroll.toLocaleString()}</span>
+			{#if lastFundsAdded !== null}
+				<span class="text-base font-bold text-green-400">+${lastFundsAdded.toLocaleString()}</span>
+			{/if}
+		</div>
 		<div class="flex items-center justify-center gap-4">
 			{#each ADD_FUND_CHIPS as chip}
 				<button
-					class="relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg ring-2 ring-inset transition-opacity {chip.color}"
-					onclick={() => game.addFunds(chip.value)}
+					class="relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg ring-2 ring-inset transition-opacity active:scale-95 {chip.color}"
+					onclick={() => onAddFunds(chip.value)}
 				>
 					<span class="pointer-events-none absolute inset-[5px] rounded-full ring-1 ring-white/30"></span>
 					{chip.label}

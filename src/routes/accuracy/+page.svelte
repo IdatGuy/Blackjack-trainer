@@ -248,6 +248,7 @@
 
 	<!-- Scrollable content -->
 	<div class="flex-1 overflow-y-auto p-3">
+	<div class="mx-auto w-full max-w-lg">
 		<!-- Time filter (shared across tabs) -->
 		<TimeFilter value={timeFilter} onchange={(v) => (timeFilter = v)} />
 
@@ -303,6 +304,7 @@
 		{:else if activeTab === 'all'}
 			<CategoryStats stats={categoryStats} />
 		{/if}
+	</div>
 	</div>
 </div>
 

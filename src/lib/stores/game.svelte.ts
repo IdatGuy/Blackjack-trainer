@@ -216,13 +216,13 @@ class GameStore {
 			correct: expected === actual,
 			hintShown: hintUsed,
 			category: 'insurance',
-			betAmount: activeHand.bet
+			betAmount: this.state.playerHands.reduce((sum, h) => sum + h.bet, 0)
 		});
 	}
 
 	takeInsurance(hintUsed = false) {
 		if (this.state.phase !== 'insurance') return;
-		const insAmt = Math.floor(this.state.playerHands[0].bet / 2);
+		const insAmt = Math.floor(this.state.playerHands.reduce((sum, h) => sum + h.bet, 0) / 2);
 		this.insuranceBet = insAmt;
 		if (settings.bettingEnabled && insAmt > 0) {
 			this.bankroll = Math.round((this.bankroll - insAmt) * 100) / 100;
