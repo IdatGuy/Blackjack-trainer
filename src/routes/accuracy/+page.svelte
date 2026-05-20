@@ -28,7 +28,11 @@
 	const PAIR_ROWS = ['AA', '22', '33', '44', '55', '66', '77', '88', '99', 'TT'];
 
 	function cellLabel(cell: ChartCell): string {
-		if (cell.base === 'R') return 'X';
+		if (cell.base === 'R') {
+			if (cell.fallback === 'S') return 'Rs';
+			if (cell.fallback === 'P') return 'Rp';
+			return 'Rh';
+		}
 		if (cell.base === 'D') return cell.fallback === 'S' ? 'Ds' : 'D';
 		return cell.base;
 	}

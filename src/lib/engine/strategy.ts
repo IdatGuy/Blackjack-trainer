@@ -27,6 +27,7 @@ const Ds = (): ChartCell => ({ base: 'D', fallback: 'S' }); // double else stand
 const P = (): ChartCell => ({ base: 'P' });
 const R = (): ChartCell => ({ base: 'R', fallback: 'H' }); // surrender else hit
 const Rs = (): ChartCell => ({ base: 'R', fallback: 'S' }); // surrender else stand
+const Rp = (): ChartCell => ({ base: 'R', fallback: 'P' }); // surrender else split
 
 // Dealer upcards used as column keys
 const UPCARDS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'A'] as const;
@@ -72,8 +73,8 @@ function makeSoft(): Record<string, Record<string, ChartCell>> {
 		A4: row([H(), H(), D(), D(), D(), H(), H(), H(), H(), H()]),
 		A5: row([H(), H(), D(), D(), D(), H(), H(), H(), H(), H()]),
 		A6: row([H(), D(), D(), D(), D(), H(), H(), H(), H(), H()]),
-		A7: row([S(), Ds(), Ds(), D(), D(), S(), S(), H(), H(), H()]),
-		A8: row([S(), S(), S(), S(), Ds(), S(), S(), S(), S(), S()]),
+		A7: row([S(), Ds(), Ds(), Ds(), Ds(), S(), S(), H(), H(), H()]),
+		A8: row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
 		A9: row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()])
 	};
 }
@@ -128,12 +129,15 @@ function apply1DPatch(
 
 function applyH17Patch(
 	hard: Record<string, Record<string, ChartCell>>,
-	soft: Record<string, Record<string, ChartCell>>
+	soft: Record<string, Record<string, ChartCell>>,
+	pairs: Record<string, Record<string, ChartCell>>
 ): void {
 	hard['11']['A'] = D();
 	hard['15']['A'] = R(); // basic strategy surrender in H17
 	hard['17']['A'] = Rs(); // basic strategy surrender in H17
 	soft['A7']['2'] = Ds();
+	soft['A8']['6'] = Ds();
+	pairs['88']['A'] = Rp();
 }
 
 function applyNoDASPatch(pairs: Record<string, Record<string, ChartCell>>): void {
@@ -208,7 +212,7 @@ function buildChartForRules(rules: RuleSet): StrategyChart {
 	if (rules.decks === 1) apply1DPatch(hard, soft);
 	else if (rules.decks === 2) apply2DPatch(hard, soft);
 
-	if (rules.dealerHitsSoft17) applyH17Patch(hard, soft);
+	if (rules.dealerHitsSoft17) applyH17Patch(hard, soft, pairs);
 	if (!rules.doubleAfterSplit) applyNoDASPatch(pairs);
 	if (rules.surrender === 'none') applyNoSurrenderPatch(hard);
 

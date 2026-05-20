@@ -29,13 +29,18 @@
 	}
 
 	function actionLabel(action: import('$lib/engine/rules.js').Action): string {
-		if (action === 'R') return 'Xh';
+		if (action === 'R') return 'Rh';
 		return action;
 	}
 
 	function cellLabel(cell: ChartCell): string {
 		if (cell.base === 'D') return cell.fallback === 'S' ? 'Ds' : 'Dh';
-		return actionLabel(cell.base);
+		if (cell.base === 'R') {
+			if (cell.fallback === 'S') return 'Rs';
+			if (cell.fallback === 'P') return 'Rp';
+			return 'Rh';
+		}
+		return cell.base;
 	}
 
 	function cellClass(cell: ChartCell): string {
@@ -76,6 +81,33 @@
 	);
 
 	const tcActive = $derived(trueCount !== undefined && trueCount >= 3);
+
+	const LEGEND_ITEMS: Array<{ label: string; swatchClass: string; desc: string }> = [
+		{ label: 'H',  swatchClass: 'bg-amber-300 text-amber-950',   desc: 'Hit' },
+		{ label: 'S',  swatchClass: 'bg-rose-300 text-rose-950',     desc: 'Stand' },
+		{ label: 'Dh', swatchClass: 'bg-sky-300 text-sky-950',       desc: 'Double or hit' },
+		{ label: 'Ds', swatchClass: 'bg-sky-300 text-sky-950',       desc: 'Double or stand' },
+		{ label: 'P',  swatchClass: 'bg-teal-300 text-teal-950',     desc: 'Split' },
+		{ label: 'Rh', swatchClass: 'bg-violet-300 text-violet-950', desc: 'Surrender or hit' },
+		{ label: 'Rs', swatchClass: 'bg-violet-300 text-violet-950', desc: 'Surrender or stand' },
+		{ label: 'Rp', swatchClass: 'bg-violet-300 text-violet-950', desc: 'Surrender or split' },
+	];
+
+	const activeLegendLabels = $derived((() => {
+		const labels = new Set<string>();
+		for (const row of Object.values(section)) {
+			for (const cell of Object.values(row)) {
+				labels.add(cellLabel(cell));
+			}
+		}
+		return labels;
+	})());
+
+	const sectionHasDeviations = $derived(
+		Object.values(section).some(row =>
+			Object.values(row).some(cell => (cell.deviations?.length ?? 0) > 0)
+		)
+	);
 </script>
 
 {#if open}
@@ -228,34 +260,18 @@
 
 				<!-- Legend -->
 				<div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 px-1">
-					<div class="flex items-center gap-1.5">
-						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-amber-300 text-[10px] font-bold text-amber-950">H</span>
-						<span class="text-xs text-gray-400">Hit</span>
-					</div>
-					<div class="flex items-center gap-1.5">
-						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-sky-300 text-[10px] font-bold text-sky-950">Dh</span>
-						<span class="text-xs text-gray-400">Double or hit</span>
-					</div>
-					<div class="flex items-center gap-1.5">
-						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-sky-300 text-[10px] font-bold text-sky-950">Ds</span>
-						<span class="text-xs text-gray-400">Double or stand</span>
-					</div>
-					<div class="flex items-center gap-1.5">
-						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-rose-300 text-[10px] font-bold text-rose-950">S</span>
-						<span class="text-xs text-gray-400">Stand</span>
-					</div>
-					<div class="flex items-center gap-1.5">
-						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-teal-300 text-[10px] font-bold text-teal-950">P</span>
-						<span class="text-xs text-gray-400">Split</span>
-					</div>
-					<div class="flex items-center gap-1.5">
-						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-violet-300 text-[10px] font-bold text-violet-950">Xh</span>
-						<span class="text-xs text-gray-400">Surrender or hit</span>
-					</div>
-					<div class="flex items-center gap-1.5">
-						<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-amber-400 text-[10px] font-bold text-amber-950 ring-2 ring-amber-500 ring-inset">S</span>
-						<span class="text-xs text-gray-400">Deviation active</span>
-					</div>
+					{#each LEGEND_ITEMS.filter(item => activeLegendLabels.has(item.label)) as item}
+						<div class="flex items-center gap-1.5">
+							<span class="flex h-5 w-7 items-center justify-center rounded-sm {item.swatchClass} text-[10px] font-bold">{item.label}</span>
+							<span class="text-xs text-gray-400">{item.desc}</span>
+						</div>
+					{/each}
+					{#if sectionHasDeviations}
+						<div class="flex items-center gap-1.5">
+							<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-amber-400 text-[10px] font-bold text-amber-950 ring-2 ring-amber-500 ring-inset">S</span>
+							<span class="text-xs text-gray-400">Deviation active</span>
+						</div>
+					{/if}
 				</div>
 			{/if}
 		</div>

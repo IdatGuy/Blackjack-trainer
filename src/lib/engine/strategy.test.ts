@@ -117,9 +117,9 @@ describe('soft totals — basic strategy', () => {
 		const action = getCorrectAction(hand([card('A'), card('7')]), card('T'), shoe(), rules);
 		expect(action).toBe('H');
 	});
-	it('soft 19 (A8) vs 6: double', () => {
+	it('soft 19 (A8) vs 6: stand', () => {
 		const action = getCorrectAction(hand([card('A'), card('8')]), card('6'), shoe(), rules);
-		expect(action).toBe('D');
+		expect(action).toBe('S');
 	});
 	it('soft 20 (A9) vs 6: stand', () => {
 		const action = getCorrectAction(hand([card('A'), card('9')]), card('6'), shoe(), rules);
@@ -297,6 +297,14 @@ describe('H17 chart differences', () => {
 	it('soft 18 (A7) vs 2: double-else-stand (H17)', () => {
 		const action = getCorrectAction(hand([card('A'), card('7')]), card('2'), shoe(), h17);
 		expect(action).toBe('D');
+	});
+	it('soft 19 (A8) vs 6: double-else-stand (H17)', () => {
+		const action = getCorrectAction(hand([card('A'), card('8')]), card('6'), shoe(), h17);
+		expect(action).toBe('D');
+	});
+	it('pair 8-8 vs A: surrender-else-split (H17)', () => {
+		const action = getCorrectAction(hand([card('8'), card('8')]), card('A'), shoe(), h17);
+		expect(action).toBe('R');
 	});
 	it('hard 11 vs A: I-18 #9 is not a deviation in H17 (already basic strategy)', () => {
 		// In H17, doubling 11 vs A is basic strategy so should not appear as a deviation
