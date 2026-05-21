@@ -213,9 +213,19 @@ class GameStore {
 			this.synthesizedTC = settings.countingEnabled ? synthesizedCell.tc : null;
 			// Prepend synthesized cards so dealHand picks them in deal order:
 			// shoe[0]=p1 (player card 1), shoe[1]=dUp (dealer upcard), shoe[2]=p2 (player card 2)
+			let shoeCards = this.state.shoe.cards;
+			// Prevent wasted drill reps: 10-value up + ace hole = instant dealer BJ, no player decision.
+			// Ace-up hands are kept as-is (insurance decision is still useful practice).
+			if (['T', 'J', 'Q', 'K'].includes(dUp.rank) && shoeCards[0]?.rank === 'A') {
+				const firstNonAce = shoeCards.findIndex((c) => c.rank !== 'A');
+				if (firstNonAce > 0) {
+					shoeCards = [...shoeCards];
+					[shoeCards[0], shoeCards[firstNonAce]] = [shoeCards[firstNonAce], shoeCards[0]];
+				}
+			}
 			this.state = {
 				...this.state,
-				shoe: { ...this.state.shoe, cards: [p1, dUp, p2, ...this.state.shoe.cards] }
+				shoe: { ...this.state.shoe, cards: [p1, dUp, p2, ...shoeCards] }
 			};
 		} else {
 			this.synthesizedTC = null;
