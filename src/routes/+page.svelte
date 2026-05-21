@@ -369,7 +369,7 @@
 	</header>
 
 	<!-- Shoe penetration bar -->
-	{#if settings.countingEnabled}
+	{#if settings.countingEnabled && !settings.weaknessWeighting}
 		<div class="h-[3px] w-full bg-white/10">
 			<div
 				class="h-full transition-all duration-300

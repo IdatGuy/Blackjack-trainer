@@ -354,7 +354,7 @@ class GameStore {
 	}
 
 	nextHand() {
-		const autoReshuffle = shouldReshuffle(this.state.shoe);
+		const autoReshuffle = !settings.weaknessWeighting && shouldReshuffle(this.state.shoe);
 		this.state = {
 			...this.state,
 			shoe: autoReshuffle ? resetShoe(this.state.shoe) : this.state.shoe,
