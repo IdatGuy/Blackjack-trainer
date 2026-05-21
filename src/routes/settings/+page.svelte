@@ -63,21 +63,6 @@
 					</button>
 				</label>
 				<hr class="border-zinc-800" />
-				<div class="flex items-center justify-between px-4 py-3.5">
-					<span class="text-sm font-medium text-gray-100">Count display</span>
-					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
-						{#each ([['off', 'Off'], ['running', 'RC'], ['true', 'TC'], ['both', 'Both']] as const) as [val, label]}
-							<button
-								onclick={() => settings.setCountDisplay(val)}
-								class="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors
-									{settings.countDisplay === val
-										? 'bg-white text-gray-900'
-										: 'text-gray-400 hover:text-gray-200'}"
-							>{label}</button>
-						{/each}
-					</div>
-				</div>
-				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show hand total</span>
 					<button
@@ -113,8 +98,49 @@
 						></span>
 					</button>
 				</label>
-				<hr class="border-zinc-800" />
+			</div>
+		</div>
+
+		<!-- Counting section -->
+		<div class="mb-6">
+			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+				Counting
+			</p>
+			<div class="overflow-hidden rounded-xl bg-zinc-900">
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
+					<span class="text-sm font-medium text-gray-100">Enable card counting</span>
+					<button
+						role="switch"
+						aria-checked={settings.countingEnabled}
+						onclick={() => settings.setCountingEnabled(!settings.countingEnabled)}
+						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.countingEnabled
+							? 'bg-green-500'
+							: 'bg-zinc-600'}"
+					>
+						<span
+							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.countingEnabled
+								? 'translate-x-5'
+								: 'translate-x-0'}"
+						></span>
+					</button>
+				</label>
+				<hr class="border-zinc-800" />
+				<div class="flex items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
+					<span class="text-sm font-medium text-gray-100">Count display</span>
+					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
+						{#each ([['off', 'Off'], ['running', 'RC'], ['true', 'TC'], ['both', 'Both']] as const) as [val, label]}
+							<button
+								onclick={() => settings.setCountDisplay(val)}
+								class="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors
+									{settings.countDisplay === val
+										? 'bg-white text-gray-900'
+										: 'text-gray-400 hover:text-gray-200'}"
+							>{label}</button>
+						{/each}
+					</div>
+				</div>
+				<hr class="border-zinc-800" />
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
 					<span class="text-sm font-medium text-gray-100">Highlight active deviations</span>
 					<button
 						role="switch"

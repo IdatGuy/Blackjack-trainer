@@ -12,6 +12,7 @@ class SettingsStore {
 	animationSpeed = $state(3); // 0=instant, 1–5
 	showFeedback = $state(true);
 	bettingEnabled = $state(true);
+	countingEnabled = $state(true);
 	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('both');
 	showHintButton = $state(false);
 	highlightActiveDeviations = $state(true);
@@ -36,6 +37,7 @@ class SettingsStore {
 					if (typeof data.animationSpeed === 'number') this.animationSpeed = data.animationSpeed;
 					if (typeof data.showFeedback === 'boolean') this.showFeedback = data.showFeedback;
 					if (typeof data.bettingEnabled === 'boolean') this.bettingEnabled = data.bettingEnabled;
+					if (typeof data.countingEnabled === 'boolean') this.countingEnabled = data.countingEnabled;
 					if (['off', 'running', 'true', 'both'].includes(data.countDisplay)) {
 						this.countDisplay = data.countDisplay;
 					}
@@ -88,6 +90,11 @@ class SettingsStore {
 
 	setBettingEnabled(v: boolean) {
 		this.bettingEnabled = v;
+		this.persist();
+	}
+
+	setCountingEnabled(v: boolean) {
+		this.countingEnabled = v;
 		this.persist();
 	}
 
@@ -171,6 +178,7 @@ class SettingsStore {
 					animationSpeed: this.animationSpeed,
 					showFeedback: this.showFeedback,
 					bettingEnabled: this.bettingEnabled,
+					countingEnabled: this.countingEnabled,
 					countDisplay: this.countDisplay,
 					showHintButton: this.showHintButton,
 					highlightActiveDeviations: this.highlightActiveDeviations,

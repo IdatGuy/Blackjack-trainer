@@ -235,7 +235,7 @@
 
 		<!-- Center: count / bankroll pill (tap to toggle when count is on) -->
 		<div class="flex items-center justify-center gap-1.5">
-			{#if settings.countDisplay !== 'off'}
+			{#if settings.countDisplay !== 'off' && settings.countingEnabled}
 				<button
 					onclick={() => (showBankroll = !showBankroll)}
 					class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow transition-colors hover:bg-gray-100 active:bg-gray-200"
@@ -351,13 +351,15 @@
 	</header>
 
 	<!-- Shoe penetration bar -->
-	<div class="h-[3px] w-full bg-white/10">
-		<div
-			class="h-full transition-all duration-300
-				{shoePenetration < 0.6 ? 'bg-green-500/70' : shoePenetration < 0.75 ? 'bg-amber-400/80' : 'bg-red-500/80'}"
-			style="width: {shoePenetration * 100}%"
-		></div>
-	</div>
+	{#if settings.countingEnabled}
+		<div class="h-[3px] w-full bg-white/10">
+			<div
+				class="h-full transition-all duration-300
+					{shoePenetration < 0.6 ? 'bg-green-500/70' : shoePenetration < 0.75 ? 'bg-amber-400/80' : 'bg-red-500/80'}"
+				style="width: {shoePenetration * 100}%"
+			></div>
+		</div>
+	{/if}
 
 	<!-- Dealer area -->
 	<div class="flex flex-1 flex-col items-center justify-center py-6">

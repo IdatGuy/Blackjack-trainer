@@ -162,6 +162,7 @@
 						</div>
 					</div>
 
+					{#if settings.countingEnabled}
 					<div class="rounded-xl bg-zinc-900 px-4 py-3.5">
 						<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Counting Deviation — Illustrious 18 #1</p>
 						<div class="flex flex-col gap-2">
@@ -204,6 +205,7 @@
 							</table>
 						</div>
 					</div>
+					{/if}
 				</div>
 			{:else}
 				<div class="flex gap-1">
@@ -234,14 +236,14 @@
 									{@const cell = section[key]?.[up]}
 									{@const devFiring = cell ? activeDeviation(cell, trueCount) : null}
 									{@const hasDev = cell ? hasDeviation(cell) : false}
-									{@const highlighted = devFiring !== null && settings.highlightActiveDeviations}
+									{@const highlighted = devFiring !== null && settings.highlightActiveDeviations && settings.countingEnabled}
 									<div class="relative m-0.5 flex h-7 w-7 shrink-0 flex-col items-center justify-center overflow-visible rounded text-[10px] font-bold leading-none
 										{highlighted
 											? 'bg-amber-400 text-amber-950 ring-2 ring-amber-500 ring-inset'
 											: cell ? cellClass(cell) : 'bg-zinc-800 text-gray-600'}">
 										{#if cell}
 											{cellLabel(cell)}
-											{#if hasDev}
+											{#if hasDev && settings.countingEnabled}
 												{@const firstDev = cell.deviations![0]}
 												<span class="text-[8px] leading-none opacity-70">{actionLabel(firstDev.action)}{firstDev.above ? '≥' : '≤'}{firstDev.tc > 0 ? '+' : ''}{firstDev.tc}</span>
 											{/if}
@@ -261,7 +263,7 @@
 							<span class="text-xs text-gray-400">{item.desc}</span>
 						</div>
 					{/each}
-					{#if sectionHasDeviations}
+					{#if sectionHasDeviations && settings.countingEnabled}
 						<div class="flex items-center gap-1.5">
 							<span class="flex h-5 w-7 items-center justify-center rounded-sm bg-amber-400 text-[10px] font-bold text-amber-950 ring-2 ring-amber-500 ring-inset">S</span>
 							<span class="text-xs text-gray-400">Deviation active</span>
