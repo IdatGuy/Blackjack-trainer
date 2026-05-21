@@ -2,7 +2,7 @@ import type { Card, Rank } from './card.js';
 import type { ChartCell, StrategyChart } from './strategy.js';
 
 export type DrillFilter = {
-	handType: 'all' | 'hard' | 'soft' | 'pair';
+	handTypes: Array<'hard' | 'soft' | 'pair'>;
 	hardMin: number;
 	hardMax: number;
 	softMin: number; // soft total (13 = A2, 20 = A9)
@@ -20,7 +20,7 @@ export type SynthesizedCell = {
 export const PAIR_RANKS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'A'];
 
 export const DEFAULT_DRILL_FILTER: DrillFilter = {
-	handType: 'all',
+	handTypes: ['hard', 'soft', 'pair'],
 	hardMin: 5,
 	hardMax: 21,
 	softMin: 13,
@@ -100,7 +100,7 @@ function passesFilter(
 	playerKey: string,
 	filter: DrillFilter
 ): boolean {
-	if (filter.handType !== 'all' && filter.handType !== handType) return false;
+	if (!filter.handTypes.includes(handType)) return false;
 	if (handType === 'hard') {
 		const total = parseInt(playerKey, 10);
 		return total >= filter.hardMin && total <= filter.hardMax;

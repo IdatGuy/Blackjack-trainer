@@ -9,8 +9,13 @@
 	function togglePairRank(rank: Rank) {
 		const cur = settings.drillFilter.pairRanks;
 		const next = cur.includes(rank) ? cur.filter(r => r !== rank) : [...cur, rank];
-		// Keep at least one rank selected
 		if (next.length > 0) settings.setDrillFilter({ pairRanks: next });
+	}
+
+	function toggleHandType(type: 'hard' | 'soft' | 'pair') {
+		const cur = settings.drillFilter.handTypes;
+		const next = cur.includes(type) ? cur.filter(t => t !== type) : [...cur, type];
+		if (next.length > 0) settings.setDrillFilter({ handTypes: next });
 	}
 </script>
 
@@ -198,15 +203,15 @@
 
 				{#if settings.weaknessWeighting}
 					<hr class="border-zinc-800" />
-					<!-- Hand type filter -->
+					<!-- Hand type filter — multi-select -->
 					<div class="px-4 py-3.5">
 						<p class="mb-2.5 text-xs font-medium text-gray-400">Filter</p>
 						<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
-							{#each ([['all', 'All'], ['hard', 'Hard'], ['soft', 'Soft'], ['pair', 'Pairs']] as const) as [val, label]}
+							{#each ([['hard', 'Hard'], ['soft', 'Soft'], ['pair', 'Pairs']] as const) as [val, label]}
 								<button
-									onclick={() => settings.setDrillFilter({ handType: val })}
+									onclick={() => toggleHandType(val)}
 									class="flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors
-										{settings.drillFilter.handType === val
+										{settings.drillFilter.handTypes.includes(val)
 											? 'bg-white text-gray-900'
 											: 'text-gray-400 hover:text-gray-200'}"
 								>{label}</button>
@@ -214,7 +219,7 @@
 						</div>
 					</div>
 
-					{#if settings.drillFilter.handType === 'hard'}
+					{#if settings.drillFilter.handTypes.includes('hard')}
 						<hr class="border-zinc-800" />
 						<div class="px-4 py-3.5">
 							<div class="flex items-center justify-between mb-2">
@@ -250,7 +255,9 @@
 								</div>
 							</div>
 						</div>
-					{:else if settings.drillFilter.handType === 'soft'}
+					{/if}
+
+					{#if settings.drillFilter.handTypes.includes('soft')}
 						<hr class="border-zinc-800" />
 						<div class="px-4 py-3.5">
 							<div class="flex items-center justify-between mb-2">
@@ -286,7 +293,9 @@
 								</div>
 							</div>
 						</div>
-					{:else if settings.drillFilter.handType === 'pair'}
+					{/if}
+
+					{#if settings.drillFilter.handTypes.includes('pair')}
 						<hr class="border-zinc-800" />
 						<div class="px-4 py-3.5">
 							<p class="mb-2.5 text-xs font-medium text-gray-400">Pair ranks</p>

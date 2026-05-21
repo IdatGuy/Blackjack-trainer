@@ -78,17 +78,27 @@ class SettingsStore {
 					}
 					if (data.drillFilter && typeof data.drillFilter === 'object') {
 						const f = data.drillFilter;
-						const ht = f.handType;
-						if (['all', 'hard', 'soft', 'pair'].includes(ht)) {
-							this.drillFilter = {
-								handType: ht,
-								hardMin: typeof f.hardMin === 'number' ? f.hardMin : DEFAULT_DRILL_FILTER.hardMin,
-								hardMax: typeof f.hardMax === 'number' ? f.hardMax : DEFAULT_DRILL_FILTER.hardMax,
-								softMin: typeof f.softMin === 'number' ? f.softMin : DEFAULT_DRILL_FILTER.softMin,
-								softMax: typeof f.softMax === 'number' ? f.softMax : DEFAULT_DRILL_FILTER.softMax,
-								pairRanks: Array.isArray(f.pairRanks) ? (f.pairRanks as Rank[]).filter(r => PAIR_RANKS.includes(r)) : [...PAIR_RANKS]
-							};
+						const VALID_TYPES = ['hard', 'soft', 'pair'] as const;
+						let handTypes: Array<'hard' | 'soft' | 'pair'>;
+						if (Array.isArray(f.handTypes)) {
+							const filtered = (f.handTypes as unknown[]).filter(
+								(t): t is 'hard' | 'soft' | 'pair' => VALID_TYPES.includes(t as 'hard' | 'soft' | 'pair')
+							);
+							handTypes = filtered.length > 0 ? filtered : [...DEFAULT_DRILL_FILTER.handTypes];
+						} else if (['all', 'hard', 'soft', 'pair'].includes(f.handType)) {
+							// migrate old single-select format
+							handTypes = f.handType === 'all' ? [...VALID_TYPES] : [f.handType as 'hard' | 'soft' | 'pair'];
+						} else {
+							handTypes = [...DEFAULT_DRILL_FILTER.handTypes];
 						}
+						this.drillFilter = {
+							handTypes,
+							hardMin: typeof f.hardMin === 'number' ? f.hardMin : DEFAULT_DRILL_FILTER.hardMin,
+							hardMax: typeof f.hardMax === 'number' ? f.hardMax : DEFAULT_DRILL_FILTER.hardMax,
+							softMin: typeof f.softMin === 'number' ? f.softMin : DEFAULT_DRILL_FILTER.softMin,
+							softMax: typeof f.softMax === 'number' ? f.softMax : DEFAULT_DRILL_FILTER.softMax,
+							pairRanks: Array.isArray(f.pairRanks) ? (f.pairRanks as Rank[]).filter(r => PAIR_RANKS.includes(r)) : [...PAIR_RANKS]
+						};
 					}
 				} catch {
 					/* ignore malformed */
