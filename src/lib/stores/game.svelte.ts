@@ -14,7 +14,14 @@ import {
 import { handKey, handType, handValue, isBlackjack, makeHand } from '$lib/engine/hand.js';
 import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
 import { buildShoe, dealCard, resetShoe, shouldReshuffle, trueCount } from '$lib/engine/shoe.js';
-import { getBaseAction, getCorrectAction, getInsuranceAction } from '$lib/engine/strategy.js';
+import { getBaseAction, getChartForRules, getCorrectAction, getInsuranceAction } from '$lib/engine/strategy.js';
+import {
+	buildDealerCard,
+	buildPlayerCards,
+	sampleWeightedCell,
+	synthesizeTC
+} from '$lib/engine/synthesizer.js';
+import { getWeaknessWeights } from '$lib/db/accuracy.js';
 import { browser } from '$app/environment';
 import { saveDecisions } from '$lib/db/persist.js';
 import type { DecisionRecord } from '$lib/db/schema.js';
@@ -91,6 +98,16 @@ class GameStore {
 	insuranceBet = $state(0);
 	insuranceResult = $state<'win' | 'loss' | null>(null);
 	_pending: PendingDecision[] = [];
+	synthesizedTC = $state<number | null>(null);
+	_weaknessWeights = $state(new Map<string, number>());
+
+	constructor() {
+		if (browser) this._prefetchWeights();
+	}
+
+	async _prefetchWeights() {
+		this._weaknessWeights = await getWeaknessWeights();
+	}
 
 	_persistBankroll() {
 		if (browser) localStorage.setItem('bj-bankroll', String(this.bankroll));
@@ -141,7 +158,7 @@ class GameStore {
 
 	_flushDecisions(results: ResolvedHand[]) {
 		if (this._pending.length === 0) return;
-		const bankrollTracked = settings.bettingEnabled;
+		const bankrollTracked = settings.bettingEnabled && !settings.weaknessWeighting;
 		const completed: DecisionRecord[] = this._pending.map((pd) => {
 			if (pd.category === 'insurance') {
 				return {
@@ -178,11 +195,33 @@ class GameStore {
 			const prev = parseInt(localStorage.getItem('bj-hands-dealt') ?? '0', 10);
 			localStorage.setItem('bj-hands-dealt', String(prev + 1));
 		}
-		if (settings.bettingEnabled) {
+		if (settings.bettingEnabled && !settings.weaknessWeighting) {
 			const totalBet = this.betAmount * settings.spotCount;
 			this.bankroll = Math.round((this.bankroll - totalBet) * 100) / 100;
 			this._persistBankroll();
 			this._setFlash(-totalBet);
+		}
+		if (settings.weaknessWeighting) {
+			const chart = getChartForRules(this.state.rules);
+			const { handType, playerKey, dealerUp } = sampleWeightedCell(
+				chart,
+				this._weaknessWeights,
+				settings.drillFilter
+			);
+			const [p1, p2] = buildPlayerCards(handType, playerKey);
+			const dUp = buildDealerCard(dealerUp);
+			const section = handType === 'pair' ? chart.pairs : handType === 'soft' ? chart.soft : chart.hard;
+			const cell = section[playerKey]?.[dealerUp];
+			this.synthesizedTC =
+				settings.countingEnabled && cell?.deviations?.length ? synthesizeTC(cell) : null;
+			// Prepend synthesized cards so dealHand picks them in deal order:
+			// shoe[0]=p1 (player card 1), shoe[1]=dUp (dealer upcard), shoe[2]=p2 (player card 2)
+			this.state = {
+				...this.state,
+				shoe: { ...this.state.shoe, cards: [p1, dUp, p2, ...this.state.shoe.cards] }
+			};
+		} else {
+			this.synthesizedTC = null;
 		}
 		this.state = dealHand(this.state, Array.from({ length: settings.spotCount }, () => this.betAmount));
 		this._maybeAutoFinish();
@@ -207,7 +246,7 @@ class GameStore {
 			handIndex: 0,
 			ruleSetId: this.state.rules.id,
 			mode: 'standard',
-			playMode: 'shoe',
+			playMode: settings.weaknessWeighting ? 'drill' : 'shoe',
 			handType: type,
 			playerTotal: handValue(activeHand.cards),
 			dealerUp: 'A',
@@ -255,7 +294,10 @@ class GameStore {
 			activeHand,
 			dealerUp,
 			this.state.shoe,
-			this.state.rules
+			this.state.rules,
+			undefined,
+			0,
+			this.synthesizedTC ?? undefined
 		);
 		const base = getBaseAction(activeHand, dealerUp, this.state.shoe, this.state.rules);
 
@@ -289,11 +331,11 @@ class GameStore {
 			handIndex: this.state.activeHandIndex,
 			ruleSetId: this.state.rules.id,
 			mode: 'standard',
-			playMode: 'shoe',
+			playMode: settings.weaknessWeighting ? 'drill' : 'shoe',
 			handType: type,
 			playerTotal,
 			dealerUp: dealerUp.rank,
-			trueCount: trueCount(this.state.shoe),
+			trueCount: this.synthesizedTC !== null ? this.synthesizedTC : trueCount(this.state.shoe),
 			expected,
 			actual: action,
 			correct: expected === action,
@@ -326,7 +368,9 @@ class GameStore {
 		this._pending = [];
 		this.insuranceBet = 0;
 		this.insuranceResult = null;
+		this.synthesizedTC = null;
 		// betAmount intentionally preserved — defaults to last bet
+		if (browser && settings.weaknessWeighting) this._prefetchWeights();
 	}
 
 	reshuffle() {
@@ -380,7 +424,15 @@ class GameStore {
 		if (this.state.phase !== 'player' || this.state.playerHands.length === 0) return null;
 		const activeHand = this.state.playerHands[this.state.activeHandIndex];
 		if (!activeHand) return null;
-		return getCorrectAction(activeHand, this.state.dealerHand.cards[0], this.state.shoe, this.state.rules);
+		return getCorrectAction(
+			activeHand,
+			this.state.dealerHand.cards[0],
+			this.state.shoe,
+			this.state.rules,
+			undefined,
+			0,
+			this.synthesizedTC ?? undefined
+		);
 	}
 
 	get baseAction(): Action | null {

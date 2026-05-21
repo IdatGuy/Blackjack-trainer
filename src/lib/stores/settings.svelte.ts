@@ -1,4 +1,8 @@
 import { browser } from '$app/environment';
+import { DEFAULT_DRILL_FILTER, PAIR_RANKS, type DrillFilter } from '$lib/engine/synthesizer.js';
+import type { Rank } from '$lib/engine/card.js';
+
+export type { DrillFilter };
 
 const SPEEDS = [0, 80, 160, 250, 400, 600];
 
@@ -27,6 +31,8 @@ class SettingsStore {
 	minBet = $state<MinBetOption>(10);
 	maxBet = $state<MaxBetOption>(1000);
 	spotCount = $state<1 | 2 | 3>(1);
+	weaknessWeighting = $state(false);
+	drillFilter = $state<DrillFilter>({ ...DEFAULT_DRILL_FILTER, pairRanks: [...PAIR_RANKS] });
 
 	constructor() {
 		if (browser) {
@@ -66,6 +72,23 @@ class SettingsStore {
 					}
 					if ([1, 2, 3].includes(data.spotCount)) {
 						this.spotCount = data.spotCount;
+					}
+					if (typeof data.weaknessWeighting === 'boolean') {
+						this.weaknessWeighting = data.weaknessWeighting;
+					}
+					if (data.drillFilter && typeof data.drillFilter === 'object') {
+						const f = data.drillFilter;
+						const ht = f.handType;
+						if (['all', 'hard', 'soft', 'pair'].includes(ht)) {
+							this.drillFilter = {
+								handType: ht,
+								hardMin: typeof f.hardMin === 'number' ? f.hardMin : DEFAULT_DRILL_FILTER.hardMin,
+								hardMax: typeof f.hardMax === 'number' ? f.hardMax : DEFAULT_DRILL_FILTER.hardMax,
+								softMin: typeof f.softMin === 'number' ? f.softMin : DEFAULT_DRILL_FILTER.softMin,
+								softMax: typeof f.softMax === 'number' ? f.softMax : DEFAULT_DRILL_FILTER.softMax,
+								pairRanks: Array.isArray(f.pairRanks) ? (f.pairRanks as Rank[]).filter(r => PAIR_RANKS.includes(r)) : [...PAIR_RANKS]
+							};
+						}
 					}
 				} catch {
 					/* ignore malformed */
@@ -170,6 +193,16 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setWeaknessWeighting(v: boolean) {
+		this.weaknessWeighting = v;
+		this.persist();
+	}
+
+	setDrillFilter(partial: Partial<DrillFilter>) {
+		this.drillFilter = { ...this.drillFilter, ...partial };
+		this.persist();
+	}
+
 	private persist() {
 		if (browser) {
 			localStorage.setItem(
@@ -192,7 +225,9 @@ class SettingsStore {
 					blackjackPays: this.blackjackPays,
 					minBet: this.minBet,
 					maxBet: this.maxBet,
-					spotCount: this.spotCount
+					spotCount: this.spotCount,
+					weaknessWeighting: this.weaknessWeighting,
+					drillFilter: this.drillFilter
 				})
 			);
 		}

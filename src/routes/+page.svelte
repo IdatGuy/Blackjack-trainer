@@ -43,6 +43,14 @@
 		game.state.shoe.dealtCards.length / (game.state.shoe.decks * 52)
 	);
 
+	const bettingActive = $derived(settings.bettingEnabled && !settings.weaknessWeighting);
+	const countActive = $derived(
+		settings.countingEnabled &&
+		(settings.weaknessWeighting
+			? game.synthesizedTC !== null
+			: settings.countDisplay !== 'off')
+	);
+
 	const isMultiHand = $derived(playerHands.length > 1);
 
 	const activeHand = $derived(playerHands[activeIndex]);
@@ -102,7 +110,7 @@
 	);
 
 	function handleDeal() {
-		if (!settings.bettingEnabled && game.betAmount < settings.minBet) {
+		if ((!settings.bettingEnabled || settings.weaknessWeighting) && game.betAmount < settings.minBet) {
 			game.addChip(settings.minBet);
 		}
 
@@ -207,6 +215,35 @@
 	}
 </script>
 
+{#snippet bankrollContent()}
+	{#if game.bankrollFlash !== null}
+		<span class={game.bankrollFlash > 0 ? 'text-green-600' : 'text-red-500'}>
+			{game.bankrollFlash > 0 ? `+$${game.bankrollFlash}` : `-$${Math.abs(game.bankrollFlash)}`}
+		</span>
+	{:else}
+		${game.bankroll}
+	{/if}
+{/snippet}
+
+{#snippet countContent()}
+	{#if settings.weaknessWeighting}
+		<span class="text-[9px] font-normal opacity-60">TC</span>
+		{game.synthesizedTC! >= 0 ? '+' : ''}{game.synthesizedTC}
+	{:else if settings.countDisplay === 'running'}
+		<span class="text-[9px] font-normal opacity-60">RC</span>
+		{rc > 0 ? '+' : ''}{rc}
+	{:else if settings.countDisplay === 'true'}
+		<span class="text-[9px] font-normal opacity-60">TC</span>
+		{tc > 0 ? '+' : ''}{tc}
+	{:else}
+		<span class="text-[9px] font-normal opacity-60">RC</span>
+		{rc > 0 ? '+' : ''}{rc}
+		<span class="mx-1 opacity-30">|</span>
+		<span class="text-[9px] font-normal opacity-60">TC</span>
+		{tc > 0 ? '+' : ''}{tc}
+	{/if}
+{/snippet}
+
 <div class="relative flex h-full flex-col">
 	{#if isDealing}
 		<button
@@ -233,51 +270,32 @@
 			</button>
 		</div>
 
-		<!-- Center: count / bankroll pill (tap to toggle when count is on) -->
+		<!-- Center: adaptive count/bankroll pill -->
 		<div class="flex items-center justify-center gap-1.5">
-			{#if settings.countDisplay !== 'off' && settings.countingEnabled}
+			{#if bettingActive && countActive}
+				<!-- Both active: clickable, bankroll first -->
 				<button
 					onclick={() => (showBankroll = !showBankroll)}
 					class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow transition-colors hover:bg-gray-100 active:bg-gray-200"
 				>
 					{#if showBankroll}
-						{#if settings.bettingEnabled}
-							{#if game.bankrollFlash !== null}
-								<span class={game.bankrollFlash > 0 ? 'text-green-600' : 'text-red-500'}>
-									{game.bankrollFlash > 0 ? `+$${game.bankrollFlash}` : `-$${Math.abs(game.bankrollFlash)}`}
-								</span>
-							{:else}
-								${game.bankroll}
-							{/if}
-						{:else}—{/if}
-					{:else if settings.countDisplay === 'running'}
-						<span class="text-[9px] font-normal opacity-60">RC</span>
-						{rc > 0 ? '+' : ''}{rc}
-					{:else if settings.countDisplay === 'true'}
-						<span class="text-[9px] font-normal opacity-60">TC</span>
-						{tc > 0 ? '+' : ''}{tc}
+						{@render bankrollContent()}
 					{:else}
-						<span class="text-[9px] font-normal opacity-60">RC</span>
-						{rc > 0 ? '+' : ''}{rc}
-						<span class="mx-1 opacity-30">|</span>
-						<span class="text-[9px] font-normal opacity-60">TC</span>
-						{tc > 0 ? '+' : ''}{tc}
+						{@render countContent()}
 					{/if}
 				</button>
-			{:else}
+			{:else if bettingActive}
+				<!-- Betting only: non-clickable -->
 				<div class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow">
-					{#if settings.bettingEnabled}
-						{#if game.bankrollFlash !== null}
-							<span class={game.bankrollFlash > 0 ? 'text-green-600' : 'text-red-500'}>
-								{game.bankrollFlash > 0 ? `+$${game.bankrollFlash}` : `-$${Math.abs(game.bankrollFlash)}`}
-							</span>
-						{:else}
-							${game.bankroll}
-						{/if}
-					{:else}—{/if}
+					{@render bankrollContent()}
+				</div>
+			{:else if countActive}
+				<!-- Count only: non-clickable -->
+				<div class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow">
+					{@render countContent()}
 				</div>
 			{/if}
-			{#if settings.bettingEnabled && (settings.countDisplay === 'off' || showBankroll)}
+			{#if bettingActive && (!countActive || showBankroll)}
 				<button
 					onclick={() => (addFundsOpen = true)}
 					class="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 active:bg-white/40"
@@ -374,7 +392,19 @@
 	<!-- Center action zone (fixed height) -->
 	<div class="flex w-full min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4 {phase === 'betting' || (phase === 'player' && !isDealing) || phase === 'insurance' || phase === 'resolution' ? 'bg-black/20 border-t border-b border-white/10' : ''}">
 		{#if phase === 'betting'}
-			{#if settings.bettingEnabled}
+			{#if settings.weaknessWeighting}
+				<div class="flex flex-col items-center gap-2">
+					<span class="rounded-full bg-zinc-700 px-3 py-0.5 text-[11px] font-semibold text-gray-300">
+						Weak Hands
+					</span>
+					<button
+						class="rounded-xl bg-yellow-500 px-10 py-3 text-base font-bold text-gray-900 shadow-lg hover:bg-yellow-400 active:bg-yellow-600"
+						onclick={handleDeal}
+					>
+						Deal
+					</button>
+				</div>
+			{:else if settings.bettingEnabled}
 				<BetInput ondeal={handleDeal} />
 			{:else}
 				<button
@@ -541,7 +571,7 @@
 	</div>
 {/if}
 
-<StrategyChart open={chartOpen} onclose={() => (chartOpen = false)} trueCount={tc} />
+<StrategyChart open={chartOpen} onclose={() => (chartOpen = false)} trueCount={game.synthesizedTC ?? tc} />
 
 <style>
 	.hand-scroll {

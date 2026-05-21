@@ -256,13 +256,14 @@ export function getCorrectAction(
 	shoe: Shoe,
 	rules: RuleSet,
 	overrides?: Partial<StrategyChart>,
-	splitCount = 0
+	splitCount = 0,
+	tcOverride?: number
 ): Action {
 	const chart = overrides
 		? mergeChart(getChartForRules(rules), overrides as StrategyChart)
 		: getChartForRules(rules);
 
-	const tc = trueCount(shoe);
+	const tc = tcOverride !== undefined ? tcOverride : trueCount(shoe);
 	const allowed = allowedActions(hand, dealerUp, rules, splitCount);
 	const upKey = upCardKey(dealerUp);
 

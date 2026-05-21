@@ -1,8 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { settings } from '$lib/stores/settings.svelte.js';
+	import { PAIR_RANKS } from '$lib/engine/synthesizer.js';
+	import type { Rank } from '$lib/engine/card.js';
 
 	const SPEED_LABELS = ['Instant', '1', '2', '3', '4', '5'];
+
+	function togglePairRank(rank: Rank) {
+		const cur = settings.drillFilter.pairRanks;
+		const next = cur.includes(rank) ? cur.filter(r => r !== rank) : [...cur, rank];
+		// Keep at least one rank selected
+		if (next.length > 0) settings.setDrillFilter({ pairRanks: next });
+	}
 </script>
 
 <div class="flex h-full flex-col">
@@ -157,6 +166,144 @@
 						></span>
 					</button>
 				</label>
+			</div>
+		</div>
+
+		<!-- Drill section -->
+		<div class="mb-6">
+			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+				Training
+			</p>
+			<div class="overflow-hidden rounded-xl bg-zinc-900">
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
+					<div>
+						<span class="text-sm font-medium text-gray-100">Prioritize weak hands</span>
+						<p class="text-xs text-gray-500 mt-0.5">Hands weighted by heat map accuracy. Betting disabled.</p>
+					</div>
+					<button
+						role="switch"
+						aria-checked={settings.weaknessWeighting}
+						onclick={() => settings.setWeaknessWeighting(!settings.weaknessWeighting)}
+						class="relative ml-3 h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none {settings.weaknessWeighting
+							? 'bg-green-500'
+							: 'bg-zinc-600'}"
+					>
+						<span
+							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.weaknessWeighting
+								? 'translate-x-5'
+								: 'translate-x-0'}"
+						></span>
+					</button>
+				</label>
+
+				{#if settings.weaknessWeighting}
+					<hr class="border-zinc-800" />
+					<!-- Hand type filter -->
+					<div class="px-4 py-3.5">
+						<p class="mb-2.5 text-xs font-medium text-gray-400">Filter</p>
+						<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
+							{#each ([['all', 'All'], ['hard', 'Hard'], ['soft', 'Soft'], ['pair', 'Pairs']] as const) as [val, label]}
+								<button
+									onclick={() => settings.setDrillFilter({ handType: val })}
+									class="flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors
+										{settings.drillFilter.handType === val
+											? 'bg-white text-gray-900'
+											: 'text-gray-400 hover:text-gray-200'}"
+								>{label}</button>
+							{/each}
+						</div>
+					</div>
+
+					{#if settings.drillFilter.handType === 'hard'}
+						<hr class="border-zinc-800" />
+						<div class="px-4 py-3.5">
+							<div class="flex items-center justify-between mb-2">
+								<p class="text-xs font-medium text-gray-400">Hard range</p>
+								<span class="text-xs font-semibold text-gray-200">
+									{settings.drillFilter.hardMin}–{settings.drillFilter.hardMax}
+								</span>
+							</div>
+							<div class="flex flex-col gap-2">
+								<div class="flex items-center gap-3">
+									<span class="w-6 text-right text-[10px] text-gray-500">Min</span>
+									<input
+										type="range" min="5" max="20" step="1"
+										value={settings.drillFilter.hardMin}
+										oninput={(e) => {
+											const v = Number((e.target as HTMLInputElement).value);
+											settings.setDrillFilter({ hardMin: Math.min(v, settings.drillFilter.hardMax - 1) });
+										}}
+										class="flex-1 accent-white"
+									/>
+								</div>
+								<div class="flex items-center gap-3">
+									<span class="w-6 text-right text-[10px] text-gray-500">Max</span>
+									<input
+										type="range" min="6" max="21" step="1"
+										value={settings.drillFilter.hardMax}
+										oninput={(e) => {
+											const v = Number((e.target as HTMLInputElement).value);
+											settings.setDrillFilter({ hardMax: Math.max(v, settings.drillFilter.hardMin + 1) });
+										}}
+										class="flex-1 accent-white"
+									/>
+								</div>
+							</div>
+						</div>
+					{:else if settings.drillFilter.handType === 'soft'}
+						<hr class="border-zinc-800" />
+						<div class="px-4 py-3.5">
+							<div class="flex items-center justify-between mb-2">
+								<p class="text-xs font-medium text-gray-400">Soft range</p>
+								<span class="text-xs font-semibold text-gray-200">
+									Soft {settings.drillFilter.softMin}–Soft {settings.drillFilter.softMax}
+								</span>
+							</div>
+							<div class="flex flex-col gap-2">
+								<div class="flex items-center gap-3">
+									<span class="w-6 text-right text-[10px] text-gray-500">Min</span>
+									<input
+										type="range" min="13" max="19" step="1"
+										value={settings.drillFilter.softMin}
+										oninput={(e) => {
+											const v = Number((e.target as HTMLInputElement).value);
+											settings.setDrillFilter({ softMin: Math.min(v, settings.drillFilter.softMax - 1) });
+										}}
+										class="flex-1 accent-white"
+									/>
+								</div>
+								<div class="flex items-center gap-3">
+									<span class="w-6 text-right text-[10px] text-gray-500">Max</span>
+									<input
+										type="range" min="14" max="20" step="1"
+										value={settings.drillFilter.softMax}
+										oninput={(e) => {
+											const v = Number((e.target as HTMLInputElement).value);
+											settings.setDrillFilter({ softMax: Math.max(v, settings.drillFilter.softMin + 1) });
+										}}
+										class="flex-1 accent-white"
+									/>
+								</div>
+							</div>
+						</div>
+					{:else if settings.drillFilter.handType === 'pair'}
+						<hr class="border-zinc-800" />
+						<div class="px-4 py-3.5">
+							<p class="mb-2.5 text-xs font-medium text-gray-400">Pair ranks</p>
+							<div class="flex flex-wrap gap-1.5">
+								{#each PAIR_RANKS as rank}
+									<button
+										onclick={() => togglePairRank(rank)}
+										class="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors
+											{settings.drillFilter.pairRanks.includes(rank)
+												? 'bg-white text-gray-900'
+												: 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'}"
+									>{rank === 'T' ? '10' : rank}</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				{/if}
 			</div>
 		</div>
 

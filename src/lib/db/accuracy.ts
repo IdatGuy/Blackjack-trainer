@@ -80,6 +80,23 @@ export async function getDeviationAccuracy(since: number): Promise<Map<string, C
 	return map;
 }
 
+export async function getWeaknessWeights(): Promise<Map<string, number>> {
+	const records = await fetchSince(0);
+	const counts = new Map<string, { correct: number; total: number }>();
+	for (const r of records) {
+		const key = `${r.handType}:${toPlayerKey(r)}:${r.dealerUp}`;
+		const s = counts.get(key) ?? { correct: 0, total: 0 };
+		s.total++;
+		if (r.correct) s.correct++;
+		counts.set(key, s);
+	}
+	const weights = new Map<string, number>();
+	for (const [key, s] of counts) {
+		weights.set(key, s.total > 0 ? 1 - s.correct / s.total : 1.0);
+	}
+	return weights;
+}
+
 export async function getCellDetail(
 	handType: 'hard' | 'soft' | 'pair',
 	playerKey: string,
