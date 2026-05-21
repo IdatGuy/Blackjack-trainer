@@ -14,6 +14,8 @@ export type SynthesizedCell = {
 	handType: 'hard' | 'soft' | 'pair';
 	playerKey: string;
 	dealerUp: Rank;
+	tc: number;
+	variant: 'base' | 'dev';
 };
 
 // Pair ranks that appear in the strategy chart (J/Q/K treated as T)
@@ -89,6 +91,20 @@ export function synthesizeTC(cell: ChartCell): number {
 	return dev.above ? dev.tc - 1 : dev.tc + 1; // just outside — basic strategy
 }
 
+// Pick a TC that will never fire any deviation for this cell
+export function synthesizeBaseTC(cell: ChartCell): number {
+	if (!cell.deviations || cell.deviations.length === 0) {
+		const tcs = [-2, -1, 0, 1, 2];
+		return tcs[Math.floor(Math.random() * tcs.length)];
+	}
+	const aboveDevs = cell.deviations.filter((d) => d.above);
+	if (aboveDevs.length > 0) {
+		return Math.min(...aboveDevs.map((d) => d.tc)) - 1;
+	}
+	const belowDevs = cell.deviations.filter((d) => !d.above);
+	return Math.max(...belowDevs.map((d) => d.tc)) + 1;
+}
+
 const UPCARDS: Rank[] = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'A'];
 
 function softTotalFromKey(key: string): number {
@@ -120,7 +136,14 @@ export function sampleWeightedCell(
 	weights: Map<string, number>,
 	filter: DrillFilter
 ): SynthesizedCell {
-	type Candidate = { handType: 'hard' | 'soft' | 'pair'; playerKey: string; dealerUp: Rank; weight: number };
+	type Candidate = {
+		handType: 'hard' | 'soft' | 'pair';
+		playerKey: string;
+		dealerUp: Rank;
+		cell: ChartCell;
+		variant: 'base' | 'dev';
+		weight: number;
+	};
 	const candidates: Candidate[] = [];
 
 	function addSection(
@@ -130,10 +153,27 @@ export function sampleWeightedCell(
 		for (const [playerKey, upCards] of Object.entries(section)) {
 			if (!passesFilter(ht, playerKey, filter)) continue;
 			for (const dealerUp of UPCARDS) {
-				if (!upCards[dealerUp]) continue;
-				const key = `${ht}:${playerKey}:${dealerUp}`;
-				const weight = weights.get(key) ?? 1.0; // unplayed = max priority
-				candidates.push({ handType: ht, playerKey, dealerUp, weight });
+				const cell = upCards[dealerUp];
+				if (!cell) continue;
+				const baseKey = `${ht}:${playerKey}:${dealerUp}`;
+				candidates.push({
+					handType: ht,
+					playerKey,
+					dealerUp,
+					cell,
+					variant: 'base',
+					weight: weights.get(baseKey) ?? 1.0
+				});
+				if (cell.deviations?.length) {
+					candidates.push({
+						handType: ht,
+						playerKey,
+						dealerUp,
+						cell,
+						variant: 'dev',
+						weight: weights.get(`${baseKey}:dev`) ?? 1.0
+					});
+				}
 			}
 		}
 	}
@@ -143,25 +183,27 @@ export function sampleWeightedCell(
 	addSection(chart.pairs, 'pair');
 
 	if (candidates.length === 0) {
-		return { handType: 'hard', playerKey: '16', dealerUp: 'T' };
+		return { handType: 'hard', playerKey: '16', dealerUp: 'T', tc: 0, variant: 'base' };
 	}
 
 	const totalWeight = candidates.reduce((s, c) => s + c.weight, 0);
 
-	// If all cells mastered (total weight = 0), sample uniformly
+	let chosen: Candidate;
 	if (totalWeight === 0) {
-		const c = candidates[Math.floor(Math.random() * candidates.length)];
-		return { handType: c.handType, playerKey: c.playerKey, dealerUp: c.dealerUp };
-	}
-
-	let rand = Math.random() * totalWeight;
-	for (const c of candidates) {
-		rand -= c.weight;
-		if (rand <= 0) {
-			return { handType: c.handType, playerKey: c.playerKey, dealerUp: c.dealerUp };
+		chosen = candidates[Math.floor(Math.random() * candidates.length)];
+	} else {
+		let rand = Math.random() * totalWeight;
+		chosen = candidates[candidates.length - 1];
+		for (const c of candidates) {
+			rand -= c.weight;
+			if (rand <= 0) {
+				chosen = c;
+				break;
+			}
 		}
 	}
 
-	const last = candidates[candidates.length - 1];
-	return { handType: last.handType, playerKey: last.playerKey, dealerUp: last.dealerUp };
+	const tc =
+		chosen.variant === 'dev' ? synthesizeTC(chosen.cell) : synthesizeBaseTC(chosen.cell);
+	return { handType: chosen.handType, playerKey: chosen.playerKey, dealerUp: chosen.dealerUp, tc, variant: chosen.variant };
 }

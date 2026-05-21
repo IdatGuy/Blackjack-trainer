@@ -84,7 +84,8 @@ export async function getWeaknessWeights(): Promise<Map<string, number>> {
 	const records = await fetchSince(0);
 	const counts = new Map<string, { correct: number; total: number }>();
 	for (const r of records) {
-		const key = `${r.handType}:${toPlayerKey(r)}:${r.dealerUp}`;
+		const baseKey = `${r.handType}:${toPlayerKey(r)}:${r.dealerUp}`;
+		const key = r.category === 'deviation' ? `${baseKey}:dev` : baseKey;
 		const s = counts.get(key) ?? { correct: 0, total: 0 };
 		s.total++;
 		if (r.correct) s.correct++;

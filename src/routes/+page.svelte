@@ -47,7 +47,7 @@
 	const countActive = $derived(
 		settings.countingEnabled &&
 		(settings.weaknessWeighting
-			? game.synthesizedTC !== null
+			? true
 			: settings.countDisplay !== 'off')
 	);
 

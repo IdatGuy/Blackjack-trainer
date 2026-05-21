@@ -18,8 +18,7 @@ import { getBaseAction, getChartForRules, getCorrectAction, getInsuranceAction }
 import {
 	buildDealerCard,
 	buildPlayerCards,
-	sampleWeightedCell,
-	synthesizeTC
+	sampleWeightedCell
 } from '$lib/engine/synthesizer.js';
 import { getWeaknessWeights } from '$lib/db/accuracy.js';
 import { browser } from '$app/environment';
@@ -203,17 +202,15 @@ class GameStore {
 		}
 		if (settings.weaknessWeighting) {
 			const chart = getChartForRules(this.state.rules);
-			const { handType, playerKey, dealerUp } = sampleWeightedCell(
+			const synthesizedCell = sampleWeightedCell(
 				chart,
 				this._weaknessWeights,
 				settings.drillFilter
 			);
+			const { handType, playerKey, dealerUp } = synthesizedCell;
 			const [p1, p2] = buildPlayerCards(handType, playerKey);
 			const dUp = buildDealerCard(dealerUp);
-			const section = handType === 'pair' ? chart.pairs : handType === 'soft' ? chart.soft : chart.hard;
-			const cell = section[playerKey]?.[dealerUp];
-			this.synthesizedTC =
-				settings.countingEnabled && cell?.deviations?.length ? synthesizeTC(cell) : null;
+			this.synthesizedTC = settings.countingEnabled ? synthesizedCell.tc : null;
 			// Prepend synthesized cards so dealHand picks them in deal order:
 			// shoe[0]=p1 (player card 1), shoe[1]=dUp (dealer upcard), shoe[2]=p2 (player card 2)
 			this.state = {
@@ -250,7 +247,7 @@ class GameStore {
 			handType: type,
 			playerTotal: handValue(activeHand.cards),
 			dealerUp: 'A',
-			trueCount: trueCount(this.state.shoe),
+			trueCount: this.synthesizedTC !== null ? this.synthesizedTC : trueCount(this.state.shoe),
 			expected,
 			actual,
 			correct: expected === actual,
