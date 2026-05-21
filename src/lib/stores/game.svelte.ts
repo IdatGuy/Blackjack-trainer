@@ -188,6 +188,18 @@ class GameStore {
 		this._pending = [];
 		this.insuranceBet = 0;
 		this.insuranceResult = null;
+		this.state = {
+			...this.state,
+			rules: {
+				...this.state.rules,
+				dealerHitsSoft17: settings.dealerHitsSoft17,
+				doubleAfterSplit: settings.doubleAfterSplit,
+				resplitAces: settings.resplitAces,
+				surrender: settings.surrender,
+				peek: settings.peek,
+				blackjackPays: settings.blackjackPays,
+			}
+		};
 		const now = Date.now();
 		this.handId = `${this.sessionId}-${now}`;
 		if (browser) {
@@ -365,6 +377,15 @@ class GameStore {
 		this.state = {
 			...this.state,
 			shoe: autoReshuffle ? resetShoe(this.state.shoe) : this.state.shoe,
+			rules: {
+				...this.state.rules,
+				dealerHitsSoft17: settings.dealerHitsSoft17,
+				doubleAfterSplit: settings.doubleAfterSplit,
+				resplitAces: settings.resplitAces,
+				surrender: settings.surrender,
+				peek: settings.peek,
+				blackjackPays: settings.blackjackPays,
+			},
 			phase: 'betting',
 			playerHands: [],
 			dealerHand: makeHand([], 0),

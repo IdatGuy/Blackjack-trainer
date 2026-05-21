@@ -216,8 +216,44 @@ describe('Illustrious 18 deviations', () => {
 		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(0), rules);
 		expect(action).toBe('S');
 	});
+	it('12 vs 4: stand at TC 0 (index boundary)', () => {
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(0), rules);
+		expect(action).toBe('S');
+	});
 	it('12 vs 4: hit at TC -1 (deviation)', () => {
 		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(-6), rules);
+		expect(action).toBe('H');
+	});
+	it('13 vs 2: stand at TC -1 (index boundary)', () => {
+		const action = getCorrectAction(hand([card('9'), card('4')]), card('2'), shoe(-6), rules);
+		expect(action).toBe('S');
+	});
+	it('13 vs 2: hit at TC -2 (deviation)', () => {
+		const action = getCorrectAction(hand([card('9'), card('4')]), card('2'), shoe(-12), rules);
+		expect(action).toBe('H');
+	});
+	it('12 vs 5: stand at TC -2 (index boundary)', () => {
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('5'), shoe(-12), rules);
+		expect(action).toBe('S');
+	});
+	it('12 vs 5: hit at TC -3 (deviation)', () => {
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('5'), shoe(-18), rules);
+		expect(action).toBe('H');
+	});
+	it('12 vs 6: stand at TC -1 (index boundary)', () => {
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('6'), shoe(-6), rules);
+		expect(action).toBe('S');
+	});
+	it('12 vs 6: hit at TC -2 (deviation)', () => {
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('6'), shoe(-12), rules);
+		expect(action).toBe('H');
+	});
+	it('13 vs 3: stand at TC -2 (index boundary)', () => {
+		const action = getCorrectAction(hand([card('9'), card('4')]), card('3'), shoe(-12), rules);
+		expect(action).toBe('S');
+	});
+	it('13 vs 3: hit at TC -3 (deviation)', () => {
+		const action = getCorrectAction(hand([card('9'), card('4')]), card('3'), shoe(-18), rules);
 		expect(action).toBe('H');
 	});
 	it('9 vs 2: hit at TC 0 (base)', () => {
@@ -384,9 +420,20 @@ describe('no-surrender chart', () => {
 		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(0), nos);
 		expect(action).toBe('S');
 	});
-	it('hard 15 vs T: hit at TC -2 (no surrender, Fab 3 does not fire)', () => {
-		// Fab 3 fires at TC≥0; at TC -2 it doesn't, so fallback of R is H
+	it('hard 15 vs T: hit at TC -2 (no surrender, Fab 3 not in chart)', () => {
 		const action = getCorrectAction(hand([card('T'), card('5')]), card('T'), shoe(-12), nos);
+		expect(action).toBe('H');
+	});
+	it('hard 15 vs T: hit at TC 0 (no surrender, Fab 3 not in chart)', () => {
+		const action = getCorrectAction(hand([card('T'), card('5')]), card('T'), shoe(0), nos);
+		expect(action).toBe('H');
+	});
+	it('hard 15 vs 9: hit at TC +2 (no surrender, Fab 2 not in chart)', () => {
+		const action = getCorrectAction(hand([card('T'), card('5')]), card('9'), shoe(12), nos);
+		expect(action).toBe('H');
+	});
+	it('hard 14 vs T: hit at TC +3 (no surrender, Fab 1 not in chart)', () => {
+		const action = getCorrectAction(hand([card('T'), card('4')]), card('T'), shoe(18), nos);
 		expect(action).toBe('H');
 	});
 });

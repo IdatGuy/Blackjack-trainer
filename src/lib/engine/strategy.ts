@@ -161,7 +161,7 @@ function applyNoSurrenderPatch(hard: Record<string, Record<string, ChartCell>>):
 
 // ─── Deviations ──────────────────────────────────────────────────────────────
 
-function applyDeviations(chart: StrategyChart, h17 = false): void {
+function applyDeviations(chart: StrategyChart, h17 = false, hasSurrender = true): void {
 	// Illustrious 18
 	dev(chart.hard, '16', 'T', { tc: 0, action: 'S', above: true }); // #2
 	dev(chart.hard, '15', 'T', { tc: 4, action: 'S', above: true }); // #3
@@ -177,17 +177,19 @@ function applyDeviations(chart: StrategyChart, h17 = false): void {
 	dev(chart.hard, '9', '7', { tc: 3, action: 'D', above: true }); // #12
 	dev(chart.hard, '16', '9', { tc: 5, action: 'S', above: true }); // #13
 	dev(chart.hard, '13', '2', { tc: -1, action: 'H', above: false }); // #14
-	dev(chart.hard, '12', '4', { tc: -1, action: 'H', above: false }); // #15
+	dev(chart.hard, '12', '4', { tc: 0, action: 'H', above: false }); // #15
 	dev(chart.hard, '12', '5', { tc: -2, action: 'H', above: false }); // #16
 	dev(chart.hard, '12', '6', { tc: -1, action: 'H', above: false }); // #17
 	dev(chart.hard, '13', '3', { tc: -2, action: 'H', above: false }); // #18
 
-	// Fab 4 (surrender deviations)
-	dev(chart.hard, '14', 'T', { tc: 3, action: 'R', above: true }); // Fab 1
-	dev(chart.hard, '15', '9', { tc: 2, action: 'R', above: true }); // Fab 2
-	dev(chart.hard, '15', 'T', { tc: 0, action: 'R', above: true }); // Fab 3
-	// Fab 4 — surrender 15 vs A: only a deviation in S17 (H17 makes it basic strategy)
-	if (!h17) dev(chart.hard, '15', 'A', { tc: 1, action: 'R', above: true });
+	// Fab 4 (surrender deviations) — only when surrender is enabled
+	if (hasSurrender) {
+		dev(chart.hard, '14', 'T', { tc: 3, action: 'R', above: true }); // Fab 1
+		dev(chart.hard, '15', '9', { tc: 2, action: 'R', above: true }); // Fab 2
+		dev(chart.hard, '15', 'T', { tc: 0, action: 'R', above: true }); // Fab 3
+		// Fab 4 — surrender 15 vs A: only a deviation in S17 (H17 makes it basic strategy)
+		if (!h17) dev(chart.hard, '15', 'A', { tc: 1, action: 'R', above: true });
+	}
 }
 
 function dev(
@@ -223,7 +225,7 @@ function buildChartForRules(rules: RuleSet): StrategyChart {
 		pairs
 	};
 
-	applyDeviations(chart, rules.dealerHitsSoft17);
+	applyDeviations(chart, rules.dealerHitsSoft17, rules.surrender !== 'none');
 	return chart;
 }
 
@@ -286,7 +288,7 @@ export function getCorrectAction(
 
 	if (cell.deviations) {
 		for (const dev of cell.deviations) {
-			const fires = dev.above ? tc >= dev.tc : tc <= dev.tc;
+			const fires = dev.above ? tc >= dev.tc : tc < dev.tc;
 			if (fires && allowed.includes(dev.action)) {
 				return dev.action;
 			}
