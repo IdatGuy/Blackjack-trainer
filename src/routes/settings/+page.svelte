@@ -3,6 +3,7 @@
 	import { settings } from '$lib/stores/settings.svelte.js';
 	import { PAIR_RANKS } from '$lib/engine/synthesizer.js';
 	import type { Rank } from '$lib/engine/card.js';
+	import RangeSlider from '$lib/components/RangeSlider.svelte';
 
 	const SPEED_LABELS = ['Instant', '1', '2', '3', '4', '5'];
 
@@ -228,32 +229,12 @@
 									{settings.drillFilter.hardMin}–{settings.drillFilter.hardMax}
 								</span>
 							</div>
-							<div class="flex flex-col gap-2">
-								<div class="flex items-center gap-3">
-									<span class="w-6 text-right text-[10px] text-gray-500">Min</span>
-									<input
-										type="range" min="5" max="20" step="1"
-										value={settings.drillFilter.hardMin}
-										oninput={(e) => {
-											const v = Number((e.target as HTMLInputElement).value);
-											settings.setDrillFilter({ hardMin: Math.min(v, settings.drillFilter.hardMax - 1) });
-										}}
-										class="flex-1 accent-white"
-									/>
-								</div>
-								<div class="flex items-center gap-3">
-									<span class="w-6 text-right text-[10px] text-gray-500">Max</span>
-									<input
-										type="range" min="6" max="21" step="1"
-										value={settings.drillFilter.hardMax}
-										oninput={(e) => {
-											const v = Number((e.target as HTMLInputElement).value);
-											settings.setDrillFilter({ hardMax: Math.max(v, settings.drillFilter.hardMin + 1) });
-										}}
-										class="flex-1 accent-white"
-									/>
-								</div>
-							</div>
+							<RangeSlider
+								min={5} max={21}
+								low={settings.drillFilter.hardMin}
+								high={settings.drillFilter.hardMax}
+								onchange={(lo, hi) => settings.setDrillFilter({ hardMin: lo, hardMax: hi })}
+							/>
 						</div>
 					{/if}
 
@@ -266,32 +247,12 @@
 									Soft {settings.drillFilter.softMin}–Soft {settings.drillFilter.softMax}
 								</span>
 							</div>
-							<div class="flex flex-col gap-2">
-								<div class="flex items-center gap-3">
-									<span class="w-6 text-right text-[10px] text-gray-500">Min</span>
-									<input
-										type="range" min="13" max="19" step="1"
-										value={settings.drillFilter.softMin}
-										oninput={(e) => {
-											const v = Number((e.target as HTMLInputElement).value);
-											settings.setDrillFilter({ softMin: Math.min(v, settings.drillFilter.softMax - 1) });
-										}}
-										class="flex-1 accent-white"
-									/>
-								</div>
-								<div class="flex items-center gap-3">
-									<span class="w-6 text-right text-[10px] text-gray-500">Max</span>
-									<input
-										type="range" min="14" max="20" step="1"
-										value={settings.drillFilter.softMax}
-										oninput={(e) => {
-											const v = Number((e.target as HTMLInputElement).value);
-											settings.setDrillFilter({ softMax: Math.max(v, settings.drillFilter.softMin + 1) });
-										}}
-										class="flex-1 accent-white"
-									/>
-								</div>
-							</div>
+							<RangeSlider
+								min={13} max={20}
+								low={settings.drillFilter.softMin}
+								high={settings.drillFilter.softMax}
+								onchange={(lo, hi) => settings.setDrillFilter({ softMin: lo, softMax: hi })}
+							/>
 						</div>
 					{/if}
 
