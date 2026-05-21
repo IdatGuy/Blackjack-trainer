@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { DEFAULT_CHART } from '$lib/engine/strategy.js';
 	import type { ChartCell } from '$lib/engine/strategy.js';
 	import {
@@ -13,7 +14,6 @@
 		type CellDetail
 	} from '$lib/db/accuracy.js';
 	import { filterSince } from '$lib/db/queries.js';
-	import { clearDecisions } from '$lib/db/index.js';
 	import HeatmapGrid from '$lib/components/accuracy/HeatmapGrid.svelte';
 	import DeviationList from '$lib/components/accuracy/DeviationList.svelte';
 	import type { DeviationEntry } from '$lib/components/accuracy/DeviationList.svelte';
@@ -122,11 +122,20 @@
 	let deviationAccuracy = $state(new Map<string, CellAccuracy>());
 
 	let showResetWarning = $state(false);
+	let accuracyResetAt = $state(
+		browser ? parseInt(localStorage.getItem('bj-accuracy-reset-at') ?? '0', 10) : 0
+	);
 
-	async function handleReset() {
-		await clearDecisions();
+	function effectiveSince() {
+		return Math.max(accuracyResetAt, filterSince(timeFilter));
+	}
+
+	function handleReset() {
+		const now = Date.now();
+		if (browser) localStorage.setItem('bj-accuracy-reset-at', String(now));
+		accuracyResetAt = now;
 		showResetWarning = false;
-		const since = filterSince(timeFilter);
+		const since = effectiveSince();
 		if (activeTab === 'hard') {
 			heatmapData = {};
 			getHeatmapData('hard', since).then((d) => (heatmapData = d));
@@ -152,7 +161,7 @@
 	// ─── Data loading ─────────────────────────────────────────────────────────
 
 	$effect(() => {
-		const since = filterSince(timeFilter);
+		const since = effectiveSince();
 		if (activeTab === 'hard') {
 			getHeatmapData('hard', since).then((d) => (heatmapData = d));
 		} else if (activeTab === 'soft') {
@@ -170,7 +179,7 @@
 		const ht = activeTab === 'pairs' ? 'pair' : (activeTab as 'hard' | 'soft');
 		detailCell = { handType: ht, playerKey: pk, dealerUp: dk };
 		detailData = null;
-		getCellDetail(ht, pk, dk, filterSince(timeFilter)).then((d) => (detailData = d));
+		getCellDetail(ht, pk, dk, effectiveSince()).then((d) => (detailData = d));
 	}
 
 	function closeDetail() {
@@ -318,7 +327,7 @@
 	<div class="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-zinc-900 px-4 pb-8 pt-4 shadow-xl">
 		<div class="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20"></div>
 		<h3 class="mb-2 text-base font-semibold text-white">Reset Accuracy Data</h3>
-		<p class="mb-6 text-sm text-white/60">This will permanently delete all accuracy history. This cannot be undone.</p>
+		<p class="mb-6 text-sm text-white/60">This will clear your accuracy history. Your bankroll and hands-played count will not be affected.</p>
 		<div class="flex gap-3">
 			<button
 				onclick={() => (showResetWarning = false)}
