@@ -20,7 +20,7 @@ export function buildShoe(decks: number): Shoe {
 	};
 }
 
-export function dealCard(shoe: Shoe): { card: Card; shoe: Shoe } {
+export function dealCard(shoe: Shoe, skipCount = false): { card: Card; shoe: Shoe } {
 	if (shoe.cards.length === 0) throw new Error('Shoe is empty');
 	const [card, ...remaining] = shoe.cards;
 	return {
@@ -29,9 +29,13 @@ export function dealCard(shoe: Shoe): { card: Card; shoe: Shoe } {
 			...shoe,
 			cards: remaining,
 			dealtCards: [...shoe.dealtCards, card],
-			runningCount: shoe.runningCount + hiLoValue(card.rank)
+			runningCount: shoe.runningCount + (skipCount ? 0 : hiLoValue(card.rank))
 		}
 	};
+}
+
+export function countCard(shoe: Shoe, card: Card): Shoe {
+	return { ...shoe, runningCount: shoe.runningCount + hiLoValue(card.rank) };
 }
 
 export function trueCount(shoe: Shoe): number {

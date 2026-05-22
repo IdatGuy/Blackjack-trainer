@@ -1,7 +1,7 @@
 import type { Card } from './card.js';
 import { type Hand, handValue, isBlackjack, isBust, makeHand } from './hand.js';
 import { type RuleSet, dealerShouldHit, DEFAULT_RULESET } from './rules.js';
-import { buildShoe, dealCard, type Shoe } from './shoe.js';
+import { buildShoe, countCard, dealCard, type Shoe } from './shoe.js';
 
 export type GamePhase = 'betting' | 'dealing' | 'player' | 'dealer' | 'resolution' | 'insurance';
 
@@ -60,9 +60,9 @@ export function dealHand(state: GameState, bets: number[]): GameState {
 		playerCards[i].push(card);
 		shoe = s;
 	}
-	// card 2 to dealer (hole card)
+	// card 2 to dealer (hole card - not counted until revealed)
 	{
-		const { card, shoe: s } = dealCard(shoe);
+		const { card, shoe: s } = dealCard(shoe, true);
 		dealerCards.push(card);
 		shoe = s;
 	}
@@ -83,6 +83,11 @@ export function dealHand(state: GameState, bets: number[]): GameState {
 		phase = 'resolution';
 	} else {
 		phase = 'player';
+	}
+
+	// Count hole card now if player decisions are skipped (hole card immediately revealed)
+	if (phase === 'dealer' || phase === 'resolution') {
+		shoe = countCard(shoe, dealerCards[1]);
 	}
 
 	return {
@@ -108,8 +113,9 @@ function advanceActive(state: GameState): GameState {
 		(h, i) => i > state.activeHandIndex && !h.isResolved && !h.isSurrendered
 	);
 	if (next === -1) {
-		// All hands done — move to dealer phase
-		return { ...state, phase: 'dealer' };
+		// All hands done — move to dealer phase; hole card is now revealed
+		const shoe = countCard(state.shoe, state.dealerHand.cards[1]);
+		return { ...state, shoe, phase: 'dealer' };
 	}
 	return { ...state, activeHandIndex: next };
 }
@@ -118,8 +124,12 @@ export function resolveInsurance(state: GameState): GameState {
 	if (state.phase !== 'insurance') throw new Error('Not in insurance phase');
 	const dealerBJ = isBlackjack(state.dealerHand.cards);
 	const allPlayerBJ = state.playerHands.every((h) => isBlackjack(h.cards));
-	const phase: GamePhase = (dealerBJ || allPlayerBJ) ? 'resolution' : 'player';
-	return { ...state, phase };
+	if (dealerBJ || allPlayerBJ) {
+		// Hole card is revealed at resolution
+		const shoe = countCard(state.shoe, state.dealerHand.cards[1]);
+		return { ...state, shoe, phase: 'resolution' };
+	}
+	return { ...state, phase: 'player' };
 }
 
 export function hit(state: GameState): GameState {
