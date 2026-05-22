@@ -310,6 +310,7 @@
 
 		<!-- Right: chart button + menu -->
 		<div class="relative flex items-center justify-end gap-2">
+			{#if settings.showStrategyChart}
 			<button
 				onclick={() => (chartOpen = true)}
 				class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-gray-300 hover:bg-white/20 active:bg-white/30"
@@ -322,6 +323,7 @@
 					<rect x="14" y="14" width="7" height="7" rx="1" stroke-linejoin="round"/>
 				</svg>
 			</button>
+			{/if}
 			<button
 				onclick={() => (menuOpen = !menuOpen)}
 				class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-xl font-bold leading-none text-gray-900 hover:bg-gray-100 active:bg-gray-200"

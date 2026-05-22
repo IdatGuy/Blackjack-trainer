@@ -19,6 +19,7 @@ class SettingsStore {
 	countingEnabled = $state(true);
 	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('both');
 	showHintButton = $state(false);
+	showStrategyChart = $state(true);
 	highlightActiveDeviations = $state(true);
 	showHandTotal = $state(false);
 	deckCount = $state<1 | 2 | 4 | 6 | 8>(6);
@@ -49,6 +50,7 @@ class SettingsStore {
 					}
 					const hintBtn = data.showHintButton ?? data.showDeviationHints;
 					if (typeof hintBtn === 'boolean') this.showHintButton = hintBtn;
+						if (typeof data.showStrategyChart === 'boolean') this.showStrategyChart = data.showStrategyChart;
 					if (typeof data.highlightActiveDeviations === 'boolean') {
 						this.highlightActiveDeviations = data.highlightActiveDeviations;
 					}
@@ -141,6 +143,11 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setShowStrategyChart(v: boolean) {
+		this.showStrategyChart = v;
+		this.persist();
+	}
+
 	setHighlightActiveDeviations(v: boolean) {
 		this.highlightActiveDeviations = v;
 		this.persist();
@@ -224,6 +231,7 @@ class SettingsStore {
 					countingEnabled: this.countingEnabled,
 					countDisplay: this.countDisplay,
 					showHintButton: this.showHintButton,
+					showStrategyChart: this.showStrategyChart,
 					highlightActiveDeviations: this.highlightActiveDeviations,
 					showHandTotal: this.showHandTotal,
 					deckCount: this.deckCount,

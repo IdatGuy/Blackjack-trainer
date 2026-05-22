@@ -13,7 +13,7 @@ import {
 } from '$lib/engine/game.js';
 import { handKey, handType, handValue, isBlackjack, makeHand } from '$lib/engine/hand.js';
 import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
-import { buildShoe, dealCard, resetShoe, shouldReshuffle, trueCount } from '$lib/engine/shoe.js';
+import { buildShoe, dealCard, resetShoe, shouldReshuffle, trueCount, type Shoe } from '$lib/engine/shoe.js';
 import { getBaseAction, getChartForRules, getCorrectAction, getInsuranceAction } from '$lib/engine/strategy.js';
 import {
 	buildDealerCard,
@@ -21,6 +21,7 @@ import {
 	sampleWeightedCell
 } from '$lib/engine/synthesizer.js';
 import { getWeaknessWeights } from '$lib/db/accuracy.js';
+import { untrack } from 'svelte';
 import { browser } from '$app/environment';
 import { saveDecisions } from '$lib/db/persist.js';
 import type { DecisionRecord } from '$lib/db/schema.js';
@@ -99,9 +100,28 @@ class GameStore {
 	_pending: PendingDecision[] = [];
 	synthesizedTC = $state<number | null>(null);
 	_weaknessWeights = $state(new Map<string, number>());
+	_regularShoeBackup: Shoe | null = null;
 
 	constructor() {
-		if (browser) this._prefetchWeights();
+		if (browser) {
+			this._prefetchWeights();
+			$effect.root(() => {
+				$effect(() => {
+					const isDrill = settings.weaknessWeighting;
+					untrack(() => this._syncDrillMode());
+				});
+			});
+		}
+	}
+
+	_syncDrillMode() {
+		if (settings.weaknessWeighting && this._regularShoeBackup === null) {
+			this._regularShoeBackup = this.state.shoe;
+			this.state = { ...this.state, shoe: buildShoe(settings.deckCount) };
+		} else if (!settings.weaknessWeighting && this._regularShoeBackup !== null) {
+			this.state = { ...this.state, shoe: this._regularShoeBackup };
+			this._regularShoeBackup = null;
+		}
 	}
 
 	async _prefetchWeights() {
@@ -182,6 +202,7 @@ class GameStore {
 
 	deal() {
 		if (this.state.phase !== 'betting') return;
+		this._syncDrillMode();
 		if (this.betAmount < settings.minBet || this.betAmount * settings.spotCount > this.bankroll) return;
 		this.actionHistory = [];
 		this.lastResults = [];
@@ -373,6 +394,7 @@ class GameStore {
 	}
 
 	nextHand() {
+		this._syncDrillMode();
 		const autoReshuffle = !settings.weaknessWeighting && shouldReshuffle(this.state.shoe);
 		this.state = {
 			...this.state,

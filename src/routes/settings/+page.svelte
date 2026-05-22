@@ -113,6 +113,24 @@
 						></span>
 					</button>
 				</label>
+				<hr class="border-zinc-800" />
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
+					<span class="text-sm font-medium text-gray-100">Show strategy chart button</span>
+					<button
+						role="switch"
+						aria-checked={settings.showStrategyChart}
+						onclick={() => settings.setShowStrategyChart(!settings.showStrategyChart)}
+						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showStrategyChart
+							? 'bg-green-500'
+							: 'bg-zinc-600'}"
+					>
+						<span
+							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showStrategyChart
+								? 'translate-x-5'
+								: 'translate-x-0'}"
+						></span>
+					</button>
+				</label>
 			</div>
 		</div>
 
