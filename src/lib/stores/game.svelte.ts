@@ -12,6 +12,7 @@ import {
 	type ResolvedHand
 } from '$lib/engine/game.js';
 import { handKey, handType, handValue, isBlackjack, makeHand } from '$lib/engine/hand.js';
+import type { Card } from '$lib/engine/card.js';
 import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
 import { buildShoe, dealCard, resetShoe, shouldReshuffle, trueCount, type Shoe } from '$lib/engine/shoe.js';
 import { getBaseAction, getChartForRules, getCorrectAction, getInsuranceAction } from '$lib/engine/strategy.js';
@@ -111,6 +112,10 @@ class GameStore {
 					untrack(() => this._syncDrillMode());
 				});
 			});
+			const savedShoe = this._loadShoe();
+			if (savedShoe) {
+				this.state = { ...this.state, shoe: savedShoe };
+			}
 		}
 	}
 
@@ -118,10 +123,47 @@ class GameStore {
 		if (settings.weaknessWeighting && this._regularShoeBackup === null) {
 			this._regularShoeBackup = this.state.shoe;
 			this.state = { ...this.state, shoe: buildShoe(settings.deckCount) };
+			this._persistShoe();
 		} else if (!settings.weaknessWeighting && this._regularShoeBackup !== null) {
 			this.state = { ...this.state, shoe: this._regularShoeBackup };
 			this._regularShoeBackup = null;
+			this._persistShoe();
 		}
+	}
+
+	_persistShoe() {
+		if (!browser) return;
+		const shoe = (settings.weaknessWeighting && this._regularShoeBackup)
+			? this._regularShoeBackup
+			: this.state.shoe;
+		sessionStorage.setItem('bj-shoe', JSON.stringify({
+			cards: shoe.cards,
+			decks: shoe.decks,
+			runningCount: shoe.runningCount
+		}));
+	}
+
+	_loadShoe(): Shoe | null {
+		if (!browser) return null;
+		const raw = sessionStorage.getItem('bj-shoe');
+		if (!raw) return null;
+		try {
+			const data = JSON.parse(raw);
+			if (data.decks !== settings.deckCount) return null;
+			if (!Number.isInteger(data.runningCount)) return null;
+			if (!Array.isArray(data.cards)) return null;
+			const validRanks = new Set(['A','2','3','4','5','6','7','8','9','T','J','Q','K']);
+			const validSuits = new Set(['♠','♥','♦','♣']);
+			for (const c of data.cards) {
+				if (!validRanks.has(c?.rank) || !validSuits.has(c?.suit)) return null;
+			}
+			return {
+				cards: data.cards as Card[],
+				decks: data.decks,
+				dealtCards: [],
+				runningCount: data.runningCount
+			};
+		} catch { return null; }
 	}
 
 	async _prefetchWeights() {
@@ -421,6 +463,7 @@ class GameStore {
 		this.synthesizedTC = null;
 		// betAmount intentionally preserved — defaults to last bet
 		if (browser && settings.weaknessWeighting) this._prefetchWeights();
+		this._persistShoe();
 	}
 
 	reshuffle() {
@@ -447,6 +490,7 @@ class GameStore {
 		this._pending = [];
 		this.betAmount = 0;
 		this.sessionId = browser ? crypto.randomUUID() : 'ssr';
+		this._persistShoe();
 	}
 
 	addChip(value: number) {
