@@ -10,7 +10,7 @@
 <button
 	role="switch"
 	aria-checked={checked}
-	onclick={() => onchange(!checked)}
+	onclick={(e) => { e.stopPropagation(); onchange(!checked); }}
 	class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {extraClass} {checked
 		? 'bg-green-500'
 		: 'bg-zinc-600'}"

@@ -45,27 +45,27 @@
 			<div class="overflow-hidden rounded-xl bg-zinc-900">
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show feedback</span>
-					<ToggleSwitch checked={settings.showFeedback} onchange={settings.setShowFeedback} />
+					<ToggleSwitch checked={settings.showFeedback} onchange={(v) => settings.setShowFeedback(v)} />
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Betting</span>
-					<ToggleSwitch checked={settings.bettingEnabled} onchange={settings.setBettingEnabled} />
+					<ToggleSwitch checked={settings.bettingEnabled} onchange={(v) => settings.setBettingEnabled(v)} />
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show hand total</span>
-					<ToggleSwitch checked={settings.showHandTotal} onchange={settings.setShowHandTotal} />
+					<ToggleSwitch checked={settings.showHandTotal} onchange={(v) => settings.setShowHandTotal(v)} />
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show hint button</span>
-					<ToggleSwitch checked={settings.showHintButton} onchange={settings.setShowHintButton} />
+					<ToggleSwitch checked={settings.showHintButton} onchange={(v) => settings.setShowHintButton(v)} />
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show strategy chart button</span>
-					<ToggleSwitch checked={settings.showStrategyChart} onchange={settings.setShowStrategyChart} />
+					<ToggleSwitch checked={settings.showStrategyChart} onchange={(v) => settings.setShowStrategyChart(v)} />
 				</label>
 			</div>
 		</div>
@@ -78,7 +78,7 @@
 			<div class="overflow-hidden rounded-xl bg-zinc-900">
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Enable card counting</span>
-					<ToggleSwitch checked={settings.countingEnabled} onchange={settings.setCountingEnabled} />
+					<ToggleSwitch checked={settings.countingEnabled} onchange={(v) => settings.setCountingEnabled(v)} />
 				</label>
 				<hr class="border-zinc-800" />
 				<div class="flex items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
@@ -98,7 +98,7 @@
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
 					<span class="text-sm font-medium text-gray-100">Highlight active deviations</span>
-					<ToggleSwitch checked={settings.highlightActiveDeviations} onchange={settings.setHighlightActiveDeviations} />
+					<ToggleSwitch checked={settings.highlightActiveDeviations} onchange={(v) => settings.setHighlightActiveDeviations(v)} />
 				</label>
 			</div>
 		</div>
@@ -114,7 +114,7 @@
 						<span class="text-sm font-medium text-gray-100">Prioritize weak hands</span>
 						<p class="text-xs text-gray-500 mt-0.5">Hands weighted by heat map accuracy. Betting disabled.</p>
 					</div>
-					<ToggleSwitch checked={settings.weaknessWeighting} onchange={settings.setWeaknessWeighting} class="ml-3 shrink-0" />
+					<ToggleSwitch checked={settings.weaknessWeighting} onchange={(v) => settings.setWeaknessWeighting(v)} class="ml-3 shrink-0" />
 				</label>
 
 				{#if settings.weaknessWeighting}
