@@ -412,12 +412,15 @@
 
 	<!-- Shoe penetration bar -->
 	{#if settings.countingEnabled && !settings.weaknessWeighting}
-		<div class="h-[3px] w-full bg-white/10">
+		<div class="relative h-[3px] w-full bg-white/10">
 			<div
 				class="h-full transition-all duration-300
 					{shoePenetration < 0.6 ? 'bg-green-500/70' : shoePenetration < 0.75 ? 'bg-amber-400/80' : 'bg-red-500/80'}"
 				style="width: {shoePenetration * 100}%"
 			></div>
+			{#each Array.from({ length: game.state.shoe.decks - 1 }, (_, i) => i + 1) as i}
+				<div class="absolute top-0 h-full w-px bg-white/30" style="left: {(i / game.state.shoe.decks) * 100}%"></div>
+			{/each}
 		</div>
 	{/if}
 
