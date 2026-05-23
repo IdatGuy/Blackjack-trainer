@@ -182,6 +182,9 @@ function applyDeviations(chart: StrategyChart, h17 = false, hasSurrender = true)
 	dev(chart.hard, '12', '6', { tc: -1, action: 'H', above: false }); // #17
 	dev(chart.hard, '13', '3', { tc: -2, action: 'H', above: false }); // #18
 
+	// BJA additions
+	dev(chart.hard, '8', '7', { tc: 2, action: 'D', above: true});
+
 	// Fab 4 (surrender deviations) — only when surrender is enabled
 	if (hasSurrender) {
 		dev(chart.hard, '14', 'T', { tc: 3, action: 'R', above: true }); // Fab 1
