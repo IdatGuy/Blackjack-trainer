@@ -256,6 +256,16 @@
 		];
 	}
 
+	// Dynamic card sizing: measure band height and derive card dimensions
+	let containerHeight = $state(0);
+	let headerHeight = $state(0);
+	let bandHeight = $state(0);
+	let badgeHeight = $state(0);
+
+	const shoeBarH = $derived(settings.countingEnabled && !settings.weaknessWeighting ? 3 : 0);
+	const cardH = $derived(Math.max(80, ((containerHeight - headerHeight - shoeBarH - bandHeight) / 2 - badgeHeight) * 0.75));
+	const cardW = $derived(cardH * 0.686);
+	const cardOverlap = $derived(cardW * 0.667);
 
 </script>
 
@@ -288,7 +298,11 @@
 	{/if}
 {/snippet}
 
-<div class="relative flex h-full flex-col">
+<div
+	class="relative flex h-dvh flex-col overflow-hidden"
+	bind:clientHeight={containerHeight}
+	style="--card-h: {cardH}px; --card-w: {cardW}px; --card-overlap: {cardOverlap}px"
+>
 	{#if isDealing}
 		<button
 			onclick={skipDeal}
@@ -298,7 +312,7 @@
 	{/if}
 
 	<!-- Top bar: 3-column grid keeps pill perfectly centered -->
-	<header class="grid grid-cols-3 items-center border-b border-zinc-800 bg-black/40 px-3 py-2">
+	<header class="grid grid-cols-3 items-center border-b border-zinc-800 bg-black/40 px-3 py-2" bind:clientHeight={headerHeight}>
 		<!-- Left: reshuffle button -->
 		<div class="flex items-center">
 			<button
@@ -411,17 +425,19 @@
 	{/if}
 
 	<!-- Dealer area -->
-	<div class="flex flex-1 flex-col items-center justify-center py-6">
+	<div class="flex flex-1 flex-col items-center justify-center py-2">
 		<Hand
 			cards={visibleDealerCards}
 			hideSecond={phase === 'player' || phase === 'insurance'}
-			label="Dealer"
-			showTotal={phase !== 'player' && phase !== 'insurance'}
+			showTotal={settings.showHandTotal && phase !== 'player' && phase !== 'insurance'}
 		/>
 	</div>
 
-	<!-- Center action zone (fixed height) -->
-	<div class="flex w-full min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4 {phase === 'betting' || (phase === 'player' && !isDealing) || phase === 'insurance' || phase === 'resolution' ? 'bg-black/20 border-t border-b border-white/10' : ''}">
+	<!-- Center action zone -->
+	<div
+		class="flex w-full flex-col items-center justify-center gap-3 px-4 py-4 {phase === 'betting' || (phase === 'player' && !isDealing) || phase === 'insurance' || phase === 'resolution' ? 'bg-black/20 border-t border-b border-white/10' : ''}"
+		bind:clientHeight={bandHeight}
+	>
 		{#if phase === 'betting'}
 			{#if settings.weaknessWeighting}
 				<div class="flex flex-col items-center gap-2">
@@ -484,7 +500,7 @@
 	</div>
 
 	<!-- Player area -->
-	<div class="flex flex-1 flex-col items-center justify-center py-6">
+	<div class="flex flex-1 flex-col items-center justify-center py-2">
 		{#if playerHands.length > 0}
 			{#if playerHands.length > 1}
 				<div class="flex justify-center gap-1.5 pb-2">
@@ -512,7 +528,7 @@
 							style="scroll-snap-align: center"
 						>
 							<!-- per-hand badge -->
-							<div class="flex w-full flex-col items-center gap-1 pb-1">
+							<div class="flex w-full flex-col items-center gap-1 pb-1" bind:clientHeight={badgeHeight}>
 								{#if phase === 'resolution' && resolved}
 									<span class="text-2xl font-bold {OUTCOME_COLOR[resolved.result]}">{OUTCOME_TEXT[resolved.result]}</span>
 									{#if game.showFeedback}
@@ -561,11 +577,6 @@
 					<!-- spacer forces trailing scroll room so last hand can reach center -->
 					<div style="flex-shrink: 0; width: calc(50% - 6rem)"></div>
 				</div>
-			</div>
-		{:else}
-			<div class="flex flex-col items-center gap-2">
-				<span class="text-sm uppercase tracking-widest text-gray-600">Player</span>
-				<div class="h-[140px] w-[96px] rounded-lg border-2 border-dashed border-zinc-700"></div>
 			</div>
 		{/if}
 	</div>

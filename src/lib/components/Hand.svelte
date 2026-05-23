@@ -58,6 +58,7 @@
 <style>
 	.card-offset {
 		margin-left: calc(-1 * var(--card-overlap, 64px));
+		transition: margin-left 300ms ease;
 	}
 	.card-offset:first-child {
 		margin-left: 0;

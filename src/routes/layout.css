@@ -15,7 +15,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	position: relative;
-	--card-h: clamp(80px, 20dvh, 160px);
+	--card-h: clamp(80px, 20dvh, 220px);
 	--card-w: calc(var(--card-h) * 0.686);
 	--card-overlap: calc(var(--card-w) * 0.667);
 }

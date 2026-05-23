@@ -77,7 +77,9 @@
 		height: var(--card-h, 140px);
 		flex-shrink: 0;
 		transform-style: preserve-3d;
-		transition: transform var(--flip-ms, 250ms) ease;
+		transition: transform var(--flip-ms, 250ms) ease,
+			width 300ms ease,
+			height 300ms ease;
 	}
 	.card-flipper.is-face-down {
 		transform: rotateY(180deg);
