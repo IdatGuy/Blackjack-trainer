@@ -1,4 +1,4 @@
-import { getDb } from './index.js';
+import { fetchDecisionsSince } from './index.js';
 import type { DecisionRecord } from './schema.js';
 
 export type HandsStats = {
@@ -24,17 +24,6 @@ export type StrategyStats = {
 	noActionRequired: number;
 };
 
-function sinceRange(since: number) {
-	return since > 0 ? IDBKeyRange.lowerBound(since) : undefined;
-}
-
-async function fetchRecords(since: number): Promise<DecisionRecord[]> {
-	const db = await getDb();
-	const range = sinceRange(since);
-	return range
-		? db.getAllFromIndex('decisions', 'by-timestamp', range)
-		: db.getAll('decisions');
-}
 
 function uniqueHands(records: DecisionRecord[]): Map<string, DecisionRecord[]> {
 	const map = new Map<string, DecisionRecord[]>();
@@ -48,7 +37,7 @@ function uniqueHands(records: DecisionRecord[]): Map<string, DecisionRecord[]> {
 }
 
 export async function getHandsStats(since: number): Promise<HandsStats> {
-	const records = await fetchRecords(since);
+	const records = await fetchDecisionsSince(since);
 	const hands = uniqueHands(records);
 	let won = 0, push = 0, lost = 0, surrender = 0;
 	for (const group of hands.values()) {
@@ -62,7 +51,7 @@ export async function getHandsStats(since: number): Promise<HandsStats> {
 }
 
 export async function getBankrollStats(since: number): Promise<BankrollStats> {
-	const records = await fetchRecords(since);
+	const records = await fetchDecisionsSince(since);
 	const tracked = records.filter((r) => r.bankrollTracked);
 	const hands = uniqueHands(tracked);
 
@@ -91,7 +80,7 @@ export async function getBankrollStats(since: number): Promise<BankrollStats> {
 }
 
 export async function getStrategyStats(since: number): Promise<StrategyStats> {
-	const records = await fetchRecords(since);
+	const records = await fetchDecisionsSince(since);
 	const hands = uniqueHands(records);
 
 	let correct = 0;

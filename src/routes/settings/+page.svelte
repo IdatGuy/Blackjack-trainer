@@ -4,6 +4,7 @@
 	import { PAIR_RANKS } from '$lib/engine/synthesizer.js';
 	import type { Rank } from '$lib/engine/card.js';
 	import RangeSlider from '$lib/components/RangeSlider.svelte';
+	import ToggleSwitch from '$lib/components/ToggleSwitch.svelte';
 
 	const SPEED_LABELS = ['Instant', '1', '2', '3', '4', '5'];
 
@@ -44,92 +45,27 @@
 			<div class="overflow-hidden rounded-xl bg-zinc-900">
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show feedback</span>
-					<button
-						role="switch"
-						aria-checked={settings.showFeedback}
-						onclick={() => settings.setShowFeedback(!settings.showFeedback)}
-						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showFeedback
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showFeedback
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch checked={settings.showFeedback} onchange={settings.setShowFeedback} />
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Betting</span>
-					<button
-						role="switch"
-						aria-checked={settings.bettingEnabled}
-						onclick={() => settings.setBettingEnabled(!settings.bettingEnabled)}
-						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.bettingEnabled
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.bettingEnabled
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch checked={settings.bettingEnabled} onchange={settings.setBettingEnabled} />
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show hand total</span>
-					<button
-						role="switch"
-						aria-checked={settings.showHandTotal}
-						onclick={() => settings.setShowHandTotal(!settings.showHandTotal)}
-						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showHandTotal
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showHandTotal
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch checked={settings.showHandTotal} onchange={settings.setShowHandTotal} />
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show hint button</span>
-					<button
-						role="switch"
-						aria-checked={settings.showHintButton}
-						onclick={() => settings.setShowHintButton(!settings.showHintButton)}
-						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showHintButton
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showHintButton
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch checked={settings.showHintButton} onchange={settings.setShowHintButton} />
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Show strategy chart button</span>
-					<button
-						role="switch"
-						aria-checked={settings.showStrategyChart}
-						onclick={() => settings.setShowStrategyChart(!settings.showStrategyChart)}
-						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.showStrategyChart
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.showStrategyChart
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch checked={settings.showStrategyChart} onchange={settings.setShowStrategyChart} />
 				</label>
 			</div>
 		</div>
@@ -142,20 +78,7 @@
 			<div class="overflow-hidden rounded-xl bg-zinc-900">
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Enable card counting</span>
-					<button
-						role="switch"
-						aria-checked={settings.countingEnabled}
-						onclick={() => settings.setCountingEnabled(!settings.countingEnabled)}
-						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.countingEnabled
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.countingEnabled
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch checked={settings.countingEnabled} onchange={settings.setCountingEnabled} />
 				</label>
 				<hr class="border-zinc-800" />
 				<div class="flex items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
@@ -175,20 +98,7 @@
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
 					<span class="text-sm font-medium text-gray-100">Highlight active deviations</span>
-					<button
-						role="switch"
-						aria-checked={settings.highlightActiveDeviations}
-						onclick={() => settings.setHighlightActiveDeviations(!settings.highlightActiveDeviations)}
-						class="relative h-6 w-11 rounded-full transition-colors focus:outline-none {settings.highlightActiveDeviations
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.highlightActiveDeviations
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch checked={settings.highlightActiveDeviations} onchange={settings.setHighlightActiveDeviations} />
 				</label>
 			</div>
 		</div>
@@ -204,20 +114,7 @@
 						<span class="text-sm font-medium text-gray-100">Prioritize weak hands</span>
 						<p class="text-xs text-gray-500 mt-0.5">Hands weighted by heat map accuracy. Betting disabled.</p>
 					</div>
-					<button
-						role="switch"
-						aria-checked={settings.weaknessWeighting}
-						onclick={() => settings.setWeaknessWeighting(!settings.weaknessWeighting)}
-						class="relative ml-3 h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none {settings.weaknessWeighting
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.weaknessWeighting
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch checked={settings.weaknessWeighting} onchange={settings.setWeaknessWeighting} class="ml-3 shrink-0" />
 				</label>
 
 				{#if settings.weaknessWeighting}

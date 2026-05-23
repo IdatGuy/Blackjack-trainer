@@ -82,7 +82,7 @@ export function buildDealerCard(rank: Rank): Card {
 }
 
 // Pick a TC that always fires a deviation for this cell
-export function synthesizeTC(cell: ChartCell): number {
+function synthesizeTC(cell: ChartCell): number {
 	if (!cell.deviations || cell.deviations.length === 0) return 0;
 	const dev = cell.deviations[Math.floor(Math.random() * cell.deviations.length)];
 	// above=true fires when tc >= dev.tc; above=false fires when tc < dev.tc
@@ -90,7 +90,7 @@ export function synthesizeTC(cell: ChartCell): number {
 }
 
 // Pick a TC that will never fire any deviation for this cell
-export function synthesizeBaseTC(cell: ChartCell): number {
+function synthesizeBaseTC(cell: ChartCell): number {
 	if (!cell.deviations || cell.deviations.length === 0) {
 		const tcs = [-2, -1, 0, 1, 2];
 		return tcs[Math.floor(Math.random() * tcs.length)];

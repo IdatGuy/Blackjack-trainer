@@ -62,10 +62,6 @@ function rankLabel(rank: string): string {
 	return rank === 'T' ? '10' : rank;
 }
 
-/** @deprecated import settings.minBet / settings.maxBet directly */
-export const MIN_BET = 10;
-/** @deprecated import settings.minBet / settings.maxBet directly */
-export const MAX_BET = 1000;
 
 function generateId(): string {
 	if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -217,6 +213,17 @@ class GameStore {
 		this._flushDecisions(results);
 	}
 
+	private _rulesFromSettings() {
+		return {
+			dealerHitsSoft17: settings.dealerHitsSoft17,
+			doubleAfterSplit: settings.doubleAfterSplit,
+			resplitAces: settings.resplitAces,
+			surrender: settings.surrender,
+			peek: settings.peek,
+			blackjackPays: settings.blackjackPays,
+		};
+	}
+
 	_flushDecisions(results: ResolvedHand[]) {
 		if (this._pending.length === 0) return;
 		const bankrollTracked = settings.bettingEnabled && !settings.weaknessWeighting;
@@ -253,15 +260,7 @@ class GameStore {
 		this.insuranceResult = null;
 		this.state = {
 			...this.state,
-			rules: {
-				...this.state.rules,
-				dealerHitsSoft17: settings.dealerHitsSoft17,
-				doubleAfterSplit: settings.doubleAfterSplit,
-				resplitAces: settings.resplitAces,
-				surrender: settings.surrender,
-				peek: settings.peek,
-				blackjackPays: settings.blackjackPays,
-			}
+			rules: { ...this.state.rules, ...this._rulesFromSettings() }
 		};
 		const now = Date.now();
 		this.handId = `${this.sessionId}-${now}`;
@@ -441,15 +440,7 @@ class GameStore {
 		this.state = {
 			...this.state,
 			shoe: autoReshuffle ? resetShoe(this.state.shoe) : this.state.shoe,
-			rules: {
-				...this.state.rules,
-				dealerHitsSoft17: settings.dealerHitsSoft17,
-				doubleAfterSplit: settings.doubleAfterSplit,
-				resplitAces: settings.resplitAces,
-				surrender: settings.surrender,
-				peek: settings.peek,
-				blackjackPays: settings.blackjackPays,
-			},
+			rules: { ...this.state.rules, ...this._rulesFromSettings() },
 			phase: 'betting',
 			playerHands: [],
 			dealerHand: makeHand([], 0),
@@ -470,16 +461,7 @@ class GameStore {
 		this.state = {
 			...this.state,
 			shoe: buildShoe(settings.deckCount),
-			rules: {
-				...this.state.rules,
-				decks: settings.deckCount,
-				dealerHitsSoft17: settings.dealerHitsSoft17,
-				doubleAfterSplit: settings.doubleAfterSplit,
-				resplitAces: settings.resplitAces,
-				surrender: settings.surrender,
-				peek: settings.peek,
-				blackjackPays: settings.blackjackPays,
-			},
+			rules: { ...this.state.rules, decks: settings.deckCount, ...this._rulesFromSettings() },
 			phase: 'betting',
 			playerHands: [],
 			dealerHand: makeHand([], 0),
@@ -600,4 +582,3 @@ class GameStore {
 }
 
 export const game = new GameStore();
-export { ACTION_PAST, ACTION_INF };

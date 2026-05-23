@@ -1,4 +1,4 @@
-import { getDb } from './index.js';
+import { fetchDecisionsSince } from './index.js';
 import type { DecisionRecord } from './schema.js';
 
 export type CellAccuracy = {
@@ -20,14 +20,8 @@ export type CellDetail = {
 	deviation: CellAccuracy;
 };
 
-async function fetchSince(since: number): Promise<DecisionRecord[]> {
-	const db = await getDb();
-	const range = since > 0 ? IDBKeyRange.lowerBound(since) : undefined;
-	return range ? db.getAllFromIndex('decisions', 'by-timestamp', range) : db.getAll('decisions');
-}
-
 // Converts a DecisionRecord's playerTotal to the chart key used in strategy.ts
-export function toPlayerKey(r: Pick<DecisionRecord, 'handType' | 'playerTotal'>): string {
+function toPlayerKey(r: Pick<DecisionRecord, 'handType' | 'playerTotal'>): string {
 	if (r.handType === 'soft') {
 		// playerTotal is numeric (e.g. 18 for A7 = soft 18); chart key is "A7"
 		return `A${Number(r.playerTotal) - 11}`;
@@ -39,7 +33,7 @@ export async function getHeatmapData(
 	handType: 'hard' | 'soft' | 'pair',
 	since: number
 ): Promise<HeatmapData> {
-	const records = await fetchSince(since);
+	const records = await fetchDecisionsSince(since);
 	const out: HeatmapData = {};
 	for (const r of records) {
 		if (r.handType !== handType) continue;
@@ -54,7 +48,7 @@ export async function getHeatmapData(
 }
 
 export async function getCategoryStats(since: number): Promise<CategoryStat[]> {
-	const records = await fetchSince(since);
+	const records = await fetchDecisionsSince(since);
 	const map = new Map<DecisionRecord['category'], CellAccuracy>();
 	for (const r of records) {
 		const s = map.get(r.category) ?? { correct: 0, total: 0 };
@@ -67,7 +61,7 @@ export async function getCategoryStats(since: number): Promise<CategoryStat[]> {
 
 // Returns accuracy keyed by "handType:playerKey:dealerUp" for deviation decisions only
 export async function getDeviationAccuracy(since: number): Promise<Map<string, CellAccuracy>> {
-	const records = await fetchSince(since);
+	const records = await fetchDecisionsSince(since);
 	const map = new Map<string, CellAccuracy>();
 	for (const r of records) {
 		if (r.category !== 'deviation') continue;
@@ -81,7 +75,7 @@ export async function getDeviationAccuracy(since: number): Promise<Map<string, C
 }
 
 export async function getWeaknessWeights(): Promise<Map<string, number>> {
-	const records = await fetchSince(0);
+	const records = await fetchDecisionsSince(0);
 	const counts = new Map<string, { correct: number; total: number }>();
 	for (const r of records) {
 		const baseKey = `${r.handType}:${toPlayerKey(r)}:${r.dealerUp}`;
@@ -104,7 +98,7 @@ export async function getCellDetail(
 	dealerUp: string,
 	since: number
 ): Promise<CellDetail> {
-	const records = await fetchSince(since);
+	const records = await fetchDecisionsSince(since);
 	const basic: CellAccuracy = { correct: 0, total: 0 };
 	const deviation: CellAccuracy = { correct: 0, total: 0 };
 	for (const r of records) {

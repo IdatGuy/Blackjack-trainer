@@ -210,9 +210,7 @@
 		];
 	}
 
-	function signSup(n: number): string {
-		return n >= 0 ? '+' : '−';
-	}
+
 </script>
 
 {#snippet bankrollContent()}
