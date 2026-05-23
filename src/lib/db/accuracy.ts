@@ -1,4 +1,4 @@
-import { fetchDecisionsSince } from './index.js';
+import { getDb, fetchDecisionsSince } from './index.js';
 import type { DecisionRecord } from './schema.js';
 
 export type CellAccuracy = {
@@ -90,6 +90,30 @@ export async function getWeaknessWeights(): Promise<Map<string, number>> {
 		weights.set(key, s.total > 0 ? 1 - s.correct / s.total : 1.0);
 	}
 	return weights;
+}
+
+export type CountAccuracyStat = {
+	total: number;
+	exact: number;
+	withinOne: number;
+	distribution: Map<number, number>;
+};
+
+export async function getCountAccuracy(since: number): Promise<CountAccuracyStat> {
+	const db = await getDb();
+	const range = since > 0 ? IDBKeyRange.lowerBound(since) : undefined;
+	const records = range
+		? await db.getAllFromIndex('countGuesses', 'by-timestamp', range)
+		: await db.getAll('countGuesses');
+
+	const distribution = new Map<number, number>();
+	let exact = 0, withinOne = 0;
+	for (const r of records) {
+		distribution.set(r.error, (distribution.get(r.error) ?? 0) + 1);
+		if (r.error === 0) exact++;
+		if (Math.abs(r.error) <= 1) withinOne++;
+	}
+	return { total: records.length, exact, withinOne, distribution };
 }
 
 export async function getCellDetail(

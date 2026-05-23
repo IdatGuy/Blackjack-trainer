@@ -27,6 +27,17 @@ export type DecisionRecord = {
 	bankrollTracked: boolean;
 };
 
+export type CountGuessRecord = {
+	id?: number;
+	timestamp: number;
+	sessionId: string;
+	playMode: 'shoe' | 'drill';
+	actualRC: number;
+	guessedRC: number;
+	correct: boolean;
+	error: number;
+};
+
 export interface BjDB extends DBSchema {
 	decisions: {
 		key: number;
@@ -35,6 +46,14 @@ export interface BjDB extends DBSchema {
 			'by-timestamp': number;
 			'by-session': string;
 			'by-ruleset': string;
+		};
+	};
+	countGuesses: {
+		key: number;
+		value: CountGuessRecord;
+		indexes: {
+			'by-timestamp': number;
+			'by-session': string;
 		};
 	};
 }

@@ -11,6 +11,8 @@
 	import { game } from '$lib/stores/game.svelte.js';
 	import type { Action } from '$lib/engine/rules.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
+	import { browser } from '$app/environment';
+	import { saveCountGuess } from '$lib/db/persist.js';
 
 	const OUTCOME_TEXT: Record<HandResult, string> = {
 		win: 'You Win',
@@ -106,6 +108,15 @@
 	async function submitCountGuess() {
 		const correct = countEntry === countPopupExpected;
 		countPopupResult = correct ? 'correct' : 'wrong';
+		if (browser) saveCountGuess({
+			timestamp: Date.now(),
+			sessionId: game.sessionId,
+			playMode: settings.weaknessWeighting ? 'drill' : 'shoe',
+			actualRC: countPopupExpected,
+			guessedRC: countEntry,
+			correct,
+			error: countEntry - countPopupExpected
+		});
 		await new Promise(r => setTimeout(r, correct ? 800 : 2000));
 		countPopupOpen = false;
 		game.nextHand();

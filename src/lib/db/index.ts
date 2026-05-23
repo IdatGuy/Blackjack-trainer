@@ -5,15 +5,25 @@ let dbPromise: ReturnType<typeof openDB<BjDB>> | null = null;
 
 export function getDb() {
 	if (!dbPromise) {
-		dbPromise = openDB<BjDB>('bj-trainer', 1, {
-			upgrade(db) {
-				const store = db.createObjectStore('decisions', {
-					keyPath: 'id',
-					autoIncrement: true
-				});
-				store.createIndex('by-timestamp', 'timestamp');
-				store.createIndex('by-session', 'sessionId');
-				store.createIndex('by-ruleset', 'ruleSetId');
+		dbPromise = openDB<BjDB>('bj-trainer', 2, {
+			upgrade(db, oldVersion) {
+				if (oldVersion < 1) {
+					const store = db.createObjectStore('decisions', {
+						keyPath: 'id',
+						autoIncrement: true
+					});
+					store.createIndex('by-timestamp', 'timestamp');
+					store.createIndex('by-session', 'sessionId');
+					store.createIndex('by-ruleset', 'ruleSetId');
+				}
+				if (oldVersion < 2) {
+					const cg = db.createObjectStore('countGuesses', {
+						keyPath: 'id',
+						autoIncrement: true
+					});
+					cg.createIndex('by-timestamp', 'timestamp');
+					cg.createIndex('by-session', 'sessionId');
+				}
 			}
 		});
 	}

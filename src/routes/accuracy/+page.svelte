@@ -7,11 +7,13 @@
 		getHeatmapData,
 		getCategoryStats,
 		getDeviationAccuracy,
+		getCountAccuracy,
 		getCellDetail,
 		type HeatmapData,
 		type CategoryStat,
 		type CellAccuracy,
-		type CellDetail
+		type CellDetail,
+		type CountAccuracyStat
 	} from '$lib/db/accuracy.js';
 	import { filterSince } from '$lib/db/queries.js';
 	import HeatmapGrid from '$lib/components/accuracy/HeatmapGrid.svelte';
@@ -113,13 +115,14 @@
 
 	// ─── State ────────────────────────────────────────────────────────────────
 
-	type Tab = 'hard' | 'soft' | 'pairs' | 'deviations' | 'all';
+	type Tab = 'hard' | 'soft' | 'pairs' | 'deviations' | 'all' | 'count';
 	let activeTab = $state<Tab>('hard');
 	let timeFilter = $state<'today' | 'week' | 'month' | 'all'>('all');
 
 	let heatmapData = $state<HeatmapData>({});
 	let categoryStats = $state<CategoryStat[]>([]);
 	let deviationAccuracy = $state(new Map<string, CellAccuracy>());
+	let countAccuracy = $state<CountAccuracyStat | null>(null);
 
 	let showResetWarning = $state(false);
 	let accuracyResetAt = $state(
@@ -148,6 +151,9 @@
 		} else if (activeTab === 'deviations') {
 			deviationAccuracy = new Map();
 			getDeviationAccuracy(since).then((m) => (deviationAccuracy = m));
+		} else if (activeTab === 'count') {
+			countAccuracy = null;
+			getCountAccuracy(since).then((d) => (countAccuracy = d));
 		} else {
 			categoryStats = [];
 			getCategoryStats(since).then((s) => (categoryStats = s));
@@ -172,6 +178,8 @@
 			getDeviationAccuracy(since).then((m) => (deviationAccuracy = m));
 		} else if (activeTab === 'all') {
 			getCategoryStats(since).then((s) => (categoryStats = s));
+		} else if (activeTab === 'count') {
+			getCountAccuracy(since).then((d) => (countAccuracy = d));
 		}
 	});
 
@@ -194,7 +202,8 @@
 		{ id: 'soft', label: 'Soft' },
 		{ id: 'pairs', label: 'Pairs' },
 		{ id: 'deviations', label: 'Deviations' },
-		{ id: 'all', label: 'All' }
+		{ id: 'all', label: 'All' },
+		{ id: 'count', label: 'Count' }
 	];
 
 	function detailPctStr(acc: CellAccuracy): string {
@@ -316,6 +325,46 @@
 
 		{:else if activeTab === 'all'}
 			<CategoryStats stats={categoryStats} />
+
+		{:else if activeTab === 'count'}
+			{#if countAccuracy === null || countAccuracy.total === 0}
+				<p class="mt-4 text-center text-sm text-white/30">Complete some count challenges to see accuracy data.</p>
+			{:else}
+				{@const exactPct = Math.round((countAccuracy.exact / countAccuracy.total) * 100)}
+				{@const withinOnePct = Math.round((countAccuracy.withinOne / countAccuracy.total) * 100)}
+				{@const maxCount = Math.max(...countAccuracy.distribution.values())}
+				{@const sortedErrors = [...countAccuracy.distribution.entries()].sort((a, b) => a[0] - b[0])}
+				<!-- Summary -->
+				<div class="mb-4 grid grid-cols-3 gap-2">
+					<div class="flex flex-col items-center rounded-xl bg-white/5 py-3">
+						<span class="text-xl font-bold text-white">{countAccuracy.total}</span>
+						<span class="mt-0.5 text-[10px] text-white/40">Total</span>
+					</div>
+					<div class="flex flex-col items-center rounded-xl bg-white/5 py-3">
+						<span class="text-xl font-bold {exactPct >= 80 ? 'text-green-400' : exactPct >= 50 ? 'text-yellow-400' : 'text-red-400'}">{exactPct}%</span>
+						<span class="mt-0.5 text-[10px] text-white/40">Exact</span>
+					</div>
+					<div class="flex flex-col items-center rounded-xl bg-white/5 py-3">
+						<span class="text-xl font-bold {withinOnePct >= 80 ? 'text-green-400' : withinOnePct >= 50 ? 'text-yellow-400' : 'text-red-400'}">{withinOnePct}%</span>
+						<span class="mt-0.5 text-[10px] text-white/40">Within ±1</span>
+					</div>
+				</div>
+				<!-- Error distribution -->
+				<div class="space-y-1.5">
+					{#each sortedErrors as [err, count]}
+						{@const pct = Math.round((count / countAccuracy.total) * 100)}
+						{@const barPct = Math.round((count / maxCount) * 100)}
+						{@const color = err === 0 ? 'bg-green-500' : Math.abs(err) === 1 ? 'bg-yellow-400' : Math.abs(err) === 2 ? 'bg-amber-500' : 'bg-red-500'}
+						<div class="flex items-center gap-2">
+							<span class="w-8 text-right text-xs font-mono font-semibold text-white/70">{err > 0 ? '+' : ''}{err}</span>
+							<div class="flex-1 overflow-hidden rounded-full bg-white/10">
+								<div class="{color} h-5 rounded-full transition-all" style="width: {barPct}%"></div>
+							</div>
+							<span class="w-12 text-right text-xs text-white/50">{count} <span class="text-white/30">({pct}%)</span></span>
+						</div>
+					{/each}
+				</div>
+			{/if}
 		{/if}
 	</div>
 	</div>

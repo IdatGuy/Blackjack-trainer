@@ -1,5 +1,5 @@
 import { getDb } from './index.js';
-import type { DecisionRecord } from './schema.js';
+import type { CountGuessRecord, DecisionRecord } from './schema.js';
 
 export async function saveDecisions(records: DecisionRecord[]): Promise<void> {
 	if (records.length === 0) return;
@@ -7,4 +7,9 @@ export async function saveDecisions(records: DecisionRecord[]): Promise<void> {
 	const tx = db.transaction('decisions', 'readwrite');
 	await Promise.all(records.map((r) => tx.store.put(r)));
 	await tx.done;
+}
+
+export async function saveCountGuess(record: CountGuessRecord): Promise<void> {
+	const db = await getDb();
+	await db.add('countGuesses', record);
 }
