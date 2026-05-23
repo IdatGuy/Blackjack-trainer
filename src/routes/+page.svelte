@@ -328,7 +328,7 @@
 		<!-- Center: count pill + bankroll pill (independent) -->
 		<div class="flex items-center justify-center gap-1.5">
 			{#if countActive}
-				<div class="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 shadow">
+				<div class="flex items-center rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 shadow">
 					{@render countContent()}
 				</div>
 			{/if}
