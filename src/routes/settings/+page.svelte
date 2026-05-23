@@ -100,6 +100,44 @@
 					<span class="text-sm font-medium text-gray-100">Highlight active deviations</span>
 					<ToggleSwitch checked={settings.highlightActiveDeviations} onchange={(v) => settings.setHighlightActiveDeviations(v)} />
 				</label>
+				<hr class="border-zinc-800" />
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
+					<div>
+						<span class="text-sm font-medium text-gray-100">Count challenge</span>
+						<p class="text-xs text-gray-500 mt-0.5">Periodically quiz your running count between hands.</p>
+					</div>
+					<ToggleSwitch checked={settings.countPopupEnabled} onchange={(v) => settings.setCountPopupEnabled(v)} class="ml-3 shrink-0" />
+				</label>
+				{#if settings.countingEnabled && settings.countPopupEnabled}
+					<hr class="border-zinc-800" />
+					<div class="px-4 py-3.5">
+						<div class="flex items-center justify-between mb-2">
+							<p class="text-xs font-medium text-gray-400">Frequency</p>
+							<span class="text-xs font-semibold text-gray-200">Every ~{settings.countPopupFrequency} hands</span>
+						</div>
+						<input
+							type="range"
+							min="1" max="20" step="1"
+							value={settings.countPopupFrequency}
+							oninput={(e) => settings.setCountPopupFrequency(+(e.target as HTMLInputElement).value)}
+							class="w-full accent-white"
+						/>
+					</div>
+					<hr class="border-zinc-800" />
+					<div class="px-4 py-3.5">
+						<div class="flex items-center justify-between mb-2">
+							<p class="text-xs font-medium text-gray-400">Variance</p>
+							<span class="text-xs font-semibold text-gray-200">±{settings.countPopupWindow} hands</span>
+						</div>
+						<input
+							type="range"
+							min="0" max="5" step="1"
+							value={settings.countPopupWindow}
+							oninput={(e) => settings.setCountPopupWindow(+(e.target as HTMLInputElement).value)}
+							class="w-full accent-white"
+						/>
+					</div>
+				{/if}
 			</div>
 		</div>
 

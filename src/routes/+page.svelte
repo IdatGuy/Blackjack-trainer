@@ -64,7 +64,53 @@
 
 	let insuranceHintUsed = $state(false);
 
-	let showBankroll = $state(true);
+	// Count challenge popup state
+	let countPopupOpen = $state(false);
+	let countEntry = $state(0);
+	let countPopupResult = $state<'correct' | 'wrong' | null>(null);
+	let countPopupExpected = $state(0);
+	let handsSincePopup = $state(0);
+	let nextPopupAt = $state(0);
+
+	function nextPopupInterval(): number {
+		const base = settings.countPopupFrequency;
+		const win = settings.countPopupWindow;
+		return Math.max(1, base + Math.round((Math.random() * 2 - 1) * win));
+	}
+
+	$effect(() => {
+		// Initialize (or reset) the popup counter whenever the feature is toggled
+		if (settings.countPopupEnabled) {
+			handsSincePopup = 0;
+			nextPopupAt = nextPopupInterval();
+		}
+	});
+
+	function handleNextHand() {
+		cancelDealerAnimation();
+		if (settings.countPopupEnabled && settings.countingEnabled) {
+			handsSincePopup++;
+			if (handsSincePopup >= nextPopupAt) {
+				handsSincePopup = 0;
+				nextPopupAt = nextPopupInterval();
+				countEntry = 0;
+				countPopupResult = null;
+				countPopupExpected = game.state.shoe.runningCount;
+				countPopupOpen = true;
+				return;
+			}
+		}
+		game.nextHand();
+	}
+
+	async function submitCountGuess() {
+		const correct = countEntry === countPopupExpected;
+		countPopupResult = correct ? 'correct' : 'wrong';
+		await new Promise(r => setTimeout(r, correct ? 800 : 2000));
+		countPopupOpen = false;
+		game.nextHand();
+	}
+
 	let menuOpen = $state(false);
 	let chartOpen = $state(false);
 	let addFundsOpen = $state(false);
@@ -256,7 +302,7 @@
 		<!-- Left: reshuffle button -->
 		<div class="flex items-center">
 			<button
-				onclick={() => { cancelDealerAnimation(); game.reshuffle(); }}
+				onclick={() => { cancelDealerAnimation(); game.reshuffle(); handsSincePopup = 0; nextPopupAt = nextPopupInterval(); }}
 				class="flex h-9 w-9 items-center justify-center rounded-lg text-xl transition-colors
 					{game.reshuffleNeeded
 					? 'bg-amber-400 text-gray-900 hover:bg-amber-300 active:bg-amber-500'
@@ -268,32 +314,12 @@
 			</button>
 		</div>
 
-		<!-- Center: adaptive count/bankroll pill -->
+		<!-- Center: bankroll pill + count pill (independent) -->
 		<div class="flex items-center justify-center gap-1.5">
-			{#if bettingActive && countActive}
-				<!-- Both active: clickable, bankroll first -->
-				<button
-					onclick={() => (showBankroll = !showBankroll)}
-					class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow transition-colors hover:bg-gray-100 active:bg-gray-200"
-				>
-					{#if showBankroll}
-						{@render bankrollContent()}
-					{:else}
-						{@render countContent()}
-					{/if}
-				</button>
-			{:else if bettingActive}
-				<!-- Betting only: non-clickable -->
-				<div class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow">
+			{#if bettingActive}
+				<div class="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 shadow">
 					{@render bankrollContent()}
 				</div>
-			{:else if countActive}
-				<!-- Count only: non-clickable -->
-				<div class="rounded-full bg-white px-5 py-1.5 text-sm font-semibold text-gray-900 shadow">
-					{@render countContent()}
-				</div>
-			{/if}
-			{#if bettingActive && (!countActive || showBankroll)}
 				<button
 					onclick={() => (addFundsOpen = true)}
 					class="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 active:bg-white/40"
@@ -303,6 +329,11 @@
 						<path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
 					</svg>
 				</button>
+			{/if}
+			{#if countActive}
+				<div class="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 shadow">
+					{@render countContent()}
+				</div>
 			{/if}
 		</div>
 
@@ -445,7 +476,7 @@
 		{:else if phase === 'resolution'}
 			<button
 				class="rounded-xl bg-yellow-500 px-8 py-3 text-base font-bold text-gray-900 shadow-lg hover:bg-yellow-400 active:bg-yellow-600"
-				onclick={() => { cancelDealerAnimation(); game.nextHand(); }}
+				onclick={handleNextHand}
 			>
 				Next Hand
 			</button>
@@ -572,6 +603,48 @@
 {/if}
 
 <StrategyChart open={chartOpen} onclose={() => (chartOpen = false)} trueCount={game.synthesizedTC ?? tc} />
+
+{#if countPopupOpen}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6">
+		<div class="w-full max-w-xs rounded-2xl bg-zinc-900 p-6 shadow-2xl">
+			<p class="mb-6 text-center text-base font-semibold text-gray-100">What's the running count?</p>
+
+			{#if countPopupResult === null}
+				<!-- Entry UI -->
+				<div class="mb-6 flex items-center justify-center gap-4">
+					<button
+						onclick={() => (countEntry--)}
+						class="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white hover:bg-zinc-700 active:bg-zinc-600"
+					>−</button>
+					<span class="w-16 text-center text-3xl font-bold tabular-nums text-white">
+						{countEntry > 0 ? '+' : ''}{countEntry}
+					</span>
+					<button
+						onclick={() => (countEntry++)}
+						class="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white hover:bg-zinc-700 active:bg-zinc-600"
+					>+</button>
+				</div>
+				<button
+					onclick={submitCountGuess}
+					class="w-full rounded-xl bg-yellow-500 py-3 text-base font-bold text-gray-900 hover:bg-yellow-400 active:bg-yellow-600"
+				>Submit</button>
+			{:else}
+				<!-- Result UI -->
+				<div class="flex flex-col items-center gap-2 py-4">
+					{#if countPopupResult === 'correct'}
+						<span class="text-4xl">✓</span>
+						<span class="text-lg font-bold text-green-400">Correct!</span>
+					{:else}
+						<span class="text-4xl">✗</span>
+						<span class="text-lg font-bold text-red-400">
+							Was {countPopupExpected > 0 ? '+' : ''}{countPopupExpected}
+						</span>
+					{/if}
+				</div>
+			{/if}
+		</div>
+	</div>
+{/if}
 
 <style>
 	.hand-scroll {

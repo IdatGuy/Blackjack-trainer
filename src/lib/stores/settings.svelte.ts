@@ -34,6 +34,9 @@ class SettingsStore {
 	spotCount = $state<1 | 2 | 3>(1);
 	weaknessWeighting = $state(false);
 	drillFilter = $state<DrillFilter>({ ...DEFAULT_DRILL_FILTER, pairRanks: [...PAIR_RANKS] });
+	countPopupEnabled = $state(false);
+	countPopupFrequency = $state(5);
+	countPopupWindow = $state(2);
 
 	constructor() {
 		if (browser) {
@@ -101,6 +104,13 @@ class SettingsStore {
 							softMax: typeof f.softMax === 'number' ? f.softMax : DEFAULT_DRILL_FILTER.softMax,
 							pairRanks: Array.isArray(f.pairRanks) ? (f.pairRanks as Rank[]).filter(r => PAIR_RANKS.includes(r)) : [...PAIR_RANKS]
 						};
+					}
+					if (typeof data.countPopupEnabled === 'boolean') this.countPopupEnabled = data.countPopupEnabled;
+					if (typeof data.countPopupFrequency === 'number' && data.countPopupFrequency >= 1) {
+						this.countPopupFrequency = Math.min(20, data.countPopupFrequency);
+					}
+					if (typeof data.countPopupWindow === 'number' && data.countPopupWindow >= 0) {
+						this.countPopupWindow = Math.min(5, data.countPopupWindow);
 					}
 				} catch {
 					/* ignore malformed */
@@ -220,6 +230,21 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setCountPopupEnabled(v: boolean) {
+		this.countPopupEnabled = v;
+		this.persist();
+	}
+
+	setCountPopupFrequency(v: number) {
+		this.countPopupFrequency = Math.max(1, Math.min(20, Math.round(v)));
+		this.persist();
+	}
+
+	setCountPopupWindow(v: number) {
+		this.countPopupWindow = Math.max(0, Math.min(5, Math.round(v)));
+		this.persist();
+	}
+
 	private persist() {
 		if (browser) {
 			localStorage.setItem(
@@ -245,7 +270,10 @@ class SettingsStore {
 					maxBet: this.maxBet,
 					spotCount: this.spotCount,
 					weaknessWeighting: this.weaknessWeighting,
-					drillFilter: this.drillFilter
+					drillFilter: this.drillFilter,
+					countPopupEnabled: this.countPopupEnabled,
+					countPopupFrequency: this.countPopupFrequency,
+					countPopupWindow: this.countPopupWindow
 				})
 			);
 		}
