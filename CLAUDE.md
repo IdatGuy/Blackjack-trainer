@@ -61,3 +61,111 @@ Three layers, strictly separated — do not blur them:
 ## Current State
 
 Phases 1–3 are complete: engine fully tested (137 passing), single-hand play with splits, card UI, basic stats/accuracy pages scaffolded. Phase 4 (counting layer) is done. Phase 5 (IndexedDB persistence + stats/accuracy pages) is in progress.
+
+---
+
+## Project Map
+
+### File Tree & Responsibilities
+
+```
+src/
+├── lib/
+│   ├── engine/                        # Pure TS — no UI imports
+│   │   ├── card.ts                    # Rank, Suit, Card; rankValue(), hiLoValue(), buildDeck(), shuffle()
+│   │   ├── hand.ts                    # Hand, HandType; handValue(), isSoft(), isBlackjack(), isBust(), isPair(), handType(), handKey(), makeHand()
+│   │   ├── shoe.ts                    # Shoe; buildShoe(), dealCard(), countCard(), trueCount(), shouldReshuffle(), resetShoe()
+│   │   ├── rules.ts                   # Action, RuleSet, DEFAULT_RULESET; allowedActions(), dealerShouldHit()
+│   │   ├── strategy.ts                # ChartCell; DEFAULT_CHART; getChartForRules(), getBaseAction(), getCorrectAction(), getInsuranceAction()
+│   │   ├── game.ts                    # GamePhase, GameState, HandResult, ResolvedHand; dealHand(), hit(), stand(), double(), split(), surrender(), resolveInsurance(), resolveHands()
+│   │   ├── synthesizer.ts             # DrillFilter; buildPlayerCards(), buildDealerCard(), sampleWeightedCell(), synthesizeTC()
+│   │   └── index.ts                   # Re-exports all engine modules
+│   │
+│   ├── db/                            # IndexedDB layer (idb library)
+│   │   ├── schema.ts                  # DecisionRecord, BjDB; imports Action, Rank, HandResult from engine
+│   │   ├── index.ts                   # getDb(), clearDecisions()
+│   │   ├── persist.ts                 # saveDecisions()
+│   │   ├── queries.ts                 # HandsStats, BankrollStats, StrategyStats; getHandsStats(), getBankrollStats(), getStrategyStats(), filterSince()
+│   │   └── accuracy.ts                # CellAccuracy, HeatmapData, CategoryStat; getHeatmapData(), getCategoryStats(), getDeviationAccuracy(), getWeaknessWeights(), getCellDetail()
+│   │
+│   ├── stores/
+│   │   ├── game.svelte.ts             # GameStore singleton `game`; wraps all engine calls, logs decisions, manages bankroll/session/drill mode
+│   │   └── settings.svelte.ts         # SettingsStore singleton `settings`; persists to localStorage `bj-settings`
+│   │
+│   └── components/
+│       ├── Card.svelte                # Single card (face-up/down)
+│       ├── Hand.svelte                # Card row + running total; uses handValue(), isBlackjack()
+│       ├── BetInput.svelte            # Chip selector + Deal button
+│       ├── ActionBar.svelte           # Hit/Stand/Double/Split/Surrender/Insurance buttons
+│       ├── StrategyChart.svelte       # Modal strategy table with TC deviation highlights; uses getChartForRules()
+│       ├── RangeSlider.svelte         # Dual-handle range input (no imports)
+│       ├── InstallPrompt.svelte       # PWA install banner
+│       ├── stats/
+│       │   ├── StatSection.svelte
+│       │   ├── HandsSection.svelte    # Win/Push/Loss counts; prop: HandsStats
+│       │   ├── BankrollSection.svelte # P/L summary; prop: BankrollStats
+│       │   ├── BankrollChart.svelte   # Line chart (ResizeObserver)
+│       │   ├── StrategySection.svelte # Correct%/hint%; prop: StrategyStats
+│       │   └── TimeFilter.svelte      # Today/Week/Month/All filter
+│       └── accuracy/
+│           ├── HeatmapGrid.svelte     # Player total × Dealer upcard grid; prop: HeatmapData
+│           ├── DeviationList.svelte   # TC deviation plays; prop: CellAccuracy[]
+│           └── CategoryStats.svelte   # Hit/Stand/Double/etc breakdown; prop: CategoryStat[]
+│
+└── routes/
+    ├── +layout.ts                     # prerender=true, ssr=false
+    ├── +layout.svelte                 # Root shell; InstallPrompt
+    ├── +page.svelte                   # Main game: Hand, ActionBar, BetInput, StrategyChart; dealer animation loop
+    ├── statistics/+page.svelte        # Stats dashboard; loads via getHandsStats/getBankrollStats/getStrategyStats
+    ├── accuracy/+page.svelte          # Heatmap + deviations; loads via getHeatmapData/getCategoryStats/getDeviationAccuracy
+    ├── settings/+page.svelte          # All settings form; writes to `settings` store
+    ├── charts/+page.svelte            # (Strategy chart page)
+    └── table-rules/+page.svelte       # (Rule set reference)
+```
+
+### Import Dependency Graph
+
+```
+card.ts ← hand.ts, shoe.ts, synthesizer.ts, game.ts
+hand.ts ← rules.ts, strategy.ts, game.ts
+shoe.ts ← strategy.ts, game.ts
+rules.ts ← strategy.ts, game.ts
+game.ts ← game.svelte.ts
+strategy.ts ← synthesizer.ts, StrategyChart.svelte, accuracy/+page.svelte
+
+schema.ts ← persist.ts, queries.ts, accuracy.ts, game.svelte.ts
+db/index.ts ← persist.ts, queries.ts, accuracy.ts
+
+settings.svelte.ts ← game.svelte.ts + every component/route
+game.svelte.ts ← +page.svelte, BetInput, ActionBar
+queries.ts ← statistics/+page.svelte
+accuracy.ts ← accuracy/+page.svelte, game.svelte.ts (getWeaknessWeights)
+```
+
+### Data Flow
+
+**Deal:**
+`BetInput` → `game.deal()` → `dealHand()` [engine] → `game.state` (reactive) → UI re-renders
+
+**Player action:**
+`ActionBar` → `game.act(action)` → strategy lookup → engine function → push to `_pending` buffer → `game.state` updates
+
+**Hand resolution:**
+`game._flushDecisions(results)` → `saveDecisions()` → IndexedDB
+
+**Drill mode:**
+`settings.weaknessWeighting=true` → `game._prefetchWeights()` → `getWeaknessWeights()` [accuracy.ts] → `sampleWeightedCell()` [synthesizer.ts] → synthesized hand prepended to shoe
+
+**Stats/Accuracy pages:**
+filter change → `$effect` → DB query functions → component props → render
+
+### Storage Keys
+
+| Key | Store | Type |
+|---|---|---|
+| `bj-settings` | localStorage | JSON (all settings) |
+| `bj-bankroll` | localStorage | float |
+| `bj-hands-dealt` | localStorage | int |
+| `bj-pwa-install-dismissed` | localStorage | bool |
+| `bj-shoe` | sessionStorage | JSON (shoe state) |
+| `decisions` | IndexedDB (BjDB v1) | DecisionRecord rows |

@@ -351,8 +351,9 @@ function mergeSection(
 	return result;
 }
 
-export function getInsuranceAction(shoe: Shoe): 'I' | 'N' {
-	return trueCount(shoe) >= 3 ? 'I' : 'N';
+export function getInsuranceAction(shoe: Shoe, tcOverride?: number): 'I' | 'N' {
+	const tc = tcOverride !== undefined ? tcOverride : trueCount(shoe);
+	return tc >= 3 ? 'I' : 'N';
 }
 
 import { handValue } from './hand.js';

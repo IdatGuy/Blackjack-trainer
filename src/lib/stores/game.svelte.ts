@@ -310,7 +310,7 @@ class GameStore {
 	}
 
 	_logInsuranceDecision(actual: 'I' | 'N', hintUsed = false) {
-		const expected = getInsuranceAction(this.state.shoe);
+		const expected = getInsuranceAction(this.state.shoe, this.synthesizedTC ?? undefined);
 		const activeHand = this.state.playerHands[0];
 		const type = handType(activeHand.cards, true);
 		const record: ActionRecord = {
@@ -364,7 +364,7 @@ class GameStore {
 	}
 
 	get correctInsuranceAction(): 'I' | 'N' {
-		return getInsuranceAction(this.state.shoe);
+		return getInsuranceAction(this.state.shoe, this.synthesizedTC ?? undefined);
 	}
 
 	act(action: Action, hintUsed = false) {
