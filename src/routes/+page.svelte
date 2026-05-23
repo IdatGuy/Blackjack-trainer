@@ -314,8 +314,13 @@
 			</button>
 		</div>
 
-		<!-- Center: bankroll pill + count pill (independent) -->
+		<!-- Center: count pill + bankroll pill (independent) -->
 		<div class="flex items-center justify-center gap-1.5">
+			{#if countActive}
+				<div class="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 shadow">
+					{@render countContent()}
+				</div>
+			{/if}
 			{#if bettingActive}
 				<div class="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 shadow">
 					{@render bankrollContent()}
@@ -329,11 +334,6 @@
 						<path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
 					</svg>
 				</button>
-			{/if}
-			{#if countActive}
-				<div class="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-gray-900 shadow">
-					{@render countContent()}
-				</div>
 			{/if}
 		</div>
 
@@ -637,7 +637,7 @@
 					{:else}
 						<span class="text-4xl">✗</span>
 						<span class="text-lg font-bold text-red-400">
-							Was {countPopupExpected > 0 ? '+' : ''}{countPopupExpected}
+							Incorrect, the count is: {countPopupExpected > 0 ? '+' : ''}{countPopupExpected}
 						</span>
 					{/if}
 				</div>

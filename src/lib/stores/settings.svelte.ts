@@ -17,7 +17,7 @@ class SettingsStore {
 	showFeedback = $state(true);
 	bettingEnabled = $state(true);
 	countingEnabled = $state(true);
-	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('both');
+	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('off');
 	showHintButton = $state(false);
 	showStrategyChart = $state(true);
 	highlightActiveDeviations = $state(true);
@@ -34,7 +34,7 @@ class SettingsStore {
 	spotCount = $state<1 | 2 | 3>(1);
 	weaknessWeighting = $state(false);
 	drillFilter = $state<DrillFilter>({ ...DEFAULT_DRILL_FILTER, pairRanks: [...PAIR_RANKS] });
-	countPopupEnabled = $state(false);
+	countPopupEnabled = $state(true);
 	countPopupFrequency = $state(5);
 	countPopupWindow = $state(2);
 
