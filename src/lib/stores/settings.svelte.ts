@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { DEFAULT_DRILL_FILTER, PAIR_RANKS, type DrillFilter } from '$lib/engine/synthesizer.js';
 import type { Rank } from '$lib/engine/card.js';
+import type { SettingsPreset } from '$lib/presets.js';
 
 export type { DrillFilter };
 
@@ -242,6 +243,24 @@ class SettingsStore {
 
 	setCountPopupWindow(v: number) {
 		this.countPopupWindow = Math.max(0, Math.min(5, Math.round(v)));
+		this.persist();
+	}
+
+	applyPreset(preset: SettingsPreset) {
+		const s = preset.settings;
+		this.showFeedback = s.showFeedback;
+		this.bettingEnabled = s.bettingEnabled;
+		this.showHandTotal = s.showHandTotal;
+		this.showHintButton = s.showHintButton;
+		this.showStrategyChart = s.showStrategyChart;
+		this.countingEnabled = s.countingEnabled;
+		this.countDisplay = s.countDisplay;
+		this.highlightActiveDeviations = s.highlightActiveDeviations;
+		this.countPopupEnabled = s.countPopupEnabled;
+		this.countPopupFrequency = s.countPopupFrequency;
+		this.countPopupWindow = s.countPopupWindow;
+		this.weaknessWeighting = s.weaknessWeighting;
+		this.animationSpeed = s.animationSpeed;
 		this.persist();
 	}
 

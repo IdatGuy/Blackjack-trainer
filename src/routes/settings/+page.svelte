@@ -5,6 +5,7 @@
 	import type { Rank } from '$lib/engine/card.js';
 	import RangeSlider from '$lib/components/RangeSlider.svelte';
 	import ToggleSwitch from '$lib/components/ToggleSwitch.svelte';
+	import { PRESETS } from '$lib/presets.js';
 
 	const SPEED_LABELS = ['Instant', '1', '2', '3', '4', '5'];
 
@@ -37,6 +38,22 @@
 	<!-- Settings content -->
 	<div class="flex-1 overflow-y-auto px-4 py-4">
 	<div class="mx-auto w-full max-w-lg">
+		<!-- Presets section -->
+		<div class="mb-6">
+			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Presets</p>
+			<div class="grid grid-cols-2 gap-2">
+				{#each PRESETS as preset}
+					<button
+						onclick={() => settings.applyPreset(preset)}
+						class="overflow-hidden rounded-xl bg-zinc-900 px-4 py-3.5 text-left transition-colors hover:bg-zinc-800 active:bg-zinc-700"
+					>
+						<p class="text-sm font-medium text-gray-100">{preset.label}</p>
+						<p class="mt-0.5 text-xs text-gray-500">{preset.description}</p>
+					</button>
+				{/each}
+			</div>
+		</div>
+
 		<!-- Gameplay section -->
 		<div class="mb-6">
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
