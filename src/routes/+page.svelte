@@ -90,7 +90,7 @@
 
 	function handleNextHand() {
 		cancelDealerAnimation();
-		if (settings.countPopupEnabled && settings.countingEnabled) {
+		if (settings.countPopupEnabled && settings.countingEnabled && !settings.weaknessWeighting) {
 			handsSincePopup++;
 			if (handsSincePopup >= nextPopupAt) {
 				handsSincePopup = 0;

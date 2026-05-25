@@ -101,10 +101,10 @@
 					<ToggleSwitch checked={settings.highlightActiveDeviations} onchange={(v) => settings.setHighlightActiveDeviations(v)} />
 				</label>
 				<hr class="border-zinc-800" />
-				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled || settings.weaknessWeighting ? 'pointer-events-none opacity-40' : ''}">
 					<div>
 						<span class="text-sm font-medium text-gray-100">Count challenge</span>
-						<p class="text-xs text-gray-500 mt-0.5">Periodically quiz your running count between hands.</p>
+						<p class="text-xs text-gray-500 mt-0.5">{settings.weaknessWeighting ? 'Disabled while prioritizing weak hands.' : 'Periodically quiz your running count between hands.'}</p>
 					</div>
 					<ToggleSwitch checked={settings.countPopupEnabled} onchange={(v) => settings.setCountPopupEnabled(v)} class="ml-3 shrink-0" />
 				</label>
