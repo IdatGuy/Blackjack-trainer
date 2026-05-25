@@ -291,7 +291,7 @@ export function getCorrectAction(
 
 	if (cell.deviations) {
 		for (const dev of cell.deviations) {
-			const fires = dev.above ? tc >= dev.tc : tc < dev.tc;
+			const fires = dev.above ? tc >= dev.tc : tc <= dev.tc;
 			if (fires && allowed.includes(dev.action)) {
 				return dev.action;
 			}
