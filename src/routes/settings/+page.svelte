@@ -156,6 +156,9 @@
 					</div>
 				{/if}
 			</div>
+			<p class="mt-2 px-1 text-xs text-gray-500">
+				Hi-Lo system. Decks remaining rounds <em>up</em> to the nearest 0.5 (e.g. 2.7 remaining &rarr; divisor of 3.0). True count truncates toward zero &mdash; RC 8 &divide; 3 decks = TC 2, not 3; RC &minus;7 &divide; 3 = TC &minus;2, not &minus;3.
+			</p>
 		</div>
 
 		<!-- Drill section -->
