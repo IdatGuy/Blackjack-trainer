@@ -62,11 +62,13 @@ describe('trueCount', () => {
 		const shoe = { ...buildShoe(6), cards: buildShoe(6).cards.slice(156), runningCount: -7 };
 		expect(trueCount(shoe)).toBe(-2);
 	});
-	it('uses ceiling threshold for divisor', () => {
-		// 109 cards = 2.096 decks → ceil to 2.5, not round to 2.0
-		// RC=10: 10/2.5 = 4 (if divisor were 2.0, TC would be 5)
-		const shoe = { ...buildShoe(6), cards: buildShoe(6).cards.slice(203), runningCount: 10 };
-		expect(trueCount(shoe)).toBe(4);
+	it('rounds divisor to nearest 0.5 at quarter-deck boundary', () => {
+		// 140 cards = 2.692 decks → below 2.75 midpoint → divisor 2.5; RC=10 → TC=4
+		const below = { ...buildShoe(6), cards: buildShoe(6).cards.slice(172), runningCount: 10 };
+		expect(trueCount(below)).toBe(4);
+		// 146 cards = 2.808 decks → above 2.75 midpoint → divisor 3.0; RC=9 → TC=3
+		const above = { ...buildShoe(6), cards: buildShoe(6).cards.slice(166), runningCount: 9 };
+		expect(trueCount(above)).toBe(3);
 	});
 });
 

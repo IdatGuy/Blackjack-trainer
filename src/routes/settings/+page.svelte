@@ -65,8 +65,13 @@
 					<ToggleSwitch checked={settings.showFeedback} onchange={(v) => settings.setShowFeedback(v)} />
 				</label>
 				<hr class="border-zinc-800" />
-				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
-					<span class="text-sm font-medium text-gray-100">Betting</span>
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5 transition-opacity {settings.weaknessWeighting ? 'pointer-events-none opacity-40' : ''}">
+					<div>
+						<span class="text-sm font-medium text-gray-100">Betting</span>
+						{#if settings.weaknessWeighting}
+							<p class="text-xs text-gray-500 mt-0.5">Disabled while prioritizing weak hands.</p>
+						{/if}
+					</div>
 					<ToggleSwitch checked={settings.bettingEnabled} onchange={(v) => settings.setBettingEnabled(v)} />
 				</label>
 				<hr class="border-zinc-800" />
@@ -157,7 +162,7 @@
 				{/if}
 			</div>
 			<p class="mt-2 px-1 text-xs text-gray-500">
-				Hi-Lo system. Decks remaining rounds <em>up</em> to the nearest 0.5 (e.g. 2.7 remaining &rarr; divisor of 3.0). True count truncates toward zero &mdash; RC 8 &divide; 3 decks = TC 2, not 3; RC &minus;7 &divide; 3 = TC &minus;2, not &minus;3.
+				Hi-Lo system. Decks remaining rounds to the nearest 0.5 using the quarter-deck as the midpoint (e.g. 2.7 remaining &rarr; divisor 2.5; 2.8 remaining &rarr; divisor 3.0). True count truncates toward zero &mdash; RC 8 &divide; 3 decks = TC 2, not 3; RC &minus;7 &divide; 3 = TC &minus;2, not &minus;3.
 			</p>
 		</div>
 

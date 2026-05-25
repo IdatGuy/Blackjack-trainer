@@ -41,7 +41,7 @@ export function countCard(shoe: Shoe, card: Card): Shoe {
 export function deckDivisor(shoe: Shoe): number {
 	const decksRemaining = shoe.cards.length / 52;
 	if (decksRemaining < 0.5) return 0.5;
-	return Math.ceil(decksRemaining * 2) / 2;
+	return Math.round(decksRemaining * 2) / 2;
 }
 
 export function trueCount(shoe: Shoe): number {
