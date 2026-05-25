@@ -191,13 +191,13 @@ class GameStore {
 		const dealerHadBJ = isBlackjack(this.state.dealerHand.cards);
 		if (this.insuranceBet > 0) {
 			this.insuranceResult = dealerHadBJ ? 'win' : 'loss';
-			if (settings.bettingEnabled && dealerHadBJ) {
+			if (settings.bettingEnabled && !settings.weaknessWeighting && dealerHadBJ) {
 				// 2:1 payout; insuranceBet was already deducted, so return bet + profit
 				this.bankroll = Math.round((this.bankroll + this.insuranceBet * 3) * 100) / 100;
 				this._persistBankroll();
 			}
 		}
-		if (settings.bettingEnabled) {
+		if (settings.bettingEnabled && !settings.weaknessWeighting) {
 			let totalReturn = 0;
 			let displayFlash = 0;
 			for (const r of results) {
@@ -345,7 +345,7 @@ class GameStore {
 		if (this.state.phase !== 'insurance') return;
 		const insAmt = Math.floor(this.state.playerHands.reduce((sum, h) => sum + h.bet, 0) / 2);
 		this.insuranceBet = insAmt;
-		if (settings.bettingEnabled && insAmt > 0) {
+		if (settings.bettingEnabled && !settings.weaknessWeighting && insAmt > 0) {
 			this.bankroll = Math.round((this.bankroll - insAmt) * 100) / 100;
 			this._persistBankroll();
 		}
