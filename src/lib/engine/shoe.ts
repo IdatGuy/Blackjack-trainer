@@ -38,11 +38,15 @@ export function countCard(shoe: Shoe, card: Card): Shoe {
 	return { ...shoe, runningCount: shoe.runningCount + hiLoValue(card.rank) };
 }
 
-export function trueCount(shoe: Shoe): number {
+export function deckDivisor(shoe: Shoe): number {
 	const decksRemaining = shoe.cards.length / 52;
-	if (decksRemaining < 0.5) return shoe.runningCount; // avoid division by near-zero
-	const divisor = Math.ceil(decksRemaining * 2) / 2;
-	return Math.trunc(shoe.runningCount / divisor);
+	if (decksRemaining < 0.5) return 0.5;
+	return Math.ceil(decksRemaining * 2) / 2;
+}
+
+export function trueCount(shoe: Shoe): number {
+	if (shoe.cards.length / 52 < 0.5) return shoe.runningCount; // avoid division by near-zero
+	return Math.trunc(shoe.runningCount / deckDivisor(shoe));
 }
 
 export function shouldReshuffle(shoe: Shoe, cutCardPosition?: number): boolean {

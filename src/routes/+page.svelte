@@ -7,7 +7,7 @@
 	import StrategyChart from '$lib/components/StrategyChart.svelte';
 	import type { HandResult } from '$lib/engine/game.js';
 	import { handValue, isBust } from '$lib/engine/hand.js';
-	import { trueCount } from '$lib/engine/shoe.js';
+	import { deckDivisor, trueCount } from '$lib/engine/shoe.js';
 	import { game } from '$lib/stores/game.svelte.js';
 	import type { Action } from '$lib/engine/rules.js';
 	import { settings } from '$lib/stores/settings.svelte.js';
@@ -41,6 +41,7 @@
 	const activeIndex = $derived(game.state.activeHandIndex);
 	const tc = $derived(trueCount(game.state.shoe));
 	const rc = $derived(game.state.shoe.runningCount);
+	const div = $derived(deckDivisor(game.state.shoe));
 	const shoePenetration = $derived(
 		game.state.shoe.dealtCards.length / (game.state.shoe.decks * 52)
 	);
@@ -50,7 +51,7 @@
 		settings.countingEnabled &&
 		(settings.weaknessWeighting
 			? true
-			: settings.countDisplay !== 'off')
+			: settings.countDisplay.rc || settings.countDisplay.tc || settings.countDisplay.div)
 	);
 
 	const isMultiHand = $derived(playerHands.length > 1);
@@ -284,18 +285,22 @@
 	{#if settings.weaknessWeighting}
 		<span class="text-[9px] font-normal opacity-60">TC</span>
 		{game.synthesizedTC! >= 0 ? '+' : ''}{game.synthesizedTC}
-	{:else if settings.countDisplay === 'running'}
-		<span class="text-[9px] font-normal opacity-60">RC</span>
-		{rc > 0 ? '+' : ''}{rc}
-	{:else if settings.countDisplay === 'true'}
-		<span class="text-[9px] font-normal opacity-60">TC</span>
-		{tc > 0 ? '+' : ''}{tc}
 	{:else}
-		<span class="text-[9px] font-normal opacity-60">RC</span>
-		{rc > 0 ? '+' : ''}{rc}
-		<span class="mx-1 opacity-30">|</span>
-		<span class="text-[9px] font-normal opacity-60">TC</span>
-		{tc > 0 ? '+' : ''}{tc}
+		{#if settings.countDisplay.rc}
+			<span class="text-[9px] font-normal opacity-60">RC</span>{rc > 0 ? '+' : ''}{rc}
+		{/if}
+		{#if settings.countDisplay.rc && (settings.countDisplay.tc || settings.countDisplay.div)}
+			<span class="mx-1 opacity-30">|</span>
+		{/if}
+		{#if settings.countDisplay.tc}
+			<span class="text-[9px] font-normal opacity-60">TC</span>{tc > 0 ? '+' : ''}{tc}
+		{/if}
+		{#if settings.countDisplay.tc && settings.countDisplay.div}
+			<span class="mx-1 opacity-30">|</span>
+		{/if}
+		{#if settings.countDisplay.div}
+			<span class="text-[9px] font-normal opacity-60">Div</span>{div}
+		{/if}
 	{/if}
 {/snippet}
 

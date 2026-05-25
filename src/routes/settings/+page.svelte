@@ -101,11 +101,11 @@
 				<div class="flex items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
 					<span class="text-sm font-medium text-gray-100">Count display</span>
 					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
-						{#each ([['off', 'Off'], ['running', 'RC'], ['true', 'TC'], ['both', 'Both']] as const) as [val, label]}
+						{#each ([['rc', 'RC'], ['tc', 'TC'], ['div', 'Div']] as const) as [key, label]}
 							<button
-								onclick={() => settings.setCountDisplay(val)}
+								onclick={() => settings.toggleCountDisplay(key)}
 								class="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors
-									{settings.countDisplay === val
+									{settings.countDisplay[key]
 										? 'bg-white text-gray-900'
 										: 'text-gray-400 hover:text-gray-200'}"
 							>{label}</button>

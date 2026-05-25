@@ -18,7 +18,7 @@ class SettingsStore {
 	showFeedback = $state(true);
 	bettingEnabled = $state(true);
 	countingEnabled = $state(true);
-	countDisplay = $state<'off' | 'running' | 'true' | 'both'>('off');
+	countDisplay = $state<{ rc: boolean; tc: boolean; div: boolean }>({ rc: false, tc: false, div: false });
 	showHintButton = $state(false);
 	showStrategyChart = $state(true);
 	highlightActiveDeviations = $state(true);
@@ -49,7 +49,15 @@ class SettingsStore {
 					if (typeof data.showFeedback === 'boolean') this.showFeedback = data.showFeedback;
 					if (typeof data.bettingEnabled === 'boolean') this.bettingEnabled = data.bettingEnabled;
 					if (typeof data.countingEnabled === 'boolean') this.countingEnabled = data.countingEnabled;
-					if (['off', 'running', 'true', 'both'].includes(data.countDisplay)) {
+					const legacyMap: Record<string, { rc: boolean; tc: boolean; div: boolean }> = {
+						off:     { rc: false, tc: false, div: false },
+						running: { rc: true,  tc: false, div: false },
+						true:    { rc: false, tc: true,  div: false },
+						both:    { rc: true,  tc: true,  div: false },
+					};
+					if (typeof data.countDisplay === 'string' && legacyMap[data.countDisplay]) {
+						this.countDisplay = legacyMap[data.countDisplay];
+					} else if (data.countDisplay && typeof data.countDisplay === 'object') {
 						this.countDisplay = data.countDisplay;
 					}
 					const hintBtn = data.showHintButton ?? data.showDeviationHints;
@@ -144,8 +152,8 @@ class SettingsStore {
 		this.persist();
 	}
 
-	setCountDisplay(v: 'off' | 'running' | 'true' | 'both') {
-		this.countDisplay = v;
+	toggleCountDisplay(key: 'rc' | 'tc' | 'div') {
+		this.countDisplay = { ...this.countDisplay, [key]: !this.countDisplay[key] };
 		this.persist();
 	}
 

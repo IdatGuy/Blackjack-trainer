@@ -9,7 +9,7 @@ export interface SettingsPreset {
 		showHintButton: boolean;
 		showStrategyChart: boolean;
 		countingEnabled: boolean;
-		countDisplay: 'off' | 'running' | 'true' | 'both';
+		countDisplay: { rc: boolean; tc: boolean; div: boolean };
 		highlightActiveDeviations: boolean;
 		countPopupEnabled: boolean;
 		countPopupFrequency: number;
@@ -31,7 +31,7 @@ export const PRESETS: SettingsPreset[] = [
 			showHintButton: true,
 			showStrategyChart: true,
 			countingEnabled: false,
-			countDisplay: 'off',
+			countDisplay: { rc: false, tc: false, div: false },
 			highlightActiveDeviations: false,
 			countPopupEnabled: false,
 			countPopupFrequency: 5,
@@ -51,7 +51,7 @@ export const PRESETS: SettingsPreset[] = [
 			showHintButton: false,
 			showStrategyChart: true,
 			countingEnabled: false,
-			countDisplay: 'off',
+			countDisplay: { rc: false, tc: false, div: false },
 			highlightActiveDeviations: false,
 			countPopupEnabled: false,
 			countPopupFrequency: 5,
@@ -71,7 +71,7 @@ export const PRESETS: SettingsPreset[] = [
 			showHintButton: false,
 			showStrategyChart: true,
 			countingEnabled: true,
-			countDisplay: 'both',
+			countDisplay: { rc: true, tc: true, div: false },
 			highlightActiveDeviations: true,
 			countPopupEnabled: true,
 			countPopupFrequency: 5,
@@ -91,7 +91,7 @@ export const PRESETS: SettingsPreset[] = [
 			showHintButton: false,
 			showStrategyChart: false,
 			countingEnabled: true,
-			countDisplay: 'off',
+			countDisplay: { rc: false, tc: false, div: false },
 			highlightActiveDeviations: false,
 			countPopupEnabled: false,
 			countPopupFrequency: 5,
