@@ -52,10 +52,21 @@ describe('trueCount', () => {
 		const shoe = { ...buildShoe(6), runningCount: 6 };
 		expect(trueCount(shoe)).toBe(1);
 	});
-	it('rounds to nearest integer', () => {
-		// 156 cards = 3 decks remaining, RC=7 → 7/3 ≈ 2.33 → round to 2
-		const shoe = { ...buildShoe(6), cards: buildShoe(6).cards.slice(156), runningCount: 7 };
+	it('truncates toward zero (positive)', () => {
+		// 156 cards = 3 decks, RC=8 → 8/3 ≈ 2.67 → trunc to 2 (round would give 3)
+		const shoe = { ...buildShoe(6), cards: buildShoe(6).cards.slice(156), runningCount: 8 };
 		expect(trueCount(shoe)).toBe(2);
+	});
+	it('truncates toward zero (negative)', () => {
+		// 156 cards = 3 decks, RC=-7 → -7/3 ≈ -2.33 → trunc to -2 (floor would give -3)
+		const shoe = { ...buildShoe(6), cards: buildShoe(6).cards.slice(156), runningCount: -7 };
+		expect(trueCount(shoe)).toBe(-2);
+	});
+	it('uses ceiling threshold for divisor', () => {
+		// 109 cards = 2.096 decks → ceil to 2.5, not round to 2.0
+		// RC=10: 10/2.5 = 4 (if divisor were 2.0, TC would be 5)
+		const shoe = { ...buildShoe(6), cards: buildShoe(6).cards.slice(203), runningCount: 10 };
+		expect(trueCount(shoe)).toBe(4);
 	});
 });
 

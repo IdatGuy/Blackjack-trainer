@@ -41,9 +41,8 @@ export function countCard(shoe: Shoe, card: Card): Shoe {
 export function trueCount(shoe: Shoe): number {
 	const decksRemaining = shoe.cards.length / 52;
 	if (decksRemaining < 0.5) return shoe.runningCount; // avoid division by near-zero
-	// Round to nearest 0.5 deck for standard TC calculation
-	const rounded = Math.round(decksRemaining * 2) / 2;
-	return Math.round(shoe.runningCount / rounded);
+	const divisor = Math.ceil(decksRemaining * 2) / 2;
+	return Math.trunc(shoe.runningCount / divisor);
 }
 
 export function shouldReshuffle(shoe: Shoe, cutCardPosition?: number): boolean {
