@@ -39,11 +39,10 @@
 	<!-- Chip row -->
 	<div class="flex items-center gap-2">
 		{#each CHIPS as chip}
-			{@const tooSmall = chip.value < settings.minBet && game.betAmount === 0}
 			{@const wouldExceed = game.betAmount + chip.value > cap}
 			<button
 				class="relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ring-2 ring-inset transition-opacity {chip.color}"
-				disabled={wouldExceed || tooSmall}
+				disabled={wouldExceed}
 				onclick={() => game.addChip(chip.value)}
 			>
 				<!-- Inner ring detail -->
