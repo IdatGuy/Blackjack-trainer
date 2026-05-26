@@ -48,7 +48,7 @@ describe('hard totals — basic strategy', () => {
 		expect(action).toBe('H');
 	});
 	it('hard 12 vs 4: hit at TC 0 (deviation fires)', () => {
-		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(), rules);
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(), rules, undefined, 0, 0);
 		expect(action).toBe('H');
 	});
 	it('hard 12 vs 2: hit', () => {
@@ -197,75 +197,75 @@ describe('Illustrious 18 deviations', () => {
 		expect(action).toBe('R'); // below TC 0 threshold, base surrender applies
 	});
 	it('16 vs T: stand at TC 0 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(0), rules);
+		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(0), rules, undefined, 0, 0);
 		expect(action).toBe('S');
 	});
 	it('16 vs T: stand at TC +2 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(12), rules);
+		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(12), rules, undefined, 0, 2);
 		expect(action).toBe('S');
 	});
 	it('11 vs A: hit at TC 0 (base)', () => {
-		const action = getCorrectAction(hand([card('6'), card('5')]), card('A'), shoe(0), rules);
+		const action = getCorrectAction(hand([card('6'), card('5')]), card('A'), shoe(0), rules, undefined, 0, 0);
 		expect(action).toBe('H');
 	});
 	it('11 vs A: double at TC +1 (deviation)', () => {
-		const action = getCorrectAction(hand([card('6'), card('5')]), card('A'), shoe(6), rules);
+		const action = getCorrectAction(hand([card('6'), card('5')]), card('A'), shoe(6), rules, undefined, 0, 1);
 		expect(action).toBe('D');
 	});
 	it('12 vs 4: hit at TC 0 (deviation fires at boundary)', () => {
-		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(0), rules);
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(0), rules, undefined, 0, 0);
 		expect(action).toBe('H');
 	});
 	it('12 vs 4: hit at TC -1 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(-6), rules);
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(-6), rules, undefined, 0, -1);
 		expect(action).toBe('H');
 	});
 	it('13 vs 2: hit at TC -1 (deviation fires at boundary)', () => {
-		const action = getCorrectAction(hand([card('9'), card('4')]), card('2'), shoe(-6), rules);
+		const action = getCorrectAction(hand([card('9'), card('4')]), card('2'), shoe(-6), rules, undefined, 0, -1);
 		expect(action).toBe('H');
 	});
 	it('13 vs 2: hit at TC -2 (deviation)', () => {
-		const action = getCorrectAction(hand([card('9'), card('4')]), card('2'), shoe(-12), rules);
+		const action = getCorrectAction(hand([card('9'), card('4')]), card('2'), shoe(-12), rules, undefined, 0, -2);
 		expect(action).toBe('H');
 	});
 	it('12 vs 5: hit at TC -2 (deviation fires at boundary)', () => {
-		const action = getCorrectAction(hand([card('T'), card('2')]), card('5'), shoe(-12), rules);
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('5'), shoe(-12), rules, undefined, 0, -2);
 		expect(action).toBe('H');
 	});
 	it('12 vs 5: hit at TC -3 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('2')]), card('5'), shoe(-18), rules);
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('5'), shoe(-18), rules, undefined, 0, -3);
 		expect(action).toBe('H');
 	});
 	it('12 vs 6: hit at TC -1 (deviation fires at boundary)', () => {
-		const action = getCorrectAction(hand([card('T'), card('2')]), card('6'), shoe(-6), rules);
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('6'), shoe(-6), rules, undefined, 0, -1);
 		expect(action).toBe('H');
 	});
 	it('12 vs 6: hit at TC -2 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('2')]), card('6'), shoe(-12), rules);
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('6'), shoe(-12), rules, undefined, 0, -2);
 		expect(action).toBe('H');
 	});
 	it('13 vs 3: hit at TC -2 (deviation fires at boundary)', () => {
-		const action = getCorrectAction(hand([card('9'), card('4')]), card('3'), shoe(-12), rules);
+		const action = getCorrectAction(hand([card('9'), card('4')]), card('3'), shoe(-12), rules, undefined, 0, -2);
 		expect(action).toBe('H');
 	});
 	it('13 vs 3: hit at TC -3 (deviation)', () => {
-		const action = getCorrectAction(hand([card('9'), card('4')]), card('3'), shoe(-18), rules);
+		const action = getCorrectAction(hand([card('9'), card('4')]), card('3'), shoe(-18), rules, undefined, 0, -3);
 		expect(action).toBe('H');
 	});
 	it('9 vs 2: hit at TC 0 (base)', () => {
-		const action = getCorrectAction(hand([card('5'), card('4')]), card('2'), shoe(0), rules);
+		const action = getCorrectAction(hand([card('5'), card('4')]), card('2'), shoe(0), rules, undefined, 0, 0);
 		expect(action).toBe('H');
 	});
 	it('9 vs 2: double at TC +1 (deviation)', () => {
-		const action = getCorrectAction(hand([card('5'), card('4')]), card('2'), shoe(6), rules);
+		const action = getCorrectAction(hand([card('5'), card('4')]), card('2'), shoe(6), rules, undefined, 0, 1);
 		expect(action).toBe('D');
 	});
 	it('TT vs 5: stand at TC +4 (base — deviation fires at TC≥5)', () => {
-		const action = getCorrectAction(hand([card('T'), card('T')]), card('5'), shoe(24), rules);
+		const action = getCorrectAction(hand([card('T'), card('T')]), card('5'), shoe(24), rules, undefined, 0, 4);
 		expect(action).toBe('S'); // TC=4, threshold is 5
 	});
 	it('TT vs 5: split at TC +5 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('T')]), card('5'), shoe(30), rules);
+		const action = getCorrectAction(hand([card('T'), card('T')]), card('5'), shoe(30), rules, undefined, 0, 5);
 		expect(action).toBe('P');
 	});
 });
@@ -281,15 +281,15 @@ describe('Fab 4 surrender deviations', () => {
 		expect(action).toBe('H'); // base is H, dev fires at TC≥2
 	});
 	it('15 vs 9: surrender at TC +2 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('5')]), card('9'), shoe(12), rules);
+		const action = getCorrectAction(hand([card('T'), card('5')]), card('9'), shoe(12), rules, undefined, 0, 2);
 		expect(action).toBe('R');
 	});
 	it('15 vs A: surrender at TC +1 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('5')]), card('A'), shoe(6), rules);
+		const action = getCorrectAction(hand([card('T'), card('5')]), card('A'), shoe(6), rules, undefined, 0, 1);
 		expect(action).toBe('R');
 	});
 	it('14 vs T: surrender at TC +3 (deviation)', () => {
-		const action = getCorrectAction(hand([card('T'), card('4')]), card('T'), shoe(18), rules);
+		const action = getCorrectAction(hand([card('T'), card('4')]), card('T'), shoe(18), rules, undefined, 0, 3);
 		expect(action).toBe('R');
 	});
 	it('14 vs T: hit at TC +2 (base)', () => {
@@ -413,7 +413,7 @@ describe('no-surrender chart', () => {
 		expect(action).toBe('H');
 	});
 	it('hard 16 vs T: stand at TC 0 (I-18 deviation fires even without surrender)', () => {
-		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(0), nos);
+		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(0), nos, undefined, 0, 0);
 		expect(action).toBe('S');
 	});
 	it('hard 15 vs T: hit at TC -2 (no surrender, Fab 3 not in chart)', () => {

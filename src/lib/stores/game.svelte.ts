@@ -99,6 +99,11 @@ class GameStore {
 	_weaknessWeights = $state(new Map<string, number>());
 	_regularShoeBackup: Shoe | null = null;
 
+	effectiveTC(): number | undefined {
+		if (!settings.countingEnabled) return undefined;
+		return this.synthesizedTC !== null ? this.synthesizedTC : trueCount(this.state.shoe);
+	}
+
 	constructor() {
 		if (browser) {
 			this._prefetchWeights();
@@ -337,7 +342,7 @@ class GameStore {
 	}
 
 	_logInsuranceDecision(actual: 'I' | 'N', hintUsed = false) {
-		const expected = getInsuranceAction(this.state.shoe, this.synthesizedTC ?? undefined);
+		const expected = getInsuranceAction(this.state.shoe, this.effectiveTC());
 		const activeHand = this.state.playerHands[0];
 		const type = handType(activeHand.cards, true);
 		const record: ActionRecord = {
@@ -391,7 +396,7 @@ class GameStore {
 	}
 
 	get correctInsuranceAction(): 'I' | 'N' {
-		return getInsuranceAction(this.state.shoe, this.synthesizedTC ?? undefined);
+		return getInsuranceAction(this.state.shoe, this.effectiveTC());
 	}
 
 	act(action: Action, hintUsed = false) {
@@ -406,7 +411,7 @@ class GameStore {
 			this.state.rules,
 			undefined,
 			0,
-			this.synthesizedTC ?? undefined
+			this.effectiveTC()
 		);
 		const base = getBaseAction(activeHand, dealerUp, this.state.shoe, this.state.rules);
 
@@ -595,7 +600,7 @@ class GameStore {
 			this.state.rules,
 			undefined,
 			0,
-			this.synthesizedTC ?? undefined
+			this.effectiveTC()
 		);
 	}
 

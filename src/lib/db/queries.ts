@@ -41,7 +41,7 @@ export async function getHandsStats(since: number): Promise<HandsStats> {
 	const hands = uniqueHands(records);
 	let won = 0, push = 0, lost = 0, surrender = 0;
 	for (const group of hands.values()) {
-		const result = group[0].handResult;
+		const result = (group.find((r) => r.category !== 'insurance') ?? group[0]).handResult;
 		if (result === 'win' || result === 'blackjack') won++;
 		else if (result === 'push') push++;
 		else if (result === 'surrender') surrender++;
@@ -64,7 +64,12 @@ export async function getBankrollStats(since: number): Promise<BankrollStats> {
 	const bankrollSeries: Array<{ hand: number; pl: number }> = [];
 
 	for (let i = 0; i < sortedHands.length; i++) {
-		const chips = sortedHands[i][0].outcomeChips;
+		const group = sortedHands[i];
+		const nonIns = group.find((r) => r.category !== 'insurance');
+		const insChips = group
+			.filter((r) => r.category === 'insurance')
+			.reduce((sum, r) => sum + r.outcomeChips, 0);
+		const chips = (nonIns?.outcomeChips ?? 0) + insChips;
 		runningPL += chips;
 		if (chips > 0) amountWon += chips;
 		else if (chips < 0) amountLost += Math.abs(chips);

@@ -268,7 +268,6 @@ export function getCorrectAction(
 		? mergeChart(getChartForRules(rules), overrides as StrategyChart)
 		: getChartForRules(rules);
 
-	const tc = tcOverride !== undefined ? tcOverride : trueCount(shoe);
 	const allowed = allowedActions(hand, dealerUp, rules, splitCount);
 	const upKey = upCardKey(dealerUp);
 
@@ -289,9 +288,9 @@ export function getCorrectAction(
 		return handValue(hand.cards) >= 17 ? 'S' : 'H';
 	}
 
-	if (cell.deviations) {
+	if (tcOverride !== undefined && cell.deviations) {
 		for (const dev of cell.deviations) {
-			const fires = dev.above ? tc >= dev.tc : tc <= dev.tc;
+			const fires = dev.above ? tcOverride >= dev.tc : tcOverride <= dev.tc;
 			if (fires && allowed.includes(dev.action)) {
 				return dev.action;
 			}
