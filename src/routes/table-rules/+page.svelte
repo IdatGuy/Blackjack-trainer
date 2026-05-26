@@ -11,14 +11,29 @@
 
 	const DECK_OPTIONS = [1, 2, 4, 6, 8] as const;
 
+	let showDeckConfirm = $state(false);
+	let pendingDecks = $state<1 | 2 | 4 | 6 | 8 | null>(null);
+
 	function selectDecks(n: 1 | 2 | 4 | 6 | 8) {
 		settings.setDeckCount(n);
-		game.reshuffle();
+		if (game.state.phase !== 'betting') {
+			pendingDecks = n;
+			showDeckConfirm = true;
+		} else {
+			game.reshuffle();
+		}
+	}
+
+	function confirmDeckChange() {
+		showDeckConfirm = false;
+		game.forfeitAndReshuffle();
+		pendingDecks = null;
 	}
 
 	function applyRule(setter: () => void) {
 		setter();
-		game.reshuffle();
+		// Rules take effect on next deal via _rulesFromSettings(); skip reshuffle mid-hand
+		if (game.state.phase === 'betting') game.reshuffle();
 	}
 
 	function fmtBet(n: number) {
@@ -244,3 +259,22 @@
 	</div>
 	</div>
 </div>
+
+{#if showDeckConfirm}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+		<div class="w-full max-w-sm rounded-2xl bg-zinc-900 p-6 shadow-xl">
+			<p class="text-base font-semibold text-white">Reshuffle mid-hand?</p>
+			<p class="mt-1 text-sm text-gray-400">Changing deck count requires a new shoe. Your current bet will be forfeited and recorded as a loss.</p>
+			<div class="mt-5 flex gap-3">
+				<button
+					onclick={() => { showDeckConfirm = false; pendingDecks = null; }}
+					class="flex-1 rounded-xl bg-zinc-800 py-2.5 text-sm font-semibold text-white hover:bg-zinc-700 active:bg-zinc-600"
+				>Cancel</button>
+				<button
+					onclick={confirmDeckChange}
+					class="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white hover:bg-red-500 active:bg-red-700"
+				>Reshuffle</button>
+			</div>
+		</div>
+	</div>
+{/if}

@@ -176,8 +176,8 @@ describe('resolveHands', () => {
 		let state = initialState();
 		state = {
 			...state,
-			playerHands: [{ cards: [card('A'), card('K')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true }],
-			dealerHand: { cards: [card('7'), card('T')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false },
+			playerHands: [{ cards: [card('A'), card('K')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true, splitDepth: 0 }],
+			dealerHand: { cards: [card('7'), card('T')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false, splitDepth: 0 },
 			phase: 'resolution'
 		};
 		const { results } = resolveHands(state);
@@ -189,8 +189,8 @@ describe('resolveHands', () => {
 		let state = initialState();
 		state = {
 			...state,
-			playerHands: [{ cards: [card('A'), card('K')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true }],
-			dealerHand: { cards: [card('A'), card('T')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false },
+			playerHands: [{ cards: [card('A'), card('K')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true, splitDepth: 0 }],
+			dealerHand: { cards: [card('A'), card('T')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false, splitDepth: 0 },
 			phase: 'resolution'
 		};
 		const { results } = resolveHands(state);
@@ -202,8 +202,8 @@ describe('resolveHands', () => {
 		let state = initialState();
 		state = {
 			...state,
-			playerHands: [{ cards: [card('T'), card('8')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true }],
-			dealerHand: { cards: [card('T'), card('7'), card('9')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false },
+			playerHands: [{ cards: [card('T'), card('8')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true, splitDepth: 0 }],
+			dealerHand: { cards: [card('T'), card('7'), card('9')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false, splitDepth: 0 },
 			phase: 'resolution'
 		};
 		const { results } = resolveHands(state);
@@ -215,8 +215,8 @@ describe('resolveHands', () => {
 		let state = initialState();
 		state = {
 			...state,
-			playerHands: [{ cards: [card('T'), card('6')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: true, isResolved: true }],
-			dealerHand: { cards: [card('T'), card('7')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false },
+			playerHands: [{ cards: [card('T'), card('6')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: true, isResolved: true, splitDepth: 0 }],
+			dealerHand: { cards: [card('T'), card('7')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false, splitDepth: 0 },
 			phase: 'resolution'
 		};
 		const { results } = resolveHands(state);
@@ -228,8 +228,8 @@ describe('resolveHands', () => {
 		let state = initialState();
 		state = {
 			...state,
-			playerHands: [{ cards: [card('T'), card('9')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true }],
-			dealerHand: { cards: [card('T'), card('8')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false },
+			playerHands: [{ cards: [card('T'), card('9')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true, splitDepth: 0 }],
+			dealerHand: { cards: [card('T'), card('8')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false, splitDepth: 0 },
 			phase: 'resolution'
 		};
 		const { results } = resolveHands(state);
@@ -240,8 +240,8 @@ describe('resolveHands', () => {
 		let state = initialState();
 		state = {
 			...state,
-			playerHands: [{ cards: [card('T'), card('8')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true }],
-			dealerHand: { cards: [card('T'), card('8')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false },
+			playerHands: [{ cards: [card('T'), card('8')], bet: 10, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: true, splitDepth: 0 }],
+			dealerHand: { cards: [card('T'), card('8')], bet: 0, isSplit: false, isDoubled: false, isSurrendered: false, isResolved: false, splitDepth: 0 },
 			phase: 'resolution'
 		};
 		const { results } = resolveHands(state);

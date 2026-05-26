@@ -198,8 +198,9 @@ export function split(state: GameState): GameState {
 	const { card: newCard2, shoe: s2 } = dealCard(shoe);
 	shoe = s2;
 
-	const hand1 = makeHand([c1, newCard1], activeHand.bet, true);
-	const hand2 = makeHand([c2, newCard2], activeHand.bet, true);
+	const nextDepth = activeHand.splitDepth + 1;
+	const hand1 = makeHand([c1, newCard1], activeHand.bet, true, nextDepth);
+	const hand2 = makeHand([c2, newCard2], activeHand.bet, true, nextDepth);
 
 	// Replace active hand with two new hands
 	const newHands = [

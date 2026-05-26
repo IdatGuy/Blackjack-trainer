@@ -126,6 +126,26 @@
 	let menuOpen = $state(false);
 	let chartOpen = $state(false);
 	let addFundsOpen = $state(false);
+	let showReshuffleConfirm = $state(false);
+
+	function handleReshuffleClick() {
+		if (game.state.phase !== 'betting') {
+			showReshuffleConfirm = true;
+		} else {
+			cancelDealerAnimation();
+			game.reshuffle();
+			handsSincePopup = 0;
+			nextPopupAt = nextPopupInterval();
+		}
+	}
+
+	function confirmReshuffle() {
+		showReshuffleConfirm = false;
+		cancelDealerAnimation();
+		game.forfeitAndReshuffle();
+		handsSincePopup = 0;
+		nextPopupAt = nextPopupInterval();
+	}
 	let lastFundsAdded = $state<number | null>(null);
 	let fundsAddedTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -318,7 +338,7 @@
 		<!-- Left: reshuffle button -->
 		<div class="flex items-center">
 			<button
-				onclick={() => { cancelDealerAnimation(); game.reshuffle(); handsSincePopup = 0; nextPopupAt = nextPopupInterval(); }}
+				onclick={handleReshuffleClick}
 				class="flex h-9 w-9 items-center justify-center rounded-lg text-xl transition-colors
 					{game.reshuffleNeeded
 					? 'bg-amber-400 text-gray-900 hover:bg-amber-300 active:bg-amber-500'
@@ -622,6 +642,25 @@
 {/if}
 
 <StrategyChart open={chartOpen} onclose={() => (chartOpen = false)} trueCount={game.synthesizedTC ?? tc} />
+
+{#if showReshuffleConfirm}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+		<div class="w-full max-w-sm rounded-2xl bg-zinc-900 p-6 shadow-xl">
+			<p class="text-base font-semibold text-white">Reshuffle mid-hand?</p>
+			<p class="mt-1 text-sm text-gray-400">Your current bet will be forfeited and recorded as a loss.</p>
+			<div class="mt-5 flex gap-3">
+				<button
+					onclick={() => (showReshuffleConfirm = false)}
+					class="flex-1 rounded-xl bg-zinc-800 py-2.5 text-sm font-semibold text-white hover:bg-zinc-700 active:bg-zinc-600"
+				>Cancel</button>
+				<button
+					onclick={confirmReshuffle}
+					class="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white hover:bg-red-500 active:bg-red-700"
+				>Reshuffle</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 {#if countPopupOpen}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6">

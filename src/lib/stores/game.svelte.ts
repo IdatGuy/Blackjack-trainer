@@ -188,6 +188,35 @@ class GameStore {
 
 	_applyResolution(results: ResolvedHand[]) {
 		this.lastResults = results;
+		// Push synthetic records for hands with no player decisions logged (e.g. instant dealer BJ)
+		const handsWithDecisions = new Set(
+			this._pending.filter((pd) => pd.category !== 'insurance').map((pd) => pd.handIndex)
+		);
+		for (let i = 0; i < results.length; i++) {
+			if (!handsWithDecisions.has(i)) {
+				const hand = this.state.playerHands[i];
+				const dealerUp = this.state.dealerHand.cards[0];
+				this._pending.push({
+					timestamp: Date.now(),
+					sessionId: this.sessionId,
+					handId: this.handId,
+					handIndex: i,
+					ruleSetId: this.state.rules.id,
+					mode: 'standard',
+					playMode: settings.weaknessWeighting ? 'drill' : 'shoe',
+					handType: handType(hand.cards),
+					playerTotal: handValue(hand.cards),
+					dealerUp: dealerUp.rank,
+					trueCount: this.synthesizedTC !== null ? this.synthesizedTC : trueCount(this.state.shoe),
+					expected: 'S',
+					actual: 'S',
+					correct: true,
+					hintShown: false,
+					category: 'hit-stand',
+					betAmount: hand.bet
+				});
+			}
+		}
 		const dealerHadBJ = isBlackjack(this.state.dealerHand.cards);
 		if (this.insuranceBet > 0) {
 			this.insuranceResult = dealerHadBJ ? 'win' : 'loss';
@@ -203,8 +232,7 @@ class GameStore {
 			for (const r of results) {
 				const returnAmount = r.netChips + r.bet;
 				totalReturn += returnAmount;
-				if (r.netChips > 0) displayFlash += r.netChips;
-				else if (returnAmount > 0) displayFlash += returnAmount;
+				if (returnAmount > 0) displayFlash += returnAmount;
 			}
 			this.bankroll = Math.round((this.bankroll + totalReturn) * 100) / 100;
 			this._persistBankroll();
@@ -427,9 +455,22 @@ class GameStore {
 
 		if (action === 'H') this.state = hit(this.state);
 		else if (action === 'S') this.state = stand(this.state);
-		else if (action === 'D') this.state = double(this.state);
-		else if (action === 'R') this.state = surrender(this.state);
-		else if (action === 'P') this.state = split(this.state);
+		else if (action === 'D') {
+			this.state = double(this.state);
+			if (settings.bettingEnabled && !settings.weaknessWeighting) {
+				this.bankroll = Math.round((this.bankroll - activeHand.bet) * 100) / 100;
+				this._persistBankroll();
+				this._setFlash(-activeHand.bet);
+			}
+		} else if (action === 'R') this.state = surrender(this.state);
+		else if (action === 'P') {
+			this.state = split(this.state);
+			if (settings.bettingEnabled && !settings.weaknessWeighting) {
+				this.bankroll = Math.round((this.bankroll - activeHand.bet) * 100) / 100;
+				this._persistBankroll();
+				this._setFlash(-activeHand.bet);
+			}
+		}
 
 		this._maybeAutoFinish();
 	}
@@ -475,6 +516,53 @@ class GameStore {
 		this._persistShoe();
 	}
 
+	forfeitAndReshuffle() {
+		if (this.state.phase !== 'betting' && this.state.playerHands.length > 0) {
+			if (browser && settings.bettingEnabled && !settings.weaknessWeighting) {
+				const now = Date.now();
+				const dealerUp = this.state.dealerHand.cards[0];
+				const forfeited: DecisionRecord[] = this.state.playerHands.map((h, i): DecisionRecord => ({
+					timestamp: now,
+					sessionId: this.sessionId,
+					handId: this.handId,
+					handIndex: i,
+					ruleSetId: this.state.rules.id,
+					mode: 'standard',
+					playMode: settings.weaknessWeighting ? 'drill' : 'shoe',
+					handType: handType(h.cards),
+					playerTotal: handValue(h.cards),
+					dealerUp: dealerUp.rank,
+					trueCount: trueCount(this.state.shoe),
+					expected: 'S',
+					actual: 'S',
+					correct: true,
+					hintShown: false,
+					category: 'hit-stand',
+					handResult: 'loss',
+					betAmount: h.bet,
+					outcomeChips: -h.bet,
+					bankrollTracked: true
+				}));
+				saveDecisions(forfeited);
+			}
+		}
+		this._pending = [];
+		this.state = {
+			...this.state,
+			shoe: buildShoe(settings.deckCount),
+			rules: { ...this.state.rules, decks: settings.deckCount, ...this._rulesFromSettings() },
+			phase: 'betting',
+			playerHands: [],
+			dealerHand: makeHand([], 0),
+			activeHandIndex: 0
+		};
+		this.lastResults = [];
+		this.actionHistory = [];
+		this.betAmount = 0;
+		this.sessionId = browser ? crypto.randomUUID() : 'ssr';
+		this._persistShoe();
+	}
+
 	addChip(value: number) {
 		this.betAmount = Math.min(this.betAmount + value, settings.maxBet, this.bankroll);
 	}
@@ -492,7 +580,7 @@ class GameStore {
 		if (this.state.phase !== 'player' || this.state.playerHands.length === 0) return [];
 		const activeHand = this.state.playerHands[this.state.activeHandIndex];
 		if (!activeHand) return [];
-		const splitCount = this.state.playerHands.length - 1;
+		const splitCount = activeHand.splitDepth;
 		return allowedActions(activeHand, this.state.dealerHand.cards[0], this.state.rules, splitCount);
 	}
 
@@ -561,9 +649,35 @@ class GameStore {
 	}
 
 	_maybeAutoFinish() {
-		// Auto-stand split aces: one card only, no further action allowed
 		if (this.state.phase === 'player') {
 			const activeHand = this.state.playerHands[this.state.activeHandIndex];
+			// Auto-advance past BJ hands in multi-spot play — push a record so outcome chips are tracked
+			if (activeHand && isBlackjack(activeHand.cards)) {
+				const dealerUp = this.state.dealerHand.cards[0];
+				this._pending.push({
+					timestamp: Date.now(),
+					sessionId: this.sessionId,
+					handId: this.handId,
+					handIndex: this.state.activeHandIndex,
+					ruleSetId: this.state.rules.id,
+					mode: 'standard',
+					playMode: settings.weaknessWeighting ? 'drill' : 'shoe',
+					handType: handType(activeHand.cards),
+					playerTotal: handValue(activeHand.cards),
+					dealerUp: dealerUp.rank,
+					trueCount: this.synthesizedTC !== null ? this.synthesizedTC : trueCount(this.state.shoe),
+					expected: 'S',
+					actual: 'S',
+					correct: true,
+					hintShown: false,
+					category: 'hit-stand',
+					betAmount: activeHand.bet
+				});
+				this.state = stand(this.state);
+				this._maybeAutoFinish();
+				return;
+			}
+			// Auto-stand split aces: one card only, no further action allowed
 			if (activeHand && activeHand.isSplit && activeHand.cards[0].rank === 'A' && activeHand.cards.length === 2) {
 				this.state = stand(this.state);
 				this._maybeAutoFinish();

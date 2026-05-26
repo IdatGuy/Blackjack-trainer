@@ -7,6 +7,7 @@ export type Hand = {
 	isDoubled: boolean;
 	isSurrendered: boolean;
 	isResolved: boolean;
+	splitDepth: number;
 };
 
 export function handValue(cards: Card[]): number {
@@ -80,13 +81,14 @@ export function handKey(cards: Card[], type: HandType): string {
 	return String(handValue(cards));
 }
 
-export function makeHand(cards: Card[], bet: number, isSplit = false): Hand {
+export function makeHand(cards: Card[], bet: number, isSplit = false, splitDepth = 0): Hand {
 	return {
 		cards,
 		bet,
 		isSplit,
 		isDoubled: false,
 		isSurrendered: false,
-		isResolved: false
+		isResolved: false,
+		splitDepth
 	};
 }

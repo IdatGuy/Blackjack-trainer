@@ -27,7 +27,7 @@ export const DEFAULT_RULESET: RuleSet = {
 	surrender: 'late',
 	peek: true,
 	blackjackPays: '3:2',
-	maxSplits: 4
+	maxSplits: 3
 };
 
 export function allowedActions(
