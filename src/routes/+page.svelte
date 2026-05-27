@@ -65,6 +65,27 @@
 		if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 	});
 
+	// When resolution appears with feedback, re-center the combined card+feedback unit.
+	// The outer div is always the snap target and expands to include the feedback column
+	// at resolution. We assign scrollLeft to the outer div's center — that IS the snap
+	// position, so mandatory snap accepts it without reverting.
+	$effect(() => {
+		if (phase === 'resolution' && game.showFeedback) {
+			const idx = activeIndex;
+			const handle = setTimeout(() => {
+				const outerEl = handEls[idx];
+				if (!outerEl) return;
+				const container = outerEl.closest<HTMLElement>('.hand-scroll');
+				if (!container) return;
+				const outerRect = outerEl.getBoundingClientRect();
+				const cRect = container.getBoundingClientRect();
+				const outerAbsLeft = outerRect.left - cRect.left + container.scrollLeft;
+				container.scrollLeft = outerAbsLeft + outerRect.width / 2 - container.clientWidth / 2;
+			}, 50);
+			return () => clearTimeout(handle);
+		}
+	});
+
 	let insuranceHintUsed = $state(false);
 
 	// Count challenge popup state
@@ -454,7 +475,6 @@
 		<Hand
 			cards={visibleDealerCards}
 			hideSecond={phase === 'player' || phase === 'insurance'}
-			label="Dealer"
 			showTotal={phase !== 'player' && phase !== 'insurance'}
 		/>
 	</div>
@@ -540,22 +560,28 @@
 				class="hand-scroll w-full overflow-x-auto"
 				in:fly={{ y: -12, duration: animDuration }}
 			>
-				<div class="flex items-start gap-4" style="padding-left: calc(50% - 68px)">
+				<div class="flex items-start gap-4" style="width: max-content; padding-left: calc(50vw - 68px)">
 					{#each playerHands as hand, i}
 						{@const lastAct = game.lastActionFor(i)}
 						{@const resolved = game.lastResults[i]}
+						{@const resSnap = phase === 'resolution' && !!resolved && game.showFeedback}
+						{@const hasRight =
+							resSnap ||
+							hand.isSurrendered ||
+							isBust(hand.cards) ||
+							(!!lastAct && !lastAct.correct && phase === 'player')}
 						<div
 							bind:this={handEls[i]}
 							class="flex flex-shrink-0 flex-row items-start gap-2 transition-all
 								{hand.isResolved && phase === 'player' ? 'opacity-50' : ''}"
+							style="scroll-snap-align: center"
 						>
-							<!-- LEFT: card ring (snap target) -->
+							<!-- LEFT: card ring -->
 							<div
 								class="rounded-xl p-1 transition-all
 									{i === activeIndex && phase === 'player'
 										? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950'
 										: ''}"
-								style="scroll-snap-align: center"
 							>
 								<Hand
 									cards={isSplitting && i < splitVisibleCounts.length
@@ -567,7 +593,8 @@
 								/>
 							</div>
 
-							<!-- RIGHT: all feedback/result -->
+							<!-- RIGHT: feedback/result (only rendered when there's content) -->
+							{#if hasRight}
 							<div class="flex w-28 flex-col gap-1 pt-1">
 								{#if phase === 'resolution' && resolved}
 									{#if game.showFeedback}
@@ -613,16 +640,12 @@
 									</div>
 								{/if}
 							</div>
+							{/if}
 						</div>
 					{/each}
 					<!-- spacer forces trailing scroll room so last hand can reach center -->
-					<div style="flex-shrink: 0; width: calc(50% - 68px)"></div>
+					<div style="flex-shrink: 0; width: calc(50vw - 68px)"></div>
 				</div>
-			</div>
-		{:else}
-			<div class="flex flex-col items-center gap-2">
-				<span class="text-sm uppercase tracking-widest text-gray-600">Player</span>
-				<div class="h-[140px] w-[96px] rounded-lg border-2 border-dashed border-zinc-700"></div>
 			</div>
 		{/if}
 	</div>
