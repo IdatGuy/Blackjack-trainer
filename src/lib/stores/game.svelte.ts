@@ -662,6 +662,14 @@ class GameStore {
 		return `You ${ACTION_PAST[record.actual]} — should have ${ACTION_INF[record.expected]} (${record.handDesc})`;
 	}
 
+	feedbackParts(record: ActionRecord): { hand: string; actual: string; expected: string } {
+		return {
+			hand: record.handDesc,
+			actual: ACTION_PAST[record.actual],
+			expected: ACTION_INF[record.expected]
+		};
+	}
+
 	lastActionFor(handIndex: number): ActionRecord | null {
 		const actions = this.actionHistory.filter(r => r.handIndex === handIndex);
 		return actions.at(-1) ?? null;

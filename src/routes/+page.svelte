@@ -540,61 +540,23 @@
 				class="hand-scroll w-full overflow-x-auto"
 				in:fly={{ y: -12, duration: animDuration }}
 			>
-				<div class="flex items-start gap-4" style="padding-left: calc(50% - 6rem)">
+				<div class="flex items-start gap-4" style="padding-left: calc(50% - 68px)">
 					{#each playerHands as hand, i}
 						{@const lastAct = game.lastActionFor(i)}
 						{@const resolved = game.lastResults[i]}
 						<div
 							bind:this={handEls[i]}
-							class="flex w-48 flex-shrink-0 flex-col items-center gap-1 transition-all
+							class="flex flex-shrink-0 flex-row items-start gap-2 transition-all
 								{hand.isResolved && phase === 'player' ? 'opacity-50' : ''}"
-							style="scroll-snap-align: center"
 						>
-							<!-- per-hand badge -->
-							<div class="flex w-full flex-col items-center gap-1 pb-1">
-								{#if phase === 'resolution' && resolved}
-									<span class="text-2xl font-bold {OUTCOME_COLOR[resolved.result]}">{OUTCOME_TEXT[resolved.result]}</span>
-									{#if game.showFeedback}
-										{@const actionsForHand = game.actionHistory.filter(r => r.handIndex === i)}
-										{@const allOk = actionsForHand.length > 0 && actionsForHand.every(r => r.correct)}
-										{@const wrong = actionsForHand.filter(r => !r.correct)}
-										{#if actionsForHand.length > 0}
-											<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">
-												{#if allOk}
-													<span class="font-semibold text-green-300">Perfect play ✓</span>
-												{:else}
-													<div class="flex flex-col gap-1">
-														{#each wrong as record}
-															<span class="text-red-300">{game.feedbackFor(record)}</span>
-														{/each}
-													</div>
-												{/if}
-											</div>
-										{/if}
-									{/if}
-									{#if i === 0 && settings.betRampEnabled && game.betRampFeedback}
-										{@const fb = game.betRampFeedback}
-										<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">
-											<span class="{fb.delta < 0 ? 'text-yellow-300' : 'text-orange-300'}">
-												Bet {fb.delta < 0 ? 'low' : 'high'} at TC {fb.tc >= 0 ? '+' : ''}{fb.tc}
-												— should be {fb.correct}u, you bet {fb.actual.toFixed(1)}u
-											</span>
-										</div>
-									{/if}
-								{:else if hand.isSurrendered}
-									<span class="text-xs text-gray-400">Surrendered</span>
-								{:else if isBust(hand.cards)}
-									<span class="text-sm font-bold text-red-400">Bust!</span>
-								{:else if lastAct && !lastAct.correct && phase === 'player'}
-									<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">
-										<span class="text-red-300">{game.shortFeedbackFor(lastAct)}</span>
-									</div>
-								{/if}
-							</div>
-							<div class="rounded-xl p-1 transition-all
-								{i === activeIndex && phase === 'player'
-									? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950'
-									: ''}">
+							<!-- LEFT: card ring (snap target) -->
+							<div
+								class="rounded-xl p-1 transition-all
+									{i === activeIndex && phase === 'player'
+										? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950'
+										: ''}"
+								style="scroll-snap-align: center"
+							>
 								<Hand
 									cards={isSplitting && i < splitVisibleCounts.length
 										? hand.cards.slice(0, splitVisibleCounts[i])
@@ -604,10 +566,57 @@
 									showTotal={settings.showHandTotal}
 								/>
 							</div>
+
+							<!-- RIGHT: all feedback/result -->
+							<div class="flex w-28 flex-col gap-1 pt-1">
+								{#if phase === 'resolution' && resolved}
+									{#if game.showFeedback}
+										<span class="text-2xl font-bold {OUTCOME_COLOR[resolved.result]}">{OUTCOME_TEXT[resolved.result]}</span>
+										{@const actionsForHand = game.actionHistory.filter(r => r.handIndex === i)}
+										{@const betMiss = i === 0 && settings.betRampEnabled && !!game.betRampFeedback}
+										{@const allOk = !betMiss && actionsForHand.length > 0 && actionsForHand.every(r => r.correct)}
+										{@const wrong = actionsForHand.filter(r => !r.correct)}
+										{#if actionsForHand.length > 0 || betMiss}
+											<div class="rounded-lg bg-black/30 px-3 py-2 text-sm">
+												{#if allOk}
+													<span class="font-semibold text-green-300">Perfect play ✓</span>
+												{:else}
+													<div class="flex flex-col gap-2">
+														{#each wrong as record}
+															{@const parts = game.feedbackParts(record)}
+															<div class="flex flex-col gap-0.5">
+																<span class="text-xs text-gray-400">{parts.hand}</span>
+																<span class="text-red-300">You {parts.actual} → Should {parts.expected}</span>
+															</div>
+														{/each}
+														{#if betMiss}
+															{@const fb = game.betRampFeedback!}
+															<div class="flex flex-col gap-0.5">
+																<span class="text-xs text-gray-400">TC {fb.tc >= 0 ? '+' : ''}{fb.tc}</span>
+																<span class="{fb.delta < 0 ? 'text-yellow-300' : 'text-orange-300'}">
+																	Bet {fb.delta < 0 ? 'low' : 'high'} — should be {fb.correct}u, you bet {fb.actual.toFixed(1)}u
+																</span>
+															</div>
+														{/if}
+													</div>
+												{/if}
+											</div>
+										{/if}
+									{/if}
+								{:else if hand.isSurrendered}
+									<span class="text-xs text-gray-400">Surrendered</span>
+								{:else if isBust(hand.cards)}
+									<span class="text-sm font-bold text-red-400">Bust!</span>
+								{:else if lastAct && !lastAct.correct && phase === 'player'}
+									<div class="rounded-lg bg-black/30 px-3 py-2 text-sm">
+										<span class="text-red-300">{game.shortFeedbackFor(lastAct)}</span>
+									</div>
+								{/if}
+							</div>
 						</div>
 					{/each}
 					<!-- spacer forces trailing scroll room so last hand can reach center -->
-					<div style="flex-shrink: 0; width: calc(50% - 6rem)"></div>
+					<div style="flex-shrink: 0; width: calc(50% - 68px)"></div>
 				</div>
 			</div>
 		{:else}
