@@ -62,11 +62,13 @@
 
 <div class="flex h-full flex-col">
 	<!-- Header -->
-	<header class="flex items-center gap-3 border-b border-zinc-800 bg-black/40 px-4 py-3">
-		<button onclick={() => goto('/')} class="text-lg leading-none text-green-400" aria-label="Back">
-			←
-		</button>
-		<span class="flex-1 text-lg font-semibold text-green-400">Statistics</span>
+	<header class="flex items-center gap-3 border-b border-zinc-800 bg-black/40 px-3 py-2">
+		<button
+			onclick={() => goto('/')}
+			class="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 active:bg-zinc-600"
+			aria-label="Back"
+		>←</button>
+		<span class="flex-1 text-base font-semibold text-white">Statistics</span>
 		<button
 			onclick={() => (showResetWarning = true)}
 			class="rounded-md px-2.5 py-1 text-xs font-semibold text-red-400 hover:bg-red-400/10 active:bg-red-400/20"

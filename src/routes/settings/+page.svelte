@@ -116,7 +116,7 @@
 				</label>
 				<hr class="border-zinc-800" />
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
-					<span class="text-sm font-medium text-gray-100">Show strategy chart button</span>
+					<span class="text-sm font-medium text-gray-100">Show strategy chart</span>
 					<ToggleSwitch checked={settings.showStrategyChart} onchange={(v) => settings.setShowStrategyChart(v)} />
 				</label>
 			</div>
@@ -143,7 +143,7 @@
 					<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 						<div>
 							<span class="text-sm font-medium text-gray-100">Grade bet sizing</span>
-							<p class="text-xs text-gray-500 mt-0.5">Compare each bet to your ramp. Large misses show feedback.</p>
+							<p class="text-xs text-gray-500 mt-0.5">Flags bets that miss your ramp by a large margin.</p>
 						</div>
 						<ToggleSwitch checked={settings.betRampEnabled} onchange={(v) => settings.setBetRampEnabled(v)} class="ml-3 shrink-0" />
 					</label>
@@ -357,7 +357,7 @@
 				{/if}
 			</div>
 			<p class="mt-2 px-1 text-xs text-gray-500">
-				Hi-Lo system. Decks remaining rounds to the nearest 0.5 using the quarter-deck as the midpoint (e.g. 2.7 remaining &rarr; divisor 2.5; 2.8 remaining &rarr; divisor 3.0). True count truncates toward zero &mdash; RC 8 &divide; 3 decks = TC 2, not 3; RC &minus;7 &divide; 3 = TC &minus;2, not &minus;3.
+				Hi-Lo counting. Decks remaining rounds to the nearest 0.5 at the quarter-deck midpoint (e.g. 2.7 → 2.5; 2.8 → 3.0). True count truncates toward zero: RC +8 ÷ 3 = TC +2; RC −7 ÷ 3 = TC −2.
 			</p>
 		</div>
 
@@ -370,7 +370,7 @@
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<div>
 						<span class="text-sm font-medium text-gray-100">Prioritize weak hands</span>
-						<p class="text-xs text-gray-500 mt-0.5">Hands weighted by heat map accuracy. Betting disabled.</p>
+						<p class="text-xs text-gray-500 mt-0.5">Deals hands where your accuracy is lowest. Disables betting.</p>
 					</div>
 					<ToggleSwitch checked={settings.weaknessWeighting} onchange={(v) => settings.setWeaknessWeighting(v)} class="ml-3 shrink-0" />
 				</label>

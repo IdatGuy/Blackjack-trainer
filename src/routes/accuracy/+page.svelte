@@ -202,7 +202,7 @@
 		{ id: 'soft', label: 'Soft' },
 		{ id: 'pairs', label: 'Pairs' },
 		{ id: 'deviations', label: 'Deviations' },
-		{ id: 'all', label: 'All' },
+		{ id: 'all', label: 'Summary' },
 		{ id: 'count', label: 'Count' }
 	];
 
@@ -274,52 +274,28 @@
 		<!-- Time filter (shared across tabs) -->
 		<TimeFilter value={timeFilter} onchange={(v) => (timeFilter = v)} />
 
+		{#snippet heatmapTab(rows: string[], rowLabels: Record<string, string>, actions: Record<string, Record<string, string>>, deviationCells: Set<string>)}
+			<div class="mb-1 text-xs font-medium text-green-400">Dealer's Hand</div>
+			<HeatmapGrid
+				{rows}
+				{rowLabels}
+				columns={[...UPCARDS]}
+				data={heatmapData}
+				{actions}
+				{deviationCells}
+				oncellclick={openCellDetail}
+			/>
+			{#if Object.keys(heatmapData).length === 0}
+				<p class="mt-4 text-center text-sm text-white/30">Play some hands to see accuracy data.</p>
+			{/if}
+		{/snippet}
+
 		{#if activeTab === 'hard'}
-			<!-- Axis label -->
-			<div class="mb-1 text-xs font-medium text-green-400">Dealer's Hand</div>
-			<HeatmapGrid
-				rows={HARD_ROWS}
-				rowLabels={Object.fromEntries(HARD_ROWS.map((r) => [r, r]))}
-				columns={[...UPCARDS]}
-				data={heatmapData}
-				actions={HARD_ACTIONS}
-				deviationCells={HARD_DEV_CELLS}
-				oncellclick={openCellDetail}
-			/>
-			{#if Object.keys(heatmapData).length === 0}
-				<p class="mt-4 text-center text-sm text-white/30">Play some hands to see accuracy data.</p>
-			{/if}
-
+			{@render heatmapTab(HARD_ROWS, Object.fromEntries(HARD_ROWS.map((r) => [r, r])), HARD_ACTIONS, HARD_DEV_CELLS)}
 		{:else if activeTab === 'soft'}
-			<div class="mb-1 text-xs font-medium text-green-400">Dealer's Hand</div>
-			<HeatmapGrid
-				rows={SOFT_ROWS}
-				rowLabels={SOFT_LABELS}
-				columns={[...UPCARDS]}
-				data={heatmapData}
-				actions={SOFT_ACTIONS}
-				deviationCells={SOFT_DEV_CELLS}
-				oncellclick={openCellDetail}
-			/>
-			{#if Object.keys(heatmapData).length === 0}
-				<p class="mt-4 text-center text-sm text-white/30">Play some hands to see accuracy data.</p>
-			{/if}
-
+			{@render heatmapTab(SOFT_ROWS, SOFT_LABELS, SOFT_ACTIONS, SOFT_DEV_CELLS)}
 		{:else if activeTab === 'pairs'}
-			<div class="mb-1 text-xs font-medium text-green-400">Dealer's Hand</div>
-			<HeatmapGrid
-				rows={PAIR_ROWS}
-				rowLabels={PAIR_LABELS}
-				columns={[...UPCARDS]}
-				data={heatmapData}
-				actions={PAIR_ACTIONS}
-				deviationCells={PAIR_DEV_CELLS}
-				oncellclick={openCellDetail}
-			/>
-			{#if Object.keys(heatmapData).length === 0}
-				<p class="mt-4 text-center text-sm text-white/30">Play some hands to see accuracy data.</p>
-			{/if}
-
+			{@render heatmapTab(PAIR_ROWS, PAIR_LABELS, PAIR_ACTIONS, PAIR_DEV_CELLS)}
 		{:else if activeTab === 'deviations'}
 			<DeviationList deviations={DEVIATION_DEFS} accuracy={deviationAccuracy} />
 

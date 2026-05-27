@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { game } from '$lib/stores/game.svelte.js';
+	import ToggleSwitch from '$lib/components/ToggleSwitch.svelte';
 	import {
 		settings,
 		MIN_BET_OPTIONS,
@@ -75,9 +76,10 @@
 						>{n}</button>
 					{/each}
 				</div>
-				<p class="mt-2 text-[11px] text-gray-600">Changing any rule reshuffles the shoe</p>
-			</div>
+				</div>
 		</div>
+
+		<p class="mb-4 text-[11px] text-gray-600">Changing any rule reshuffles the shoe.</p>
 
 		<!-- Dealer Rules -->
 		<div class="mb-6">
@@ -129,20 +131,11 @@
 						<span class="text-sm font-medium text-gray-100">Dealer peek</span>
 						<p class="text-[11px] text-gray-500">Dealer checks hole card for blackjack</p>
 					</div>
-					<button
-						role="switch"
-						aria-checked={settings.peek}
-						onclick={() => applyRule(() => settings.setPeek(!settings.peek))}
-						class="relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none {settings.peek
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.peek
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch
+						checked={settings.peek}
+						onchange={(v) => applyRule(() => settings.setPeek(v))}
+						class="shrink-0"
+					/>
 				</label>
 			</div>
 		</div>
@@ -179,39 +172,21 @@
 				<!-- Double after split -->
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Double after split</span>
-					<button
-						role="switch"
-						aria-checked={settings.doubleAfterSplit}
-						onclick={() => applyRule(() => settings.setDoubleAfterSplit(!settings.doubleAfterSplit))}
-						class="relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none {settings.doubleAfterSplit
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.doubleAfterSplit
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch
+						checked={settings.doubleAfterSplit}
+						onchange={(v) => applyRule(() => settings.setDoubleAfterSplit(v))}
+						class="shrink-0"
+					/>
 				</label>
 
 				<!-- Resplit aces -->
 				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
 					<span class="text-sm font-medium text-gray-100">Resplit aces</span>
-					<button
-						role="switch"
-						aria-checked={settings.resplitAces}
-						onclick={() => applyRule(() => settings.setResplitAces(!settings.resplitAces))}
-						class="relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none {settings.resplitAces
-							? 'bg-green-500'
-							: 'bg-zinc-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform {settings.resplitAces
-								? 'translate-x-5'
-								: 'translate-x-0'}"
-						></span>
-					</button>
+					<ToggleSwitch
+						checked={settings.resplitAces}
+						onchange={(v) => applyRule(() => settings.setResplitAces(v))}
+						class="shrink-0"
+					/>
 				</label>
 			</div>
 		</div>
@@ -221,7 +196,7 @@
 			<p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">Betting Limits</p>
 			<div class="overflow-hidden rounded-xl bg-zinc-900 px-4 py-3.5 space-y-4">
 				<div>
-					<div class="mb-2 flex items-center justify-between">
+					<div class="mb-2">
 						<span class="text-sm font-medium text-gray-100">Minimum Bet</span>
 					</div>
 					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
@@ -238,7 +213,7 @@
 				</div>
 
 				<div>
-					<div class="mb-2 flex items-center justify-between">
+					<div class="mb-2">
 						<span class="text-sm font-medium text-gray-100">Maximum Bet</span>
 					</div>
 					<div class="flex gap-1 rounded-lg bg-zinc-800 p-0.5">
