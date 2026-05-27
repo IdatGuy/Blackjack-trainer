@@ -271,7 +271,8 @@ export function getCorrectAction(
 	rules: RuleSet,
 	overrides?: Partial<StrategyChart>,
 	splitCount = 0,
-	tcOverride?: number
+	tcOverride?: number,
+	rcOverride?: number
 ): Action {
 	const chart = overrides
 		? mergeChart(getChartForRules(rules), overrides as StrategyChart)
@@ -299,7 +300,13 @@ export function getCorrectAction(
 
 	if (tcOverride !== undefined && cell.deviations) {
 		for (const dev of cell.deviations) {
-			const fires = dev.above ? tcOverride >= dev.tc : tcOverride <= dev.tc;
+			let fires: boolean;
+			if (dev.tc === 0) {
+				const rc = rcOverride ?? shoe.runningCount;
+				fires = dev.above ? rc > 0 : rc < 0;
+			} else {
+				fires = dev.above ? tcOverride >= dev.tc : tcOverride <= dev.tc;
+			}
 			if (fires && allowed.includes(dev.action)) {
 				return dev.action;
 			}

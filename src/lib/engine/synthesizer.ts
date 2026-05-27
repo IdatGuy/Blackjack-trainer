@@ -86,7 +86,7 @@ function synthesizeTC(cell: ChartCell): number {
 	if (!cell.deviations || cell.deviations.length === 0) return 0;
 	const dev = cell.deviations[Math.floor(Math.random() * cell.deviations.length)];
 	// above=true fires when tc >= dev.tc; above=false fires when tc < dev.tc
-	return dev.above ? dev.tc : dev.tc - 1;
+	return dev.above ? (dev.tc === 0 ? 1 : dev.tc) : dev.tc - 1;
 }
 
 // Pick a TC that will never fire any deviation for this cell

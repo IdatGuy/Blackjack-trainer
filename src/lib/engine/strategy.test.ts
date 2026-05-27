@@ -47,9 +47,9 @@ describe('hard totals — basic strategy', () => {
 		const action = getCorrectAction(hand([card('6'), card('5')]), card('A'), shoe(), rules);
 		expect(action).toBe('H');
 	});
-	it('hard 12 vs 4: hit at TC 0 (deviation fires)', () => {
+	it('hard 12 vs 4: stand at RC 0 (deviation requires negative count)', () => {
 		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(), rules, undefined, 0, 0);
-		expect(action).toBe('H');
+		expect(action).toBe('S');
 	});
 	it('hard 12 vs 2: hit', () => {
 		const action = getCorrectAction(hand([card('T'), card('2')]), card('2'), shoe(), rules);
@@ -196,8 +196,16 @@ describe('Illustrious 18 deviations', () => {
 		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(-6), rules);
 		expect(action).toBe('R'); // below TC 0 threshold, base surrender applies
 	});
-	it('16 vs T: stand at TC 0 (deviation)', () => {
+	it('16 vs T: surrender at RC 0 (TC=0 but no positive count, no deviation)', () => {
 		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(0), rules, undefined, 0, 0);
+		expect(action).toBe('R');
+	});
+	it('16 vs T: surrender at RC -1 even when TC rounds to 0 (bug fix: negative RC must not trigger stand)', () => {
+		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(-1), rules, undefined, 0, 0);
+		expect(action).toBe('R');
+	});
+	it('16 vs T: stand at RC +1 even when TC rounds to 0 (any positive count)', () => {
+		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(1), rules, undefined, 0, 0);
 		expect(action).toBe('S');
 	});
 	it('16 vs T: stand at TC +2 (deviation)', () => {
@@ -212,9 +220,13 @@ describe('Illustrious 18 deviations', () => {
 		const action = getCorrectAction(hand([card('6'), card('5')]), card('A'), shoe(6), rules, undefined, 0, 1);
 		expect(action).toBe('D');
 	});
-	it('12 vs 4: hit at TC 0 (deviation fires at boundary)', () => {
+	it('12 vs 4: stand at RC 0 (no negative count, no deviation)', () => {
 		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(0), rules, undefined, 0, 0);
-		expect(action).toBe('H');
+		expect(action).toBe('S');
+	});
+	it('12 vs 4: stand at RC +1 (positive count, no deviation)', () => {
+		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(1), rules, undefined, 0, 0);
+		expect(action).toBe('S');
 	});
 	it('12 vs 4: hit at TC -1 (deviation)', () => {
 		const action = getCorrectAction(hand([card('T'), card('2')]), card('4'), shoe(-6), rules, undefined, 0, -1);
@@ -412,9 +424,9 @@ describe('no-surrender chart', () => {
 		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(-18), nos);
 		expect(action).toBe('H');
 	});
-	it('hard 16 vs T: stand at TC 0 (I-18 deviation fires even without surrender)', () => {
+	it('hard 16 vs T: hit at RC 0 (no positive count, I-18 deviation does not fire)', () => {
 		const action = getCorrectAction(hand([card('T'), card('6')]), card('T'), shoe(0), nos, undefined, 0, 0);
-		expect(action).toBe('S');
+		expect(action).toBe('H');
 	});
 	it('hard 15 vs T: hit at TC -2 (no surrender, Fab 3 not in chart)', () => {
 		const action = getCorrectAction(hand([card('T'), card('5')]), card('T'), shoe(-12), nos);

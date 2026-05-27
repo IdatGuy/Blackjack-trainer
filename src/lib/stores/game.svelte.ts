@@ -107,6 +107,11 @@ class GameStore {
 		return this.synthesizedTC !== null ? this.synthesizedTC : trueCount(this.state.shoe);
 	}
 
+	effectiveRC(): number | undefined {
+		if (!settings.countingEnabled) return undefined;
+		return this.synthesizedTC !== null ? this.synthesizedTC : this.state.shoe.runningCount;
+	}
+
 	constructor() {
 		if (browser) {
 			this._prefetchWeights();
@@ -452,7 +457,8 @@ class GameStore {
 			this.state.rules,
 			undefined,
 			0,
-			this.effectiveTC()
+			this.effectiveTC(),
+			this.effectiveRC()
 		);
 		const base = getBaseAction(activeHand, dealerUp, this.state.shoe, this.state.rules);
 
@@ -642,7 +648,8 @@ class GameStore {
 			this.state.rules,
 			undefined,
 			0,
-			this.effectiveTC()
+			this.effectiveTC(),
+			this.effectiveRC()
 		);
 	}
 
