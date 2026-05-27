@@ -16,6 +16,7 @@ import type { Card } from '$lib/engine/card.js';
 import { allowedActions, dealerShouldHit, type Action } from '$lib/engine/rules.js';
 import { buildShoe, dealCard, resetShoe, shouldReshuffle, trueCount, type Shoe } from '$lib/engine/shoe.js';
 import { getBaseAction, getChartForRules, getCorrectAction, getInsuranceAction } from '$lib/engine/strategy.js';
+import { lookupMultiple } from '$lib/engine/betRamp.js';
 import {
 	buildDealerCard,
 	buildPlayerCards,
@@ -24,7 +25,7 @@ import {
 import { getWeaknessWeights } from '$lib/db/accuracy.js';
 import { untrack } from 'svelte';
 import { browser } from '$app/environment';
-import { saveDecisions } from '$lib/db/persist.js';
+import { saveBetRampRecord, saveDecisions } from '$lib/db/persist.js';
 import type { DecisionRecord } from '$lib/db/schema.js';
 import { settings } from './settings.svelte.js';
 
@@ -98,6 +99,8 @@ class GameStore {
 	synthesizedTC = $state<number | null>(null);
 	_weaknessWeights = $state(new Map<string, number>());
 	_regularShoeBackup: Shoe | null = null;
+	betRampFeedback = $state<{ delta: number; tc: number; correct: number; actual: number } | null>(null);
+	_pendingBetRamp: { correctMultiple: number; actualMultiple: number; tc: number; tcBucket: number; delta: number } | null = null;
 
 	effectiveTC(): number | undefined {
 		if (!settings.countingEnabled) return undefined;
@@ -280,6 +283,28 @@ class GameStore {
 		});
 		this._pending = [];
 		if (browser) saveDecisions(completed);
+		if (browser && this._pendingBetRamp && settings.betRamp) {
+			const p = this._pendingBetRamp;
+			this._pendingBetRamp = null;
+			saveBetRampRecord({
+				timestamp: Date.now(),
+				sessionId: this.sessionId,
+				trueCount: p.tc,
+				tcBucket: p.tcBucket,
+				correctMultiple: p.correctMultiple,
+				actualMultiple: p.actualMultiple,
+				delta: p.delta,
+				unitSize: settings.betRamp.unitSize
+			});
+			if (Math.abs(p.delta) >= settings.betRamp.feedbackThreshold) {
+				this.betRampFeedback = {
+					delta: p.delta,
+					tc: p.tcBucket,
+					correct: p.correctMultiple,
+					actual: p.actualMultiple
+				};
+			}
+		}
 	}
 
 	deal() {
@@ -306,6 +331,22 @@ class GameStore {
 			this.bankroll = Math.round((this.bankroll - totalBet) * 100) / 100;
 			this._persistBankroll();
 			this._setFlash(-totalBet);
+		}
+		if (settings.betRampEnabled && settings.betRamp && settings.bettingEnabled && !settings.weaknessWeighting) {
+			const rawTC = trueCount(this.state.shoe);
+			const correctMultiple = lookupMultiple(settings.betRamp, rawTC);
+			const actualMultiple = this.betAmount / settings.betRamp.unitSize;
+			const delta = actualMultiple - correctMultiple;
+			this._pendingBetRamp = {
+				correctMultiple,
+				actualMultiple,
+				tc: rawTC,
+				tcBucket:
+					settings.betRamp.tcConversion === 'floor'
+						? Math.floor(rawTC)
+						: Math.round(rawTC),
+				delta
+			};
 		}
 		if (settings.weaknessWeighting) {
 			const chart = getChartForRules(this.state.rules);
@@ -498,6 +539,7 @@ class GameStore {
 		this.insuranceBet = 0;
 		this.insuranceResult = null;
 		this.synthesizedTC = null;
+		this.betRampFeedback = null;
 		// betAmount intentionally preserved — defaults to last bet
 		if (browser && settings.weaknessWeighting) this._prefetchWeights();
 		this._persistShoe();

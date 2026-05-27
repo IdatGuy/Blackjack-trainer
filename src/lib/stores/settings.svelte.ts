@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { DEFAULT_DRILL_FILTER, PAIR_RANKS, type DrillFilter } from '$lib/engine/synthesizer.js';
 import type { Rank } from '$lib/engine/card.js';
 import type { SettingsPreset } from '$lib/presets.js';
+import type { BetRamp } from '$lib/engine/betRamp.js';
 
 export type { DrillFilter };
 
@@ -38,6 +39,8 @@ class SettingsStore {
 	countPopupEnabled = $state(true);
 	countPopupFrequency = $state(5);
 	countPopupWindow = $state(2);
+	betRampEnabled = $state(false);
+	betRamp = $state<BetRamp | null>(null);
 
 	constructor() {
 		if (browser) {
@@ -120,6 +123,12 @@ class SettingsStore {
 					}
 					if (typeof data.countPopupWindow === 'number' && data.countPopupWindow >= 0) {
 						this.countPopupWindow = Math.min(5, data.countPopupWindow);
+					}
+					if (typeof data.betRampEnabled === 'boolean') {
+						this.betRampEnabled = data.betRampEnabled;
+					}
+					if (data.betRamp && typeof data.betRamp === 'object') {
+						this.betRamp = data.betRamp as BetRamp;
 					}
 				} catch {
 					/* ignore malformed */
@@ -254,6 +263,16 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setBetRampEnabled(v: boolean) {
+		this.betRampEnabled = v;
+		this.persist();
+	}
+
+	setBetRamp(ramp: BetRamp) {
+		this.betRamp = ramp;
+		this.persist();
+	}
+
 	applyPreset(preset: SettingsPreset) {
 		const s = preset.settings;
 		this.showFeedback = s.showFeedback;
@@ -300,7 +319,9 @@ class SettingsStore {
 					drillFilter: this.drillFilter,
 					countPopupEnabled: this.countPopupEnabled,
 					countPopupFrequency: this.countPopupFrequency,
-					countPopupWindow: this.countPopupWindow
+					countPopupWindow: this.countPopupWindow,
+					betRampEnabled: this.betRampEnabled,
+					betRamp: this.betRamp
 				})
 			);
 		}

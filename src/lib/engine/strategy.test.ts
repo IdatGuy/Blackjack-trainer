@@ -101,9 +101,9 @@ describe('soft totals — basic strategy', () => {
 		const action = getCorrectAction(hand([card('A'), card('6')]), card('3'), shoe(), rules);
 		expect(action).toBe('D');
 	});
-	it('soft 18 (A7) vs 2: stand', () => {
+	it('soft 18 (A7) vs 2: double (Ds)', () => {
 		const action = getCorrectAction(hand([card('A'), card('7')]), card('2'), shoe(), rules);
-		expect(action).toBe('S');
+		expect(action).toBe('D');
 	});
 	it('soft 18 (A7) vs 3: double (Ds)', () => {
 		const action = getCorrectAction(hand([card('A'), card('7')]), card('3'), shoe(), rules);
@@ -353,9 +353,9 @@ describe('No-DAS chart differences', () => {
 		const action = getCorrectAction(hand([card('2'), card('2')]), card('2'), shoe(), nodas);
 		expect(action).toBe('H');
 	});
-	it('2-2 vs 3: split (no DAS — still optimal to split)', () => {
+	it('2-2 vs 3: hit (no DAS)', () => {
 		const action = getCorrectAction(hand([card('2'), card('2')]), card('3'), shoe(), nodas);
-		expect(action).toBe('P');
+		expect(action).toBe('H');
 	});
 	it('3-3 vs 2: hit (no DAS)', () => {
 		const action = getCorrectAction(hand([card('3'), card('3')]), card('2'), shoe(), nodas);

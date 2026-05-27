@@ -1,5 +1,5 @@
-import { fetchDecisionsSince } from './index.js';
-import type { DecisionRecord } from './schema.js';
+import { getDb, fetchDecisionsSince } from './index.js';
+import type { BetRampRecord, DecisionRecord } from './schema.js';
 
 export type HandsStats = {
 	won: number;
@@ -109,6 +109,55 @@ export async function getStrategyStats(since: number): Promise<StrategyStats> {
 	const noActionRequired = Math.max(0, totalDealt - handsPlayed);
 
 	return { handsPlayed, correct, correctWithHints, incorrect, noActionRequired };
+}
+
+export type BetRampTCStat = {
+	tc: number;
+	total: number;
+	withinThreshold: number;
+	avgDelta: number;
+	overCount: number;
+	underCount: number;
+	correctMultiple: number;
+};
+
+async function fetchBetRampSince(since: number): Promise<BetRampRecord[]> {
+	const db = await getDb();
+	const range = since > 0 ? IDBKeyRange.lowerBound(since) : undefined;
+	return range
+		? db.getAllFromIndex('betRampDecisions', 'by-timestamp', range)
+		: db.getAll('betRampDecisions');
+}
+
+export async function getBetRampStats(
+	since: number,
+	threshold: number
+): Promise<BetRampTCStat[]> {
+	const records = await fetchBetRampSince(since);
+	const map = new Map<number, { total: number; within: number; sumDelta: number; over: number; under: number; correctMultiple: number }>();
+
+	for (const r of records) {
+		const bucket = r.tcBucket;
+		const s = map.get(bucket) ?? { total: 0, within: 0, sumDelta: 0, over: 0, under: 0, correctMultiple: r.correctMultiple };
+		s.total++;
+		s.sumDelta += r.delta;
+		if (Math.abs(r.delta) < threshold) s.within++;
+		if (r.delta > 0) s.over++;
+		else if (r.delta < 0) s.under++;
+		map.set(bucket, s);
+	}
+
+	return [...map.entries()]
+		.sort(([a], [b]) => a - b)
+		.map(([tc, s]) => ({
+			tc,
+			total: s.total,
+			withinThreshold: s.within,
+			avgDelta: s.total > 0 ? s.sumDelta / s.total : 0,
+			overCount: s.over,
+			underCount: s.under,
+			correctMultiple: s.correctMultiple
+		}));
 }
 
 export function filterSince(filter: 'today' | 'week' | 'month' | 'all'): number {

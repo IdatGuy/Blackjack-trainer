@@ -5,7 +5,7 @@ let dbPromise: ReturnType<typeof openDB<BjDB>> | null = null;
 
 export function getDb() {
 	if (!dbPromise) {
-		dbPromise = openDB<BjDB>('bj-trainer', 2, {
+		dbPromise = openDB<BjDB>('bj-trainer', 3, {
 			upgrade(db, oldVersion) {
 				if (oldVersion < 1) {
 					const store = db.createObjectStore('decisions', {
@@ -23,6 +23,14 @@ export function getDb() {
 					});
 					cg.createIndex('by-timestamp', 'timestamp');
 					cg.createIndex('by-session', 'sessionId');
+				}
+				if (oldVersion < 3) {
+					const br = db.createObjectStore('betRampDecisions', {
+						keyPath: 'id',
+						autoIncrement: true
+					});
+					br.createIndex('by-timestamp', 'timestamp');
+					br.createIndex('by-session', 'sessionId');
 				}
 			}
 		});

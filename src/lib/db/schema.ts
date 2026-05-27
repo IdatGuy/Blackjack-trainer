@@ -38,6 +38,18 @@ export type CountGuessRecord = {
 	error: number;
 };
 
+export type BetRampRecord = {
+	id?: number;
+	timestamp: number;
+	sessionId: string;
+	trueCount: number;
+	tcBucket: number;
+	correctMultiple: number;
+	actualMultiple: number;
+	delta: number;
+	unitSize: number;
+};
+
 export interface BjDB extends DBSchema {
 	decisions: {
 		key: number;
@@ -51,6 +63,14 @@ export interface BjDB extends DBSchema {
 	countGuesses: {
 		key: number;
 		value: CountGuessRecord;
+		indexes: {
+			'by-timestamp': number;
+			'by-session': string;
+		};
+	};
+	betRampDecisions: {
+		key: number;
+		value: BetRampRecord;
 		indexes: {
 			'by-timestamp': number;
 			'by-session': string;

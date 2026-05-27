@@ -572,6 +572,15 @@
 											</div>
 										{/if}
 									{/if}
+									{#if i === 0 && settings.betRampEnabled && game.betRampFeedback}
+										{@const fb = game.betRampFeedback}
+										<div class="w-full rounded-lg bg-black/30 px-4 py-3 text-center text-sm">
+											<span class="{fb.delta < 0 ? 'text-yellow-300' : 'text-orange-300'}">
+												Bet {fb.delta < 0 ? 'low' : 'high'} at TC {fb.tc >= 0 ? '+' : ''}{fb.tc}
+												— should be {fb.correct}u, you bet {fb.actual.toFixed(1)}u
+											</span>
+										</div>
+									{/if}
 								{:else if hand.isSurrendered}
 									<span class="text-xs text-gray-400">Surrendered</span>
 								{:else if isBust(hand.cards)}

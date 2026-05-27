@@ -12,11 +12,15 @@
 		getHandsStats,
 		getBankrollStats,
 		getStrategyStats,
+		getBetRampStats,
 		filterSince,
 		type HandsStats,
 		type BankrollStats,
-		type StrategyStats
+		type StrategyStats,
+		type BetRampTCStat
 	} from '$lib/db/queries.js';
+	import BetRampSection from '$lib/components/stats/BetRampSection.svelte';
+	import { settings } from '$lib/stores/settings.svelte.js';
 
 	type Filter = 'today' | 'week' | 'month' | 'all';
 
@@ -25,15 +29,18 @@
 	let handsStats = $state<HandsStats | null>(null);
 	let bankrollStats = $state<BankrollStats | null>(null);
 	let strategyStats = $state<StrategyStats | null>(null);
+	let betRampStats = $state<BetRampTCStat[] | null>(null);
 
 	async function load(f: Filter) {
 		if (!browser) return;
 		const since = filterSince(f);
+		const threshold = settings.betRamp?.feedbackThreshold ?? 2;
 		try {
-			[handsStats, bankrollStats, strategyStats] = await Promise.all([
+			[handsStats, bankrollStats, strategyStats, betRampStats] = await Promise.all([
 				getHandsStats(since),
 				getBankrollStats(since),
-				getStrategyStats(since)
+				getStrategyStats(since),
+				getBetRampStats(since, threshold)
 			]);
 		} catch (e) {
 			console.error('[stats] load failed:', e);
@@ -107,5 +114,15 @@
 		<StatSection title="Strategy">
 			<StrategySection stats={strategyStats} />
 		</StatSection>
+
+		{#if settings.betRampEnabled && settings.betRamp}
+			<StatSection title="Bet Ramp">
+				<BetRampSection
+					stats={betRampStats ?? []}
+					threshold={settings.betRamp.feedbackThreshold}
+					unitSize={settings.betRamp.unitSize}
+				/>
+			</StatSection>
+		{/if}
 	</div>
 </div>

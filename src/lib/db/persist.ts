@@ -1,5 +1,5 @@
 import { getDb } from './index.js';
-import type { CountGuessRecord, DecisionRecord } from './schema.js';
+import type { BetRampRecord, CountGuessRecord, DecisionRecord } from './schema.js';
 
 export async function saveDecisions(records: DecisionRecord[]): Promise<void> {
 	if (records.length === 0) return;
@@ -12,4 +12,9 @@ export async function saveDecisions(records: DecisionRecord[]): Promise<void> {
 export async function saveCountGuess(record: CountGuessRecord): Promise<void> {
 	const db = await getDb();
 	await db.add('countGuesses', record);
+}
+
+export async function saveBetRampRecord(record: Omit<BetRampRecord, 'id'>): Promise<void> {
+	const db = await getDb();
+	await db.add('betRampDecisions', record);
 }
