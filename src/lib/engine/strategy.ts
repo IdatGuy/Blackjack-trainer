@@ -73,7 +73,7 @@ function makeSoft(): Record<string, Record<string, ChartCell>> {
 		A4: row([H(), H(), D(), D(), D(), H(), H(), H(), H(), H()]),
 		A5: row([H(), H(), D(), D(), D(), H(), H(), H(), H(), H()]),
 		A6: row([H(), D(), D(), D(), D(), H(), H(), H(), H(), H()]),
-		A7: row([S(), Ds(), Ds(), Ds(), Ds(), S(), S(), H(), H(), H()]),
+		A7: row([Ds(), Ds(), Ds(), Ds(), Ds(), S(), S(), H(), H(), H()]),
 		A8: row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()]),
 		A9: row([S(), S(), S(), S(), S(), S(), S(), S(), S(), S()])
 	};
@@ -142,6 +142,7 @@ function applyH17Patch(
 
 function applyNoDASPatch(pairs: Record<string, Record<string, ChartCell>>): void {
 	pairs['22']['2'] = H();
+	pairs['22']['3'] = H();
 	pairs['33']['2'] = H();
 	pairs['33']['3'] = H();
 	pairs['44']['5'] = H();
@@ -175,7 +176,7 @@ function applyDeviations(chart: StrategyChart, h17 = false, hasSurrender = true)
 	dev(chart.hard, '9', '2', { tc: 1, action: 'D', above: true }); // #10
 	dev(chart.hard, '10', 'A', { tc: 4, action: 'D', above: true }); // #11
 	dev(chart.hard, '9', '7', { tc: 3, action: 'D', above: true }); // #12
-	dev(chart.hard, '16', '9', { tc: 5, action: 'S', above: true }); // #13
+	dev(chart.hard, '16', '9', { tc: 4, action: 'S', above: true }); // #13
 	dev(chart.hard, '13', '2', { tc: -1, action: 'H', above: false }); // #14
 	dev(chart.hard, '12', '4', { tc: 0, action: 'H', above: false }); // #15
 	dev(chart.hard, '12', '5', { tc: -2, action: 'H', above: false }); // #16
@@ -184,7 +185,15 @@ function applyDeviations(chart: StrategyChart, h17 = false, hasSurrender = true)
 
 	// BJA additions
 	dev(chart.hard, '8', '6', { tc: 2, action: 'D', above: true});
-
+	dev(chart.soft, 'A8', '4', { tc: 3, action: 'D', above: true});
+	dev(chart.soft, 'A8', '5', { tc: 1, action: 'D', above: true});
+	dev(chart.soft, 'A8', '6', { tc: 1, action: 'D', above: true});
+	if (h17) dev(chart.soft, 'A8', '6', { tc: 0, action: 'S', above: false});
+	dev(chart.soft, 'A6', '2', { tc: 1, action: 'D', above: true});
+	if (h17) dev(chart.hard, '16', 'A', { tc: 3, action: 'S', above: true});
+	if (h17) dev(chart.hard, '15', 'A', { tc: 5, action: 'S', above: true});
+	if (h17) dev(chart.hard, '10', 'A', { tc: 3, action: 'D', above: true});
+	
 	// Fab 4 (surrender deviations) — only when surrender is enabled
 	if (hasSurrender) {
 		dev(chart.hard, '14', 'T', { tc: 3, action: 'R', above: true }); // Fab 1
