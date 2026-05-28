@@ -661,17 +661,12 @@
 							(!!lastAct && !lastAct.correct && phase === 'player')}
 						<div
 							bind:this={handEls[i]}
-							class="flex flex-shrink-0 flex-row items-start gap-2 transition-all
-								{hand.isResolved && phase === 'player' ? 'opacity-50' : ''}"
+							class="flex flex-shrink-0 flex-row items-start gap-2 transition-all origin-top
+								{phase === 'player' && i !== activeIndex ? 'scale-90 opacity-50' : ''}"
 							style="scroll-snap-align: center"
 						>
-							<!-- LEFT: card ring -->
-							<div
-								class="rounded-xl p-1 transition-all
-									{i === activeIndex && phase === 'player'
-										? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-gray-950'
-										: ''}"
-							>
+							<!-- LEFT: cards -->
+							<div class="rounded-xl p-1">
 								<Hand
 									cards={isSplitting && i < splitVisibleCounts.length
 										? hand.cards.slice(0, splitVisibleCounts[i])
