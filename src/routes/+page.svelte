@@ -30,17 +30,6 @@
 		surrender: 'text-white'
 	};
 
-	const SPEEDS = [0, 160, 400, 600, 900, 1300, 1800, 2400, 3200];
-
-	// While the table is auto-playing (wonging), use the auto-play speed; otherwise the manual speed.
-	function currentDur(): number {
-		return SPEEDS[game.autoPlaying ? settings.autoPlaySpeed : settings.animationSpeed] ?? 0;
-	}
-
-	const animDuration = $derived(
-		SPEEDS[game.autoPlaying ? settings.autoPlaySpeed : settings.animationSpeed] ?? 0
-	);
-
 	const phase = $derived(game.state.phase);
 	const playerHands = $derived(game.state.playerHands);
 	const playerHand = $derived(playerHands[0]);
@@ -119,7 +108,8 @@
 
 	function handleNextHand() {
 		cancelDealerAnimation();
-		if (settings.countPopupEnabled && settings.countingEnabled && !settings.weaknessWeighting) {
+		if (settings.countPopupEnabled && settings.countingEnabled && !settings.weaknessWeighting &&
+			!settings.countDisplay.rc && !settings.countDisplay.tc && !settings.countDisplay.div) {
 			handsSincePopup++;
 			if (handsSincePopup >= nextPopupAt) {
 				handsSincePopup = 0;
@@ -220,7 +210,7 @@
 			game.addChip(settings.minBet);
 		}
 
-		const dur = currentDur();
+		const dur = game.animDuration;
 
 		if (dur > 0) {
 			// Set BEFORE game.deal() so Svelte batches them into one DOM update
@@ -259,7 +249,7 @@
 	});
 
 	function startDealerSequence() {
-		const dur = currentDur();
+		const dur = game.animDuration;
 
 		if (dur === 0) {
 			while (game.dealerShouldDraw) game.dealerDraw();
@@ -292,7 +282,7 @@
 	function handleAction(action: Action, hintUsed: boolean) {
 		if (action !== 'P') { game.act(action, hintUsed); return; }
 
-		const dur = currentDur();
+		const dur = game.animDuration;
 		splitHandStartIdx = game.state.activeHandIndex;
 		game.act('P', hintUsed);
 
@@ -332,7 +322,7 @@
 	}
 
 	function autoStep() {
-		const dur = currentDur();
+		const dur = game.animDuration;
 		switch (game.state.phase) {
 			case 'betting':
 				if (stopRequested) {
@@ -647,7 +637,7 @@
 			{/if}
 			<div
 				class="hand-scroll w-full overflow-x-auto"
-				in:fly={{ y: -12, duration: animDuration }}
+				in:fly={{ y: -12, duration: game.animDuration }}
 			>
 				<div class="flex items-start gap-4" style="width: max-content; padding-left: calc(50vw - 68px)">
 					{#each playerHands as hand, i}

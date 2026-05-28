@@ -147,6 +147,10 @@ class SettingsStore {
 		return SPEEDS[this.animationSpeed] ?? 0;
 	}
 
+	get autoPlayDuration(): number {
+		return SPEEDS[this.autoPlaySpeed] ?? 0;
+	}
+
 	setAnimationSpeed(v: number) {
 		this.animationSpeed = Math.max(0, Math.min(8, Math.round(v)));
 		this.persist();

@@ -109,6 +109,12 @@ class GameStore {
 		return settings.bettingEnabled && !settings.weaknessWeighting && !this.autoPlaying;
 	}
 
+	// Single mode-aware animation duration: auto-play speed while wonging,
+	// animation speed otherwise. All UI consumers read this.
+	get animDuration(): number {
+		return this.autoPlaying ? settings.autoPlayDuration : settings.animDuration;
+	}
+
 	effectiveTC(): number | undefined {
 		if (!settings.countingEnabled) return undefined;
 		return this.synthesizedTC !== null ? this.synthesizedTC : trueCount(this.state.shoe);

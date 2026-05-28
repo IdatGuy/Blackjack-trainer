@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Card } from '$lib/engine/card.js';
-	import { settings } from '$lib/stores/settings.svelte.js';
+	import { game } from '$lib/stores/game.svelte.js';
 
 	let { card, faceDown = false }: { card: Card | null; faceDown?: boolean } = $props();
 
@@ -28,7 +28,7 @@
 	};
 
 	const isRed = $derived(card !== null && (card.suit === 'H' || card.suit === 'D'));
-	const flipMs = $derived(settings.animDuration);
+	const flipMs = $derived(game.animDuration);
 </script>
 
 <div

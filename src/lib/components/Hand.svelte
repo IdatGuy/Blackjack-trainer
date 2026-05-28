@@ -2,10 +2,8 @@
 	import { fly } from 'svelte/transition';
 	import type { Card } from '$lib/engine/card.js';
 	import { handValue, isBlackjack } from '$lib/engine/hand.js';
-	import { settings } from '$lib/stores/settings.svelte.js';
+	import { game } from '$lib/stores/game.svelte.js';
 	import CardComp from './Card.svelte';
-
-	const SPEEDS = [0, 160, 400, 600, 900, 1300, 1800, 2400, 3200];
 
 	let {
 		cards,
@@ -19,7 +17,7 @@
 		showTotal?: boolean;
 	} = $props();
 
-	const animDuration = $derived(SPEEDS[settings.animationSpeed] ?? 0);
+	const animDuration = $derived(game.animDuration);
 
 	const total = $derived(cards.length > 0 ? handValue(cards) : null);
 	const bj = $derived(cards.length === 2 && isBlackjack(cards));
