@@ -66,7 +66,7 @@
 	// at resolution. We assign scrollLeft to the outer div's center — that IS the snap
 	// position, so mandatory snap accepts it without reverting.
 	$effect(() => {
-		if (phase === 'resolution' && game.showFeedback) {
+		if (phase === 'resolution' && game.showFeedback && !game.autoPlaying) {
 			const idx = activeIndex;
 			const handle = setTimeout(() => {
 				const outerEl = handEls[idx];
@@ -643,12 +643,12 @@
 					{#each playerHands as hand, i}
 						{@const lastAct = game.lastActionFor(i)}
 						{@const resolved = game.lastResults[i]}
-						{@const resSnap = phase === 'resolution' && !!resolved && game.showFeedback}
+						{@const resSnap = phase === 'resolution' && !!resolved && game.showFeedback && !game.autoPlaying}
 						{@const hasRight =
 							resSnap ||
-							hand.isSurrendered ||
-							isBust(hand.cards) ||
-							(!!lastAct && !lastAct.correct && phase === 'player')}
+							(hand.isSurrendered && phase === 'player') ||
+							(isBust(hand.cards) && phase === 'player') ||
+							(!!lastAct && !lastAct.correct && phase === 'player' && !game.autoPlaying)}
 						<div
 							bind:this={handEls[i]}
 							class="flex flex-shrink-0 flex-row items-start gap-2 transition-all origin-top
