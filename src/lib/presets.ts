@@ -16,6 +16,9 @@ export interface SettingsPreset {
 		countPopupWindow: number;
 		weaknessWeighting: boolean;
 		animationSpeed: number;
+		betRampEnabled: boolean;
+		autoPlayEnabled: boolean;
+		autoPlaySpeed: number;
 	};
 }
 
@@ -37,7 +40,10 @@ export const PRESETS: SettingsPreset[] = [
 			countPopupFrequency: 5,
 			countPopupWindow: 2,
 			weaknessWeighting: false,
-			animationSpeed: 3
+			animationSpeed: 3,
+			betRampEnabled: false,
+			autoPlayEnabled: false,
+			autoPlaySpeed: 2
 		}
 	},
 	{
@@ -57,7 +63,10 @@ export const PRESETS: SettingsPreset[] = [
 			countPopupFrequency: 5,
 			countPopupWindow: 2,
 			weaknessWeighting: false,
-			animationSpeed: 3
+			animationSpeed: 3,
+			betRampEnabled: false,
+			autoPlayEnabled: false,
+			autoPlaySpeed: 2
 		}
 	},
 	{
@@ -77,7 +86,10 @@ export const PRESETS: SettingsPreset[] = [
 			countPopupFrequency: 5,
 			countPopupWindow: 2,
 			weaknessWeighting: false,
-			animationSpeed: 3
+			animationSpeed: 3,
+			betRampEnabled: false,
+			autoPlayEnabled: false,
+			autoPlaySpeed: 2
 		}
 	},
 	{
@@ -97,7 +109,10 @@ export const PRESETS: SettingsPreset[] = [
 			countPopupFrequency: 5,
 			countPopupWindow: 2,
 			weaknessWeighting: false,
-			animationSpeed: 2
+			animationSpeed: 2,
+			betRampEnabled: false,
+			autoPlayEnabled: true,
+			autoPlaySpeed: 2
 		}
 	}
 ];

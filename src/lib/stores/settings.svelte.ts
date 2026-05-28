@@ -308,6 +308,9 @@ class SettingsStore {
 		this.countPopupWindow = s.countPopupWindow;
 		this.weaknessWeighting = s.weaknessWeighting;
 		this.animationSpeed = s.animationSpeed;
+		this.betRampEnabled = s.betRampEnabled;
+		this.autoPlayEnabled = s.autoPlayEnabled;
+		this.autoPlaySpeed = s.autoPlaySpeed;
 		this.persist();
 	}
 
