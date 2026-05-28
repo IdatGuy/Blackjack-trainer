@@ -8,7 +8,7 @@
 	import { PRESETS } from '$lib/presets.js';
 	import { generateRampCells, type BetRamp } from '$lib/engine/betRamp.js';
 
-	const SPEED_LABELS = ['Instant', '1', '2', '3', '4', '5'];
+	const SPEED_LABELS = ['Instant', '1', '2', '3', '4', '5', '6', '7', '8'];
 
 	// Bet ramp local draft — mirrors settings.betRamp but allows editing before saving
 	let rampUnitSize = $state(settings.betRamp?.unitSize ?? 25);
@@ -119,6 +119,36 @@
 					<span class="text-sm font-medium text-gray-100">Show strategy chart</span>
 					<ToggleSwitch checked={settings.showStrategyChart} onchange={(v) => settings.setShowStrategyChart(v)} />
 				</label>
+				<hr class="border-zinc-800" />
+				<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
+					<div>
+						<span class="text-sm font-medium text-gray-100">Auto-play (Wonging)</span>
+						<p class="mt-0.5 text-xs text-gray-500">Adds a Sit Out button so the table plays itself while you back-count. Never affects bankroll or stats.</p>
+					</div>
+					<ToggleSwitch checked={settings.autoPlayEnabled} onchange={(v) => settings.setAutoPlayEnabled(v)} />
+				</label>
+				{#if settings.autoPlayEnabled}
+					<hr class="border-zinc-800" />
+					<div class="px-4 py-3.5">
+						<div class="mb-3 flex items-center justify-between">
+							<span class="text-sm font-medium text-gray-100">Auto-play speed</span>
+							<span class="text-sm font-semibold text-gray-300">{SPEED_LABELS[settings.autoPlaySpeed]}</span>
+						</div>
+						<input
+							type="range"
+							min="0"
+							max="8"
+							step="1"
+							value={settings.autoPlaySpeed}
+							oninput={(e) => settings.setAutoPlaySpeed(Number((e.target as HTMLInputElement).value))}
+							class="w-full accent-white"
+						/>
+						<div class="mt-1 flex justify-between text-[10px] text-gray-600">
+							<span>Instant</span>
+							<span>Slowest</span>
+						</div>
+					</div>
+				{/if}
 			</div>
 		</div>
 
@@ -465,7 +495,7 @@
 				<input
 					type="range"
 					min="0"
-					max="5"
+					max="8"
 					step="1"
 					value={settings.animationSpeed}
 					oninput={(e) => settings.setAnimationSpeed(Number((e.target as HTMLInputElement).value))}

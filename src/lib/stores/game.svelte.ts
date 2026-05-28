@@ -101,6 +101,13 @@ class GameStore {
 	_regularShoeBackup: Shoe | null = null;
 	betRampFeedback = $state<{ delta: number; tc: number; correct: number; actual: number } | null>(null);
 	_pendingBetRamp: { correctMultiple: number; actualMultiple: number; tc: number; tcBucket: number; delta: number } | null = null;
+	autoPlaying = $state(false);
+
+	// Bankroll is only mutated during real, manual, money play — never while
+	// the table is auto-playing (wonging/back-counting) or in drill mode.
+	get _bankrollActive(): boolean {
+		return settings.bettingEnabled && !settings.weaknessWeighting && !this.autoPlaying;
+	}
 
 	effectiveTC(): number | undefined {
 		if (!settings.countingEnabled) return undefined;
@@ -233,13 +240,13 @@ class GameStore {
 		const dealerHadBJ = isBlackjack(this.state.dealerHand.cards);
 		if (this.insuranceBet > 0) {
 			this.insuranceResult = dealerHadBJ ? 'win' : 'loss';
-			if (settings.bettingEnabled && !settings.weaknessWeighting && dealerHadBJ) {
+			if (this._bankrollActive && dealerHadBJ) {
 				// 2:1 payout; insuranceBet was already deducted, so return bet + profit
 				this.bankroll = Math.round((this.bankroll + this.insuranceBet * 3) * 100) / 100;
 				this._persistBankroll();
 			}
 		}
-		if (settings.bettingEnabled && !settings.weaknessWeighting) {
+		if (this._bankrollActive) {
 			let totalReturn = 0;
 			let displayFlash = 0;
 			for (const r of results) {
@@ -266,6 +273,8 @@ class GameStore {
 	}
 
 	_flushDecisions(results: ResolvedHand[]) {
+		// Auto-play decisions are always perfect and must never reach Stats/Accuracy.
+		if (this.autoPlaying) { this._pending = []; return; }
 		if (this._pending.length === 0) return;
 		const bankrollTracked = settings.bettingEnabled && !settings.weaknessWeighting;
 		const completed: DecisionRecord[] = this._pending.map((pd) => {
@@ -315,7 +324,7 @@ class GameStore {
 	deal() {
 		if (this.state.phase !== 'betting') return;
 		this._syncDrillMode();
-		if (this.betAmount < settings.minBet || this.betAmount * settings.spotCount > this.bankroll) return;
+		if (!this.autoPlaying && (this.betAmount < settings.minBet || this.betAmount * settings.spotCount > this.bankroll)) return;
 		this.actionHistory = [];
 		this.lastResults = [];
 		this._pending = [];
@@ -327,17 +336,17 @@ class GameStore {
 		};
 		const now = Date.now();
 		this.handId = `${this.sessionId}-${now}`;
-		if (browser) {
+		if (browser && !this.autoPlaying) {
 			const prev = parseInt(localStorage.getItem('bj-hands-dealt') ?? '0', 10);
 			localStorage.setItem('bj-hands-dealt', String(prev + 1));
 		}
-		if (settings.bettingEnabled && !settings.weaknessWeighting) {
+		if (this._bankrollActive) {
 			const totalBet = this.betAmount * settings.spotCount;
 			this.bankroll = Math.round((this.bankroll - totalBet) * 100) / 100;
 			this._persistBankroll();
 			this._setFlash(-totalBet);
 		}
-		if (settings.betRampEnabled && settings.betRamp && settings.bettingEnabled && !settings.weaknessWeighting) {
+		if (settings.betRampEnabled && settings.betRamp && this._bankrollActive) {
 			const rawTC = trueCount(this.state.shoe);
 			const correctMultiple = lookupMultiple(settings.betRamp, rawTC);
 			const actualMultiple = this.betAmount / settings.betRamp.unitSize;
@@ -383,7 +392,8 @@ class GameStore {
 		} else {
 			this.synthesizedTC = null;
 		}
-		this.state = dealHand(this.state, Array.from({ length: settings.spotCount }, () => this.betAmount));
+		const betPer = this.autoPlaying ? settings.minBet : this.betAmount;
+		this.state = dealHand(this.state, Array.from({ length: settings.spotCount }, () => betPer));
 		this._maybeAutoFinish();
 	}
 
@@ -424,7 +434,7 @@ class GameStore {
 		if (this.state.phase !== 'insurance') return;
 		const insAmt = Math.floor(this.state.playerHands.reduce((sum, h) => sum + h.bet, 0) / 2);
 		this.insuranceBet = insAmt;
-		if (settings.bettingEnabled && !settings.weaknessWeighting && insAmt > 0) {
+		if (this._bankrollActive && insAmt > 0) {
 			this.bankroll = Math.round((this.bankroll - insAmt) * 100) / 100;
 			this._persistBankroll();
 		}
@@ -509,7 +519,7 @@ class GameStore {
 		else if (action === 'S') this.state = stand(this.state);
 		else if (action === 'D') {
 			this.state = double(this.state);
-			if (settings.bettingEnabled && !settings.weaknessWeighting) {
+			if (this._bankrollActive) {
 				this.bankroll = Math.round((this.bankroll - activeHand.bet) * 100) / 100;
 				this._persistBankroll();
 				this._setFlash(-activeHand.bet);
@@ -517,7 +527,7 @@ class GameStore {
 		} else if (action === 'R') this.state = surrender(this.state);
 		else if (action === 'P') {
 			this.state = split(this.state);
-			if (settings.bettingEnabled && !settings.weaknessWeighting) {
+			if (this._bankrollActive) {
 				this.bankroll = Math.round((this.bankroll - activeHand.bet) * 100) / 100;
 				this._persistBankroll();
 				this._setFlash(-activeHand.bet);
@@ -571,7 +581,7 @@ class GameStore {
 
 	forfeitAndReshuffle() {
 		if (this.state.phase !== 'betting' && this.state.playerHands.length > 0) {
-			if (browser && settings.bettingEnabled && !settings.weaknessWeighting) {
+			if (browser && this._bankrollActive) {
 				const now = Date.now();
 				const dealerUp = this.state.dealerHand.cards[0];
 				const forfeited: DecisionRecord[] = this.state.playerHands.map((h, i): DecisionRecord => ({

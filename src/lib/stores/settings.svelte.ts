@@ -6,7 +6,7 @@ import type { BetRamp } from '$lib/engine/betRamp.js';
 
 export type { DrillFilter };
 
-const SPEEDS = [0, 80, 160, 250, 400, 600];
+const SPEEDS = [0, 160, 400, 600, 900, 1300, 1800, 2400, 3200];
 
 export const MIN_BET_OPTIONS = [5, 10, 25, 50] as const;
 export const MAX_BET_OPTIONS = [100, 250, 500, 1000, 2000] as const;
@@ -41,6 +41,8 @@ class SettingsStore {
 	countPopupWindow = $state(2);
 	betRampEnabled = $state(false);
 	betRamp = $state<BetRamp | null>(null);
+	autoPlayEnabled = $state(false);
+	autoPlaySpeed = $state(2); // 0=instant, 1–5
 
 	constructor() {
 		if (browser) {
@@ -130,6 +132,10 @@ class SettingsStore {
 					if (data.betRamp && typeof data.betRamp === 'object') {
 						this.betRamp = data.betRamp as BetRamp;
 					}
+					if (typeof data.autoPlayEnabled === 'boolean') this.autoPlayEnabled = data.autoPlayEnabled;
+					if (typeof data.autoPlaySpeed === 'number') {
+						this.autoPlaySpeed = Math.max(0, Math.min(8, Math.round(data.autoPlaySpeed)));
+					}
 				} catch {
 					/* ignore malformed */
 				}
@@ -142,7 +148,7 @@ class SettingsStore {
 	}
 
 	setAnimationSpeed(v: number) {
-		this.animationSpeed = Math.max(0, Math.min(5, Math.round(v)));
+		this.animationSpeed = Math.max(0, Math.min(8, Math.round(v)));
 		this.persist();
 	}
 
@@ -273,6 +279,16 @@ class SettingsStore {
 		this.persist();
 	}
 
+	setAutoPlayEnabled(v: boolean) {
+		this.autoPlayEnabled = v;
+		this.persist();
+	}
+
+	setAutoPlaySpeed(v: number) {
+		this.autoPlaySpeed = Math.max(0, Math.min(8, Math.round(v)));
+		this.persist();
+	}
+
 	applyPreset(preset: SettingsPreset) {
 		const s = preset.settings;
 		this.showFeedback = s.showFeedback;
@@ -321,7 +337,9 @@ class SettingsStore {
 					countPopupFrequency: this.countPopupFrequency,
 					countPopupWindow: this.countPopupWindow,
 					betRampEnabled: this.betRampEnabled,
-					betRamp: this.betRamp
+					betRamp: this.betRamp,
+					autoPlayEnabled: this.autoPlayEnabled,
+					autoPlaySpeed: this.autoPlaySpeed
 				})
 			);
 		}

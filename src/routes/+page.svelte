@@ -30,9 +30,16 @@
 		surrender: 'text-white'
 	};
 
-	const SPEEDS = [0, 80, 160, 250, 400, 600];
+	const SPEEDS = [0, 160, 400, 600, 900, 1300, 1800, 2400, 3200];
 
-	const animDuration = $derived(SPEEDS[settings.animationSpeed] ?? 0);
+	// While the table is auto-playing (wonging), use the auto-play speed; otherwise the manual speed.
+	function currentDur(): number {
+		return SPEEDS[game.autoPlaying ? settings.autoPlaySpeed : settings.animationSpeed] ?? 0;
+	}
+
+	const animDuration = $derived(
+		SPEEDS[game.autoPlaying ? settings.autoPlaySpeed : settings.animationSpeed] ?? 0
+	);
 
 	const phase = $derived(game.state.phase);
 	const playerHands = $derived(game.state.playerHands);
@@ -213,7 +220,7 @@
 			game.addChip(settings.minBet);
 		}
 
-		const dur = SPEEDS[settings.animationSpeed] ?? 0;
+		const dur = currentDur();
 
 		if (dur > 0) {
 			// Set BEFORE game.deal() so Svelte batches them into one DOM update
@@ -252,7 +259,7 @@
 	});
 
 	function startDealerSequence() {
-		const dur = SPEEDS[settings.animationSpeed] ?? 0;
+		const dur = currentDur();
 
 		if (dur === 0) {
 			while (game.dealerShouldDraw) game.dealerDraw();
@@ -285,7 +292,7 @@
 	function handleAction(action: Action, hintUsed: boolean) {
 		if (action !== 'P') { game.act(action, hintUsed); return; }
 
-		const dur = SPEEDS[settings.animationSpeed] ?? 0;
+		const dur = currentDur();
 		splitHandStartIdx = game.state.activeHandIndex;
 		game.act('P', hintUsed);
 
@@ -308,6 +315,63 @@
 			setTimeout(() => { isSplitting = false; splitVisibleCounts = []; }, 2 * dur + 50),
 		];
 	}
+
+	// Auto-play / Wonging: the table plays itself perfectly while the user back-counts.
+	let autoTimer: ReturnType<typeof setTimeout> | null = null;
+	let stopRequested = $state(false);
+
+	function sitOut() {
+		stopRequested = false;
+		game.autoPlaying = true; // $effect below starts the loop
+	}
+
+	function rejoin() {
+		// Defer the actual stop to the next betting boundary so the in-progress
+		// auto hand finishes cleanly rather than being handed to the user mid-hand.
+		stopRequested = true;
+	}
+
+	function autoStep() {
+		const dur = currentDur();
+		switch (game.state.phase) {
+			case 'betting':
+				if (stopRequested) {
+					game.autoPlaying = false;
+					autoTimer = null;
+					return;
+				}
+				handleDeal();
+				autoTimer = setTimeout(autoStep, 4 * dur + 150);
+				break;
+			case 'insurance':
+				if (game.correctInsuranceAction === 'I') game.takeInsurance();
+				else game.declineInsurance();
+				autoTimer = setTimeout(autoStep, dur + 50);
+				break;
+			case 'player': {
+				const a = game.correctAction;
+				if (a) handleAction(a, false);
+				autoTimer = setTimeout(autoStep, dur + 50);
+				break;
+			}
+			case 'dealer':
+				// Dealer is played out by startDealerSequence (its own $effect); just wait.
+				autoTimer = setTimeout(autoStep, dur + 50);
+				break;
+			case 'resolution':
+				autoTimer = setTimeout(() => { game.nextHand(); autoStep(); }, Math.max(dur, 500));
+				break;
+		}
+	}
+
+	$effect(() => {
+		if (game.autoPlaying) {
+			if (!autoTimer) autoStep();
+		} else if (autoTimer) {
+			clearTimeout(autoTimer);
+			autoTimer = null;
+		}
+	});
 
 
 </script>
@@ -346,7 +410,7 @@
 {/snippet}
 
 <div class="relative flex h-full flex-col">
-	{#if isDealing}
+	{#if isDealing && !game.autoPlaying}
 		<button
 			onclick={skipDeal}
 			class="absolute inset-0 z-50 cursor-pointer"
@@ -480,8 +544,25 @@
 	</div>
 
 	<!-- Center action zone (fixed height) -->
-	<div class="flex w-full min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4 {phase === 'betting' || (phase === 'player' && !isDealing) || phase === 'insurance' || phase === 'resolution' ? 'bg-black/20 border-t border-b border-white/10' : ''}">
-		{#if phase === 'betting'}
+	<div class="flex w-full min-h-[160px] flex-col items-center justify-center gap-3 px-4 py-4 {game.autoPlaying || phase === 'betting' || (phase === 'player' && !isDealing) || phase === 'insurance' || phase === 'resolution' ? 'bg-black/20 border-t border-b border-white/10' : ''}">
+		{#if game.autoPlaying}
+			<div class="flex flex-col items-center gap-3 text-center">
+				<span class="flex items-center gap-2 rounded-full bg-zinc-700 px-3 py-0.5 text-[11px] font-semibold text-gray-300">
+					<span class="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400"></span>
+					Sitting out — back-counting
+				</span>
+				<button
+					class="rounded-xl px-10 py-3 text-base font-bold shadow-lg transition-colors
+						{stopRequested
+							? 'cursor-default bg-zinc-700 text-gray-400'
+							: 'bg-yellow-500 text-gray-900 hover:bg-yellow-400 active:bg-yellow-600'}"
+					disabled={stopRequested}
+					onclick={rejoin}
+				>
+					{stopRequested ? 'Rejoining next hand…' : 'Rejoin'}
+				</button>
+			</div>
+		{:else if phase === 'betting'}
 			{#if settings.weaknessWeighting}
 				<div class="flex flex-col items-center gap-2">
 					<span class="rounded-full bg-zinc-700 px-3 py-0.5 text-[11px] font-semibold text-gray-300">
@@ -502,6 +583,14 @@
 					onclick={handleDeal}
 				>
 					Deal
+				</button>
+			{/if}
+			{#if settings.autoPlayEnabled && !settings.weaknessWeighting}
+				<button
+					class="rounded-lg border border-zinc-600 px-6 py-2 text-xs font-semibold text-gray-300 transition-colors hover:border-zinc-500 hover:text-white active:bg-zinc-800"
+					onclick={sitOut}
+				>
+					Sit Out &amp; Back-count
 				</button>
 			{/if}
 		{:else if phase === 'insurance'}
@@ -597,7 +686,7 @@
 							{#if hasRight}
 							<div class="flex w-28 flex-col gap-1 pt-1">
 								{#if phase === 'resolution' && resolved}
-									{#if game.showFeedback}
+									{#if game.showFeedback && !game.autoPlaying}
 										<span class="text-2xl font-bold {OUTCOME_COLOR[resolved.result]}">{OUTCOME_TEXT[resolved.result]}</span>
 										{@const actionsForHand = game.actionHistory.filter(r => r.handIndex === i)}
 										{@const betMiss = i === 0 && settings.betRampEnabled && !!game.betRampFeedback}
@@ -634,8 +723,9 @@
 									<span class="text-xs text-gray-400">Surrendered</span>
 								{:else if isBust(hand.cards)}
 									<span class="text-sm font-bold text-red-400">Bust!</span>
-								{:else if lastAct && !lastAct.correct && phase === 'player'}
+								{:else if lastAct && !lastAct.correct && phase === 'player' && !game.autoPlaying}
 									<div class="rounded-lg bg-black/30 px-3 py-2 text-sm">
+
 										<span class="text-red-300">{game.shortFeedbackFor(lastAct)}</span>
 									</div>
 								{/if}

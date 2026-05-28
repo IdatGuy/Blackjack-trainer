@@ -6,7 +6,7 @@
 
 	let { children } = $props();
 
-	const SPEEDS = [0, 80, 160, 250, 400, 600];
+	const SPEEDS = [0, 160, 400, 600, 900, 1300, 1800, 2400, 3200];
 	const animDuration = $derived(SPEEDS[settings.animationSpeed] ?? 0);
 </script>
 

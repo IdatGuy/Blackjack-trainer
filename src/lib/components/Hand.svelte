@@ -5,7 +5,7 @@
 	import { settings } from '$lib/stores/settings.svelte.js';
 	import CardComp from './Card.svelte';
 
-	const SPEEDS = [0, 80, 160, 250, 400, 600];
+	const SPEEDS = [0, 160, 400, 600, 900, 1300, 1800, 2400, 3200];
 
 	let {
 		cards,
