@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { settings } from '$lib/stores/settings.svelte.js';
-	import { PAIR_RANKS } from '$lib/engine/synthesizer.js';
+	import { HARD_TOTALS, PAIR_RANKS, SOFT_TOTALS } from '$lib/engine/synthesizer.js';
 	import type { Rank } from '$lib/engine/card.js';
-	import RangeSlider from '$lib/components/RangeSlider.svelte';
 	import ToggleSwitch from '$lib/components/ToggleSwitch.svelte';
 	import { PRESETS } from '$lib/presets.js';
 	import { generateRampCells, type BetRamp } from '$lib/engine/betRamp.js';
@@ -54,6 +53,9 @@
 		const next = cur.includes(rank) ? cur.filter(r => r !== rank) : [...cur, rank];
 		if (next.length > 0) settings.setDrillFilter({ pairRanks: next });
 	}
+
+	function toggleHardTotal(total: number) { settings.toggleHardTotal(total); }
+	function toggleSoftTotal(total: number) { settings.toggleSoftTotal(total); }
 
 	function toggleHandType(type: 'hard' | 'soft' | 'pair') {
 		const cur = settings.drillFilter.handTypes;
@@ -430,36 +432,36 @@
 					{#if settings.drillFilter.handTypes.includes('hard')}
 						<hr class="border-zinc-800" />
 						<div class="px-4 py-3.5">
-							<div class="flex items-center justify-between mb-2">
-								<p class="text-xs font-medium text-gray-400">Hard range</p>
-								<span class="text-xs font-semibold text-gray-200">
-									{settings.drillFilter.hardMin}–{settings.drillFilter.hardMax}
-								</span>
+							<p class="mb-2.5 text-xs font-medium text-gray-400">Hard totals</p>
+							<div class="flex flex-wrap gap-1.5">
+								{#each HARD_TOTALS as total}
+									<button
+										onclick={() => toggleHardTotal(total)}
+										class="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors
+											{settings.drillFilter.hardTotals.includes(total)
+												? 'bg-white text-gray-900'
+												: 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'}"
+									>{total}</button>
+								{/each}
 							</div>
-							<RangeSlider
-								min={5} max={21}
-								low={settings.drillFilter.hardMin}
-								high={settings.drillFilter.hardMax}
-								onchange={(lo, hi) => settings.setDrillFilter({ hardMin: lo, hardMax: hi })}
-							/>
 						</div>
 					{/if}
 
 					{#if settings.drillFilter.handTypes.includes('soft')}
 						<hr class="border-zinc-800" />
 						<div class="px-4 py-3.5">
-							<div class="flex items-center justify-between mb-2">
-								<p class="text-xs font-medium text-gray-400">Soft range</p>
-								<span class="text-xs font-semibold text-gray-200">
-									Soft {settings.drillFilter.softMin}–Soft {settings.drillFilter.softMax}
-								</span>
+							<p class="mb-2.5 text-xs font-medium text-gray-400">Soft totals</p>
+							<div class="flex flex-wrap gap-1.5">
+								{#each SOFT_TOTALS as total}
+									<button
+										onclick={() => toggleSoftTotal(total)}
+										class="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors
+											{settings.drillFilter.softTotals.includes(total)
+												? 'bg-white text-gray-900'
+												: 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'}"
+									>A{total - 11}</button>
+								{/each}
 							</div>
-							<RangeSlider
-								min={13} max={20}
-								low={settings.drillFilter.softMin}
-								high={settings.drillFilter.softMax}
-								onchange={(lo, hi) => settings.setDrillFilter({ softMin: lo, softMax: hi })}
-							/>
 						</div>
 					{/if}
 

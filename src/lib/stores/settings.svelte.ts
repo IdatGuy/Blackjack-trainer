@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { DEFAULT_DRILL_FILTER, PAIR_RANKS, type DrillFilter } from '$lib/engine/synthesizer.js';
+import { DEFAULT_DRILL_FILTER, HARD_TOTALS, PAIR_RANKS, SOFT_TOTALS, type DrillFilter } from '$lib/engine/synthesizer.js';
 import type { Rank } from '$lib/engine/card.js';
 import type { SettingsPreset } from '$lib/presets.js';
 import type { BetRamp } from '$lib/engine/betRamp.js';
@@ -110,14 +110,31 @@ class SettingsStore {
 						} else {
 							handTypes = [...DEFAULT_DRILL_FILTER.handTypes];
 						}
-						this.drillFilter = {
-							handTypes,
-							hardMin: typeof f.hardMin === 'number' ? f.hardMin : DEFAULT_DRILL_FILTER.hardMin,
-							hardMax: typeof f.hardMax === 'number' ? f.hardMax : DEFAULT_DRILL_FILTER.hardMax,
-							softMin: typeof f.softMin === 'number' ? f.softMin : DEFAULT_DRILL_FILTER.softMin,
-							softMax: typeof f.softMax === 'number' ? f.softMax : DEFAULT_DRILL_FILTER.softMax,
-							pairRanks: Array.isArray(f.pairRanks) ? (f.pairRanks as Rank[]).filter(r => PAIR_RANKS.includes(r)) : [...PAIR_RANKS]
-						};
+						// Migrate old min/max format to explicit arrays
+							let hardTotals: number[];
+							if (Array.isArray(f.hardTotals)) {
+								hardTotals = (f.hardTotals as unknown[]).filter((n): n is number => HARD_TOTALS.includes(n as number));
+								if (hardTotals.length === 0) hardTotals = [...HARD_TOTALS];
+							} else if (typeof f.hardMin === 'number' && typeof f.hardMax === 'number') {
+								hardTotals = HARD_TOTALS.filter(n => n >= f.hardMin && n <= f.hardMax);
+							} else {
+								hardTotals = [...HARD_TOTALS];
+							}
+							let softTotals: number[];
+							if (Array.isArray(f.softTotals)) {
+								softTotals = (f.softTotals as unknown[]).filter((n): n is number => SOFT_TOTALS.includes(n as number));
+								if (softTotals.length === 0) softTotals = [...SOFT_TOTALS];
+							} else if (typeof f.softMin === 'number' && typeof f.softMax === 'number') {
+								softTotals = SOFT_TOTALS.filter(n => n >= f.softMin && n <= f.softMax);
+							} else {
+								softTotals = [...SOFT_TOTALS];
+							}
+							this.drillFilter = {
+								handTypes,
+								hardTotals,
+								softTotals,
+								pairRanks: Array.isArray(f.pairRanks) ? (f.pairRanks as Rank[]).filter(r => PAIR_RANKS.includes(r)) : [...PAIR_RANKS]
+							};
 					}
 					if (typeof data.countPopupEnabled === 'boolean') this.countPopupEnabled = data.countPopupEnabled;
 					if (typeof data.countPopupFrequency === 'number' && data.countPopupFrequency >= 1) {
@@ -257,6 +274,18 @@ class SettingsStore {
 	setDrillFilter(partial: Partial<DrillFilter>) {
 		this.drillFilter = { ...this.drillFilter, ...partial };
 		this.persist();
+	}
+
+	toggleHardTotal(total: number) {
+		const cur = this.drillFilter.hardTotals;
+		const next = cur.includes(total) ? cur.filter(n => n !== total) : [...cur, total];
+		if (next.length > 0) this.setDrillFilter({ hardTotals: next });
+	}
+
+	toggleSoftTotal(total: number) {
+		const cur = this.drillFilter.softTotals;
+		const next = cur.includes(total) ? cur.filter(n => n !== total) : [...cur, total];
+		if (next.length > 0) this.setDrillFilter({ softTotals: next });
 	}
 
 	setCountPopupEnabled(v: boolean) {
