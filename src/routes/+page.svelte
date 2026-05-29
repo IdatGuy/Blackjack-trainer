@@ -529,7 +529,7 @@
 		<Hand
 			cards={visibleDealerCards}
 			hideSecond={phase === 'player' || phase === 'insurance'}
-			showTotal={phase !== 'player' && phase !== 'insurance'}
+			showTotal={settings.showHandTotal && phase !== 'player' && phase !== 'insurance'}
 		/>
 	</div>
 
