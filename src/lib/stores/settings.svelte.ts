@@ -168,6 +168,7 @@ class SettingsStore {
 
 	setCountingEnabled(v: boolean) {
 		this.countingEnabled = v;
+		if (!v) this.betRampEnabled = false;
 		this.persist();
 	}
 

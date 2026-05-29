@@ -170,10 +170,14 @@
 
 				{#if settings.bettingEnabled}
 					<hr class="border-zinc-800" />
-					<label class="flex cursor-pointer items-center justify-between px-4 py-3.5">
+					<label class="flex cursor-pointer items-center justify-between px-4 py-3.5 transition-opacity {!settings.countingEnabled ? 'pointer-events-none opacity-40' : ''}">
 						<div>
 							<span class="text-sm font-medium text-gray-100">Grade bet sizing</span>
-							<p class="text-xs text-gray-500 mt-0.5">Flags bets that miss your ramp by a large margin.</p>
+							{#if !settings.countingEnabled}
+								<p class="text-xs text-gray-500 mt-0.5">Requires card counting to be enabled.</p>
+							{:else}
+								<p class="text-xs text-gray-500 mt-0.5">Flags bets that miss your ramp by a large margin.</p>
+							{/if}
 						</div>
 						<ToggleSwitch checked={settings.betRampEnabled} onchange={(v) => settings.setBetRampEnabled(v)} class="ml-3 shrink-0" />
 					</label>
