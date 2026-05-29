@@ -322,10 +322,12 @@
 	}
 
 	function autoStep() {
+		if (!game.autoPlaying) { autoTimer = null; return; }
 		const dur = game.animDuration;
 		switch (game.state.phase) {
 			case 'betting':
 				if (stopRequested) {
+					stopRequested = false;
 					game.autoPlaying = false;
 					autoTimer = null;
 					return;
@@ -356,7 +358,7 @@
 
 	$effect(() => {
 		if (game.autoPlaying) {
-			if (!autoTimer) autoStep();
+			if (!autoTimer) autoTimer = setTimeout(autoStep, 0);
 		} else if (autoTimer) {
 			clearTimeout(autoTimer);
 			autoTimer = null;
