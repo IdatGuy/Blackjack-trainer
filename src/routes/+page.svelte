@@ -139,6 +139,7 @@
 		await new Promise(r => setTimeout(r, correct ? 800 : 2000));
 		countPopupOpen = false;
 		game.nextHand();
+		if (game.autoPlaying) autoStep();
 	}
 
 	let menuOpen = $state(false);
@@ -351,7 +352,10 @@
 				autoTimer = setTimeout(autoStep, dur + 50);
 				break;
 			case 'resolution':
-				autoTimer = setTimeout(() => { game.nextHand(); autoStep(); }, Math.max(dur, 500));
+				autoTimer = setTimeout(() => {
+					handleNextHand();
+					if (!countPopupOpen) autoStep();
+				}, Math.max(dur, 500));
 				break;
 		}
 	}

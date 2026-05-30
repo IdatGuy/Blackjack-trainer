@@ -127,7 +127,7 @@
 						<span class="text-sm font-medium text-gray-100">Auto-play (Wonging)</span>
 						<p class="mt-0.5 text-xs text-gray-500">Adds a Sit Out button so the table plays itself while you back-count. Never affects bankroll or stats.</p>
 					</div>
-					<ToggleSwitch checked={settings.autoPlayEnabled} onchange={(v) => settings.setAutoPlayEnabled(v)} />
+					<ToggleSwitch checked={settings.autoPlayEnabled} onchange={(v) => settings.setAutoPlayEnabled(v)} class="ml-3 shrink-0" />
 				</label>
 				{#if settings.autoPlayEnabled}
 					<hr class="border-zinc-800" />
